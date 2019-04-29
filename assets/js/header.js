@@ -9,6 +9,9 @@ function onScroll() {
     if(scrollPosition > 0) {
         $header.removeClass('dark');
         $header.addClass('light');
+    } else if (scrollPosition == 0) {
+        $header.removeClass('light');
+        $header.addClass('dark');
     }
 }
 window.addEventListener('scroll', _.throttle(onScroll, 300));

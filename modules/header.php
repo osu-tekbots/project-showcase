@@ -1,6 +1,6 @@
 <?php
 /**
- * This header module should be included in all PHP files that render visible HTML content. It includes all the necessary
+ * This header module should be included in all PHP files that render visible HTML content. It includes all the
  * JavaScript and CSS files and creates the header navigation bar.
  * 
  * Before including the header file, you can specify a `$js` or `$css` variable to add additional JavaScript files
@@ -14,7 +14,7 @@ if (!session_id()) {
 
 $baseUrl = $configManager->getBaseUrl();
 
-$title = isset($title) ? $title : 'Senior Design Capstone | OSU';
+$title = (isset($title) ? $title : 'Project Showcase') . ' | OSU';
 
 
 // CSS to include in the page. If you provide a CSS reference as an associative array, the keys are the
@@ -28,6 +28,11 @@ $css = array_merge(
         array(
             'href' => 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
             'integrity' => 'sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T',
+            'crossorigin' => 'anonymous'
+        ),
+        array(
+            'href' => 'https://use.fontawesome.com/releases/v5.8.1/css/all.css',
+            'integrity' => 'sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf',
             'crossorigin' => 'anonymous'
         ),
         'assets/css/theme.css',
@@ -61,7 +66,11 @@ $js = array_merge(
             'integrity' => 'sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM',
             'crossorigin' => 'anonymous'
         ),
-        'https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js'
+        'https://cdn.jsdelivr.net/npm/lodash@4.17.11/lodash.min.js',
+        array(
+            'src' => 'assets/js/header.js',
+            'defer' => 'true'
+        )
     ), $js
 );
 

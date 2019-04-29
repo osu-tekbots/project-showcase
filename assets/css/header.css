@@ -2,7 +2,7 @@ header {
     position: fixed;
     z-index: 1000;
     width: 100vw;
-    transition: padding 300ms ease, background-color 300ms ease, color 300ms ease;
+    transition: padding 500ms ease, background-color 500ms ease, color 500ms ease;
     display: flex;
     align-items: center;
 }
@@ -10,13 +10,14 @@ header {
 header.dark {
     background-color: var(--color-black);
     color: var(--color-white);
-    padding: 15px 30px;
+    padding: 30px 30px;
 }
 
 header.light {
     padding: 10px 30px;
     background-color: var(--color-white);
     color: var(--color-primary);
+    box-shadow: 0px 0px 5px var(--color-black);
 }
 
 .logo {
@@ -25,7 +26,7 @@ header.light {
 }
 
 .logo h1 {
-    margin: 0px 0px 0px 15px;
+    margin: 0px 0px 0px 24px;
     color: inherit;
     font-family: Ostrich-Sans;
     letter-spacing: 0.2em;
