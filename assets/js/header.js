@@ -14,4 +14,4 @@ function onScroll() {
         $header.addClass('dark');
     }
 }
-window.addEventListener('scroll', _.throttle(onScroll, 300));
+window.addEventListener('scroll', _.throttle(onScroll, 100));

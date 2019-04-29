@@ -16,6 +16,11 @@ $baseUrl = $configManager->getBaseUrl();
 
 $title = (isset($title) ? $title : 'Project Showcase') . ' | OSU';
 
+// If the URL contains a query string parameter 'contentOnly=true', then we won't display a header or a footer
+if(!isset($contentOnly)) {
+    $contentOnly = isset($_GET['contentOnly']) && $_GET['contentOnly'] == 'true';
+}
+
 
 // CSS to include in the page. If you provide a CSS reference as an associative array, the keys are the
 // atributes of the <link> tag. If it is a string, the string is assumed to be the href.
@@ -124,6 +129,10 @@ $navlinks = array(
 
 </head>
 <body>
+    <?php 
+    if(!$contentOnly): 
+    ?>
+
     <header id="header" class="dark">
         <div class="logo">
             <img class="logo" src="assets/img/osu-logo-orange.png" />
@@ -141,4 +150,9 @@ $navlinks = array(
             </ul>
         </nav>
     </header>
+
+    <?php
+    endif;
+    ?>
+    
     <main>
