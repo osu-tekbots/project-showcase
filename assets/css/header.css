@@ -10,19 +10,26 @@ header {
     transition: padding 500ms ease, background-color 500ms ease, color 500ms ease;
     display: flex;
     align-items: center;
+    padding: 10px 30px;
 }
 
 header.dark {
     background-color: var(--color-black);
     color: var(--color-white);
-    padding: 30px 30px;
 }
 
 header.light {
-    padding: 10px 30px;
     background-color: var(--color-white);
     color: var(--color-primary);
     box-shadow: 0px 0px 5px var(--color-black);
+}
+
+.header-main-link {
+    color: inherit;
+}
+
+.header-main-link:hover {
+    color: inherit;
 }
 
 .logo {
