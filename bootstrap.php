@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 define('PUBLIC_FILES', __DIR__);
 
 include PUBLIC_FILES . '/lib/shared/autoload.php';
@@ -14,3 +16,5 @@ try {
 } catch (\Exception $e) {
     $logger = null;
 }
+
+$isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
