@@ -41,9 +41,11 @@ $css = array_merge(
             'crossorigin' => 'anonymous'
         ),
         'assets/css/theme.css',
+        'assets/css/global.css',
+        'assets/css/bootstrap-overloads.css',
         'assets/css/layout.css',
         'assets/css/header.css',
-        'assets/css/footer.css'
+        'assets/css/footer.css',
     ),
     $css
 );
@@ -79,12 +81,9 @@ $js = array_merge(
     ), $js
 );
 
-$loggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
-
 // Setup the navigation links
 $navlinks = array(
-    'LOGIN' => 'pages/auth/login.php',
-    'SIGNUP' => 'pages/auth/signup.php'
+    'BROWSE' => 'browse',
 );
 
 ?>
@@ -134,19 +133,39 @@ $navlinks = array(
     ?>
 
     <header id="header" class="dark">
-        <div class="logo">
-            <img class="logo" src="assets/img/osu-logo-orange.png" />
-            <h1><span id="projectPrefix">Project </span>Showcase</h1>
-        </div>
+        <a class="header-main-link" href="">
+            <div class="logo">
+                <img class="logo" src="assets/img/osu-logo-orange.png" />
+                <h1><span id="projectPrefix">Project </span>Showcase</h1>
+            </div>
+        </a>
         <nav class="navigation">
             <ul>
             <?php 
             foreach ($navlinks as $title => $link) {
                 echo "
-                <a href='$link'><li>$title</li></a>
+                <a href='$link'>
+                    <li>$title</li>
+                </a>
+                ";
+            }
+
+            // The last link is the SIGN IN or the PROFILE link
+            if($isLoggedIn) {
+                echo "
+                <a href='profile/'>
+                    <li>PROFILE</li>
+                </a>
+                ";
+            } else { 
+                echo "
+                <a href='signin'>
+                    <li>SIGN IN</li>
+                </a>
                 ";
             }
             ?>
+
             </ul>
         </nav>
     </header>
@@ -155,4 +174,4 @@ $navlinks = array(
     endif;
     ?>
     
-    <main>
+    <main <?php if(!$contentOnly) echo 'class="extra-padding"'; ?>>
