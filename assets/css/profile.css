@@ -36,21 +36,23 @@
     flex-grow: 1;
     margin-left: 15px;
     align-self: flex-end;
-    margin-bottom: 40px;
+    margin-bottom: 35px;
 }
 
 .profile-links {
-    margin-top: 15px;
+    margin-top: 20px;
     height: 34px;
 }
 
 .profile-links a {
     color: var(--color-black);
+    margin-right: 10px;
 }
 
 .profile-links a:hover {
     text-decoration: none;
     color: var(--color-primary);
+    cursor: pointer;
 }
 
 .profile-content {

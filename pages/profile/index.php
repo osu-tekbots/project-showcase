@@ -59,20 +59,20 @@ if (!$profile) {
 
     // Create HTML for external links if the user has any
     $websiteLink = $profile->getWebsiteLink();
-    $websiteLinkHtml = !is_null($websiteLink) && !empty($websiteLink) ? "
-        <a href='$websiteLink'>
+    $websiteHtml = !is_null($websiteLink) && !empty($websiteLink) ? "
+        <a href='$websiteLink' target='_blank'>
             <i class='fas fa-globe fa-2x'></i>
         </a>
     " : '';
     $githubLink = $profile->getGithubLink();
     $githubHtml = !empty($githubLink) && !is_null($githubLink) ? "
-        <a href='$githubLink'>
+        <a href='$githubLink' target='_blank'>
             <i class='fab fa-github fa-2x'></i>
         </a>
     " : '';
     $linkedinLink = $profile->getLinkedInLink();
     $linkedinHtml = !is_null($linkedinLink) && !empty($linkedinLink) ? "
-        <a href='$linkedinLink'>
+        <a href='$linkedinLink' target='_blank'>
             <i class='fab fa-linkedin fa-2x'></i>
         </a>
     ": '';
@@ -137,7 +137,9 @@ if (!$profile) {
                         <h1 class='profile-name'>$name</h1>
                         <h4 class='profile-major'>$major</h4>
                         <div class='profile-links'>
+                            $websiteHtml
                             $githubHtml
+                            $linkedinHtml
                         </div>
                     </div>
                     $resumeHtml

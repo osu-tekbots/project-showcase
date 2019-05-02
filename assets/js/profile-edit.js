@@ -12,7 +12,10 @@ function onEditProfileFormInputChange() {
         changesDetected = true;
     }
 }
-$('#formEditProfile input').change(onEditProfileFormInputChange);
+$('#formEditProfile input[type=text]').keyup(onEditProfileFormInputChange);
+$('#formEditProfile textarea').keyup(onEditProfileFormInputChange);
+$('#formEditProfile input[type=file]').change(onEditProfileFormInputChange);
+$('#formEditProfile input[type=checkbox]').change(onEditProfileFormInputChange);
 
 /**
  * Changes the label for the profile image input so that it displays the name of the file that was selected. This
@@ -66,7 +69,7 @@ function onEditProfileFormSubmit() {
     // Serialize the form elements into JSON (except for the files). The files (if they exist) we will append to
     // a separate request that will use a urlformencoded request body.
     let bodyInfo = {
-        action: 'updateProfile'
+        action: 'saveProfile'
     };
 
     let bodyFiles = new FormData();

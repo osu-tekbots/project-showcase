@@ -70,6 +70,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
 <div class="container">
     <h1>Edit Profile</h1>
     <form id="formEditProfile">
+        
+        <input type="hidden" name="userId" value="<?php echo $userId; ?>" />
 
         <div class="btn-profile-edit-submit">
             <button disabled type="submit" class="btn btn-lg btn-primary" id="btnEditProfileSubmit">
