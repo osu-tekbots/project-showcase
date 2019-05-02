@@ -7,6 +7,12 @@
     position: fixed;
     right: 20%;
     top: 110px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-profile-edit-submit .loader {
+    margin-left: 15px;
 }
 
 @media only screen and (max-width: 1023px) {
@@ -17,3 +23,10 @@
         margin-bottom: 10px;
     }
 }
+
+#profileImagePreview {
+    display: block;
+    margin: 15px 20px;
+    border-radius: 50%;
+}
+

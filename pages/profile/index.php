@@ -79,7 +79,7 @@ if (!$profile) {
 
     // Create the HTML to render a resume download link if the user has a resume uploaded
     $resumeFileName = $profile->getResumeFileName();
-    $resumeHtml = true ? "
+    $resumeHtml = !is_null($resumeFileName) && !empty($resumeFileName) ? "
         <a href='files/resumes/$userId-$resumeFileName' class='btn btn-primary'>
             <i class='fas fa-download'></i>&nbsp;&nbsp;Resume
         </a>

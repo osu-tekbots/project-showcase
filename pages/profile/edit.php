@@ -56,6 +56,12 @@ $title = 'Edit Profile';
 $css = array(
     'assets/css/profile-edit.css'
 );
+$js = array(
+    array(
+        'src' => 'assets/js/profile-edit.js',
+        'defer' => 'true'
+    )
+);
 include_once PUBLIC_FILES . '/modules/header.php';
 
 ?>
@@ -65,9 +71,12 @@ include_once PUBLIC_FILES . '/modules/header.php';
     <h1>Edit Profile</h1>
     <form id="formEditProfile">
 
-        <button disabled type="submit" class="btn btn-lg btn-primary btn-profile-edit-submit">
-            <i class="fas fa-save"></i>&nbsp;&nbsp;Save Changes
-        </button>
+        <div class="btn-profile-edit-submit">
+            <button disabled type="submit" class="btn btn-lg btn-primary" id="btnEditProfileSubmit">
+                <i class="fas fa-save"></i>&nbsp;&nbsp;Save Changes
+            </button>
+            <span class="loader" id="formEditProfileLoader"></span>
+        </div>
 
         <h3 id="general">General</h3>
         <div class="form-group row">
@@ -110,8 +119,11 @@ include_once PUBLIC_FILES . '/modules/header.php';
             <?php echo $pProfileImageHtml; ?>
             <img id="profileImagePreview" src="<?php echo $pProfileImageLink; ?>" />
             <div class="custom-file col-sm-6">
-                <input name="profileImage" type="file" class="custom-file-input" id="profileImage">
-                <label class="custom-file-label" for="profileImage">Choose image</label>
+                <input name="profileImage" type="file" class="custom-file-input" id="profileImage"
+                    accept=".png, .jpeg, image/png, image/jpeg">
+                <label class="custom-file-label" for="profileImage" id="profileImageLabel">
+                    Choose image (PNG or JPEG)
+                </label>
             </div>
         </div>
         <br/>
@@ -155,8 +167,11 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <div class="form-group">
             <?php echo $pResumeHtml; ?>
             <div class="custom-file col-sm-6">
-                <input name="profileResume" type="file" class="custom-file-input" id="profileResume">
-                <label class="custom-file-label" for="profileResume">Choose file (PDF only)</label>
+                <input name="profileResume" type="file" class="custom-file-input" id="profileResume"
+                    accept=".pdf, application/pdf">
+                <label class="custom-file-label" for="profileResume" id="profileResumeLabel">
+                    Choose file (PDF)
+                </label>
             </div>
         </div>
         <br/>
