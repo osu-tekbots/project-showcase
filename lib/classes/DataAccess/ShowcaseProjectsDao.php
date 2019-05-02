@@ -44,16 +44,18 @@ class ShowcaseProjectsDao {
             SELECT * 
             FROM showcase_project, showcase_worked_on $artifactsTable
             WHERE swo_u_id = :id AND swo_sp_id = sp_id $artifactsPredicate
-            ORDER BY swo_u_id
+            ORDER BY swo_u_id, swo_sp_id
             ";
             $params = array(':id' => $userId);
             $results = $this->conn->query($sql, $params);
 
             $projects = array();
+            $pid = '';
             $uid = '';
             foreach ($results as $row) {
-                if ($row['swo_u_id'] != $uid) {
+                if ($row['swo_u_id'] != $uid || $row['swo_sp_id'] != $pid) {
                     $uid = $row['swo_u_id'];
+                    $pid = $row['swo_sp_id'];
                     $projects[] = self::ExtractShowcaseProjectFromRow($row);
                 }
                 if ($includeArtifacts) {
@@ -62,6 +64,11 @@ class ShowcaseProjectsDao {
                     $p->addArtifact($artifact);
                 }
             }
+
+            // Finally sort the projects by their create date
+            \usort($projects, function($p1, $p2) {
+                return $p1->getDateCreated() > $p2->getDateCreated();
+            });
 
             return $projects;
         } catch (\Exception $e) {
@@ -73,13 +80,17 @@ class ShowcaseProjectsDao {
     /**
      * Inserts a new showcase project into the database.
      * 
-     * This does not add artifacts to the project.
+     * This does not add artifacts to the project. It does optionally take a user ID which it will use to associate
+     * a user with a project. If no user ID is provided, a corresponding entry in the `showcase_worked_on` table
+     * will not be created.
      *
-     * @param \Model\ShowcaseProject $project the project o add
+     * @param \Model\ShowcaseProject $project the project to add
+     * @param string|null $userId the ID of the user to associate with the project.
      * @return boolean true on success, false otherwise
      */
-    public function addNewProject($project) {
+    public function addNewProject($project, $userId = null) {
         try {
+            $this->conn->startTransaction();
             $sql = '
             INSERT INTO showcase_project (
                 sp_id, sp_title, sp_description, sp_published, sp_date_created, sp_date_updated
@@ -97,8 +108,19 @@ class ShowcaseProjectsDao {
             );
             $this->conn->execute($sql, $params);
 
+            if($userId != null) {
+                $ok = $this->associateProjectWithUser($project->getId(), $userId);
+                if(!$ok) {
+                    $this->conn->rollback();
+                    return false;
+                }
+            }
+
+            $this->conn->commit();
+
             return true;
         } catch (\Exception $e) {
+            $this->conn->rollback();
             $this->logger->error('Failed to add new showcase project: ' . $e->getMessage());
             return false;
         }
