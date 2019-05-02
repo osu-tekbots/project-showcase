@@ -24,9 +24,24 @@
     }
 }
 
+.image-preview {
+    display: flex;
+    align-items: center;
+}
+
+#btnProfileImageDelete {
+    margin-left: 15px;
+}
+
+.profile-image-input-container {
+    margin-top: 15px;
+}
+
 #profileImagePreview {
     display: block;
-    margin: 15px 20px;
+    margin: 0px 20px;
     border-radius: 50%;
+    width: 100px;
+    height: 100px;
 }
 

@@ -18,6 +18,7 @@
 
 .profile-header {
     position: relative;
+    height: 200px;
     margin-top: 170px;
     display: flex;
     align-items: center;
@@ -36,7 +37,7 @@
     flex-grow: 1;
     margin-left: 15px;
     align-self: flex-end;
-    margin-bottom: 35px;
+    margin-bottom: 25px;
 }
 
 .profile-links {

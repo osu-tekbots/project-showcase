@@ -30,22 +30,25 @@ $pAbout = $profile->getAbout();
 
 $pHasProfileImage = $profile->isImageUploaded();
 $pProfileImageHtml = $pHasProfileImage ? "
-    <p>Current Profile Image</p>
+    <p id='profileImageText'>Current Profile Image</p>
 " : "
-    <p>No Image has been uploaded</p>
+    <p id='profileImageText'>No Image has been uploaded</p>
 ";
 
-$pProfileImageLink = $pHasProfileImage ? "files/images/$userId" : '';
+$pProfileImageLink = $pHasProfileImage ? "downloaders/profile-images?id=$userId" : '';
+$pProfileImagePreviewStyle = $pHasProfileImage ? '' : "style='display: none;'";
+$pProfileImageDeleteStyle = $pHasProfileImage ? '' : "style='display: none;'";
 
 $pWebsiteLink = $profile->getWebsiteLink();
 $pGitHubLink = $profile->getGithubLink();
 $pLinkedInLink = $profile->getLinkedInLink();
 
-$pResumeFileName = $profile->getResumeFileName();
-$pResumeHtml = !is_null($pResumeFileName) && !empty($pResumeFileName) ? "
-    <p>Current file: $pResumeFileName</p>
+$pHasResume = $profile->isResumeUploaded();
+$pResumeLink = $pHasResume ? "downloaders/resumes?id=$userId" : '';
+$pResumeHtml = $pHasResume ? "
+    <p id='resumeText'>You have uploaded a resume. <a href='$pResumeLink'>Download</a></p>
 " : "
-    <p>No file has been uploaded</p>
+    <p id='resumeText'>No resume has been uploaded</p>
 ";
 
 
@@ -70,8 +73,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
 <div class="container">
     <h1>Edit Profile</h1>
     <form id="formEditProfile">
-        
-        <input type="hidden" name="userId" value="<?php echo $userId; ?>" />
+
+        <input type="hidden" name="userId" id="userId" value="<?php echo $userId; ?>" />
 
         <div class="btn-profile-edit-submit">
             <button disabled type="submit" class="btn btn-lg btn-primary" id="btnEditProfileSubmit">
@@ -119,8 +122,15 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <h3 id="resume">Profile Image</h3>
         <div class="form-group">
             <?php echo $pProfileImageHtml; ?>
-            <img id="profileImagePreview" src="<?php echo $pProfileImageLink; ?>" />
-            <div class="custom-file col-sm-6">
+            <div class="image-preview">
+                <img id="profileImagePreview" src="<?php echo $pProfileImageLink; ?>" 
+                    <?php echo $pProfileImagePreviewStyle; ?> />
+                <button type="button" class="btn btn-danger" id="btnProfileImageDelete" 
+                    <?php echo $pProfileImageDeleteStyle; ?>>
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div class="custom-file col-sm-6 profile-image-input-container">
                 <input name="profileImage" type="file" class="custom-file-input" id="profileImage"
                     accept=".png, .jpeg, image/png, image/jpeg">
                 <label class="custom-file-label" for="profileImage" id="profileImageLabel">
@@ -136,7 +146,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 Include a summary of your skills, experience, and acheivements
             </label>
             <div class="col-sm-5">
-                <textarea name="about" class="form-control" rows="10"><?php echo $pAbout; ?></textarea>
+                <textarea name="about" class="form-control" rows="15"><?php echo $pAbout; ?></textarea>
             </div>
             
         </div>

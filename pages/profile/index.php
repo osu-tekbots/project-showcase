@@ -47,7 +47,9 @@ if (!$profile) {
     // Everything checks start, start capturing variables to render the page
 
     // Create the HTML for the header content
-    $image = $profile->isImageUploaded() ? "files/images/$userId" : 'assets/img/avatar.png';
+    $image = $profile->isImageUploaded() 
+        ? "<img class='profile-image' src='downloaders/profile-images?id=$userId' />" 
+        : '';
     $name = $profile->getUser()->getFirstName() . ' ' . $profile->getUser()->getLastName();
     $major = $profile->getUser()->getMajor();
 
@@ -78,9 +80,9 @@ if (!$profile) {
     ": '';
 
     // Create the HTML to render a resume download link if the user has a resume uploaded
-    $resumeFileName = $profile->getResumeFileName();
-    $resumeHtml = !is_null($resumeFileName) && !empty($resumeFileName) ? "
-        <a href='files/resumes/$userId-$resumeFileName' class='btn btn-primary'>
+    $resumeUploaded = $profile->isResumeUploaded();
+    $resumeHtml = $resumeUploaded ? "
+        <a href='downloaders/resumes?id=$userId' class='btn btn-primary'>
             <i class='fas fa-download'></i>&nbsp;&nbsp;Resume
         </a>
     " : '';
@@ -132,7 +134,7 @@ if (!$profile) {
         <div class='container'>
             <div class='profile'>
                 <div class='profile-header'>
-                    <img class='profile-image' src='$image' />
+                    $image
                     <div class='profile-header-content'>
                         <h1 class='profile-name'>$name</h1>
                         <h4 class='profile-major'>$major</h4>

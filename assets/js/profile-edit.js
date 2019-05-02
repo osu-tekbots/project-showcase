@@ -20,6 +20,8 @@ $('#formEditProfile input[type=checkbox]').change(onEditProfileFormInputChange);
 /**
  * Changes the label for the profile image input so that it displays the name of the file that was selected. This
  * will also change the preview image.
+ *
+ * TODO: add cropping functionality here
  */
 function onProfileImageSelect() {
     if (this.files.length > 0) {
@@ -28,10 +30,7 @@ function onProfileImageSelect() {
         reader.onload = e => {
             let $preview = $('#profileImagePreview');
             $preview.attr('src', e.target.result);
-            $preview.css({
-                width: '100px',
-                height: '100px'
-            });
+            $preview.show();
         };
         reader.readAsDataURL(this.files[0]);
 
@@ -61,7 +60,10 @@ $('#profileResume').change(onResumeFileSelect);
  * asynchronous calls are being processed.
  */
 let pendingInfoUpdateResponse = false;
-let pendingFileUploadResponse = false;
+let pendingResumeUpload = false;
+let pendingProfileImageUpload = false;
+let newResumeSelected = false;
+let newProfileImageSelected = false;
 function onEditProfileFormSubmit() {
     // Capture the form
     let form = new FormData(document.getElementById('formEditProfile'));
@@ -72,13 +74,17 @@ function onEditProfileFormSubmit() {
         action: 'saveProfile'
     };
 
-    let bodyFiles = new FormData();
-    let bodyFilesCount = 0;
+    let bodyResume = new FormData();
+
+    let bodyProfileImage = new FormData();
 
     for (const [key, value] of form.entries()) {
-        if ((key == 'profileResume' || key == 'profileImage') && value.size > 0) {
-            bodyFiles.append(key, value);
-            bodyFilesCount++;
+        if (key == 'profileResume' && value.size > 0) {
+            bodyResume.append(key, value);
+            newResumeSelected = true;
+        } else if (key == 'profileImage' && value.size > 0) {
+            bodyProfileImage.append(key, value);
+            newProfileImageSelected = true;
         } else {
             bodyInfo[key] = value;
         }
@@ -88,7 +94,6 @@ function onEditProfileFormSubmit() {
     api.post('/profiles.php', bodyInfo)
         .then(res => {
             onApiResponse('info', true);
-            snackbar(res.message, 'success');
         })
         .catch(err => {
             onApiResponse('info', false);
@@ -96,18 +101,34 @@ function onEditProfileFormSubmit() {
         });
     pendingInfoUpdateResponse = true;
 
-    // Make the request for uploading files if they exist
-    if (bodyFilesCount > 0) {
-        api.post('/upload.php', bodyFiles, true)
+    // Request to upload the resume if there is one
+    if (newResumeSelected) {
+        bodyResume.append('action', 'uploadResume');
+        bodyResume.append('userId', bodyInfo.userId);
+        api.post('/resumes.php', bodyResume, true)
             .then(res => {
-                onApiResponse('file', true);
-                snackbar(res.message, 'success');
+                onApiResponse('resume', true);
             })
             .catch(err => {
-                onApiResponse('file', false);
+                onApiResponse('resume', false);
                 snackbar(err.message, 'error');
             });
-        pendingFileUploadResponse = true;
+        pendingResumeUpload = true;
+    }
+
+    // Request to upload the profile image if there is one
+    if (newProfileImageSelected) {
+        bodyProfileImage.append('action', 'uploadImage');
+        bodyProfileImage.append('userId', bodyInfo.userId);
+        api.post('/profile-images.php', bodyProfileImage, true)
+            .then(res => {
+                onApiResponse('image', true);
+            })
+            .catch(err => {
+                onApiResponse('image', false);
+                snackbar(err.message, 'error');
+            });
+        pendingProfileImageUpload = true;
     }
 
     $('#btnEditProfileSubmit').attr('disabled', true);
@@ -125,14 +146,60 @@ function onApiResponse(type, success) {
         case 'info':
             pendingInfoUpdateResponse = false;
             break;
-        case 'file':
-            pendingFileUploadResponse = false;
+        case 'resume':
+            pendingResumeUpload = false;
+        case 'image':
+            pendingProfileImageUpload = false;
             break;
     }
-    if (!pendingFileUploadResponse && !pendingInfoUpdateResponse) {
+    if (!pendingResumeUpload && !pendingProfileImageUpload && !pendingInfoUpdateResponse) {
         $('#formEditProfileLoader').hide();
         if (!success) {
             $('#btnEditProfileSubmit').attr('disabled', false);
+        } else {
+            // Replace the profile image text
+            if (newProfileImageSelected) {
+                $('#profileImageText').text(`
+                    Current Profile Image
+                `);
+                $('#btnProfileImageDelete').show();
+                newProfileImageSelected = false;
+            }
+
+            // Replace the resume text
+            if (newResumeSelected) {
+                $('#resumeText').html(`
+                    You previously uploaded a resume. 
+                    <a href='downloaders/resumes?id=${$('#userId').val()}'>Download</a>
+                `);
+                newResumeSelected = false;
+            }
+
+            snackbar('Successfully saved profile', 'success');
         }
     }
 }
+
+/**
+ * Deletes the current profile image after confirming with the user that this is what they want.
+ */
+function onDeleteProfileImage() {
+    let body = new FormData();
+    body.append('action', 'deleteImage');
+    body.append('userId', $('#userId').val());
+
+    api.post('/profile-images.php', body, true)
+        .then(res => {
+            $('#profileImageText').text(`
+            No Image has been uploaded
+        `);
+            $('#profileImagePreview').attr('src', '');
+            $('#profileImagePreview').hide();
+            $('#btnProfileImageDelete').hide();
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+}
+$('#btnProfileImageDelete').click(onDeleteProfileImage);
