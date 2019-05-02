@@ -11,9 +11,9 @@ RewriteEngine On
 # If the requested file is not a directory or a file, we need to append .php
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} pages/
+RewriteCond %{REQUEST_FILENAME} (pages/|downloaders/|api/)
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
 # Prepend `/pages` to the URI if it needs it
-RewriteCond %{REQUEST_URI} !^(/api|/assets|/files|/pages)
+RewriteCond %{REQUEST_URI} !^(/api|/assets|/downloaders|/pages)
 RewriteRule ^(.*)$ pages/$1 
