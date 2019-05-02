@@ -18,7 +18,7 @@ class ShowcaseProjectArtifact {
     /** @var string */
     private $description;
     /** @var string */
-    private $fileName;
+    private $fileUploaded;
     /** @var string */
     private $link;
     /** @var bool */
@@ -39,6 +39,7 @@ class ShowcaseProjectArtifact {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
             $this->setPublished(true);
+            $this->setFileUploaded(false);
             $this->setDateCreated(new \DateTime());
         }
         $this->setId($id);
@@ -135,19 +136,19 @@ class ShowcaseProjectArtifact {
     }
 
     /**
-     * Get the value of fileName
+     * Get the value of fileUploaded
      */ 
-    public function getFileName() {
-        return $this->fileName;
+    public function isFileUploaded() {
+        return $this->fileUploaded;
     }
 
     /**
-     * Set the value of fileName
+     * Set the value of fileUploaded
      *
      * @return  self
      */ 
-    public function setFileName($fileName) {
-        $this->fileName = $fileName;
+    public function setFileUploaded($value) {
+        $this->fileUploaded = $value;
 
         return $this;
     }

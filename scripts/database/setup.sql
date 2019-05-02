@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS showcase_project_artifact (
     spa_sp_id CHAR(16) NOT NULL,
     spa_name VARCHAR(256) NOT NULL,
     spa_description TEXT,
-    spa_file_name VARCHAR(256),
+    spa_file_uploaded BOOLEAN NOT NULL DEFAULT FALSE,
     spa_link VARCHAR(512),
-    spa_published BOOLEAN,
+    spa_published BOOLEAN NOT NULL DEFAULT TRUE,
     spa_date_created DATETIME NOT NULL,
     spa_date_updated DATETIME,
 
