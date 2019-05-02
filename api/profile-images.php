@@ -6,6 +6,8 @@
  // TODO: restrict access to only the user who is performing actions on their own image or admins
 
 use DataAccess\ShowcaseProfilesDao;
+use DataAccess\UsersDao;
+use Model\UserType;
 
 /**
  * Simple function that allows us to respond with a response code and a message inside a JSON object.
@@ -30,6 +32,13 @@ if (!isset($_POST['action'])) {
 $userId = isset($_POST['userId']) && !empty($_POST['userId']) ? $_POST['userId'] : null;
 if (empty($userId)) {
     respond(400, 'Must include ID of user in request');
+}
+
+// Make sure the current user has permission to perform this action
+$usersDao = new UsersDao($dbConn, $logger);
+$user = $usersDao->getUser($userId);    
+if (!$user || !$isLoggedIn || ($userId != $_SESSION['userID'] && $user->getType()->getId() != UserType::ADMIN) ) {
+    respond(401, 'You do not have permission to make this request');
 }
 
 // Construct the path
