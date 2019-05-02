@@ -71,6 +71,182 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Inserts a new showcase project into the database.
+     * 
+     * This does not add artifacts to the project.
+     *
+     * @param \Model\ShowcaseProject $project the project o add
+     * @return boolean true on success, false otherwise
+     */
+    public function addNewProject($project) {
+        try {
+            $sql = '
+            INSERT INTO showcase_project (
+                sp_id, sp_title, sp_description, sp_published, sp_date_created, sp_date_updated
+            ) VALUES (
+                :id, :title, :description, :published, :created, :updated
+            )
+            ';
+            $params = array(
+                ':id' => $project->getId(),
+                ':title' => $project->getTitle(),
+                ':description' => $project->getDescription(),
+                ':published' => $project->isPublished(),
+                ':created' => QueryUtils::FormatDate($project->getDateCreated()),
+                ':updated' => QueryUtils::FormatDate($project->getDateUpdated())
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new showcase project: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Inserts new project artifacts into the database and associates them with their project.
+     *
+     * @param \Model\ShowcaseProjectArtifact[] $artifacts an array of artifacts to insert
+     * @return boolean true on success, false otherwise
+     */
+    public function addNewProjectArtifacts($artifacts) {
+        try {
+            $this->conn->startTransaction();
+
+            $sql = '
+            INSERT INTO showcase_project_artifact (
+                spa_id, spa_sp_id, spa_name, spa_description, spa_file_uploaded, spa_link, spa_published,
+                spa_date_created, spa_date_updated
+            ) VALUES (
+                :id, :pid, :name, :description, :file, :link, :published, :created, :updated
+            )
+            ';
+
+            foreach ($artifacts as $a) {
+                $params = array(
+                    ':id' => $a->getId(),
+                    ':pid' => $a->getProject()->getId(),
+                    ':name' => $a->getName(),
+                    ':description' => $a->getDescription(),
+                    ':file' => $a->isFileUploaded(),
+                    ':link' => $a->getLink(),
+                    ':published' => $a->isPublished(),
+                    ':created' => QueryUtils::FormatDate($a->getDateCreated()),
+                    ':updated' => QueryUtils::FormatDate($a->getDateUpdated())
+                );
+                $this->conn->execute($sql, $params);
+            }
+
+            $this->conn->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            $this->conn->rollback();
+            $this->logger->error('Failed to add new showcase project artifacts: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Adds a user as a collaborator on a project, inserting a new entry into the `showcase_worked_on` table.
+     *
+     * @param string $projectId
+     * @param string $userId
+     * @return boolean true on success, false otherwise
+     */
+    public function associateProjectWithUser($projectId, $userId) {
+        try {
+            $sql = '
+            INSERT INTO showcase_worked_on (
+                swo_sp_id, swo_u_id
+            ) VALUES (
+                :pid,
+                :uid
+            )
+            ';
+            $params = array(
+                ':pid' => $projectId,
+                ':uid' => $userId
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to associated user $userId with project $projectId: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Updates the values of a project entry in the database.
+     *
+     * @param \Model\ShowcaseProject $project the project to update
+     * @return boolean true on success, false otherwise
+     */
+    public function updateProject($project) {
+        try {
+            $sql = '
+            UPDATE showcase_project SET
+                sp_title = :title,
+                sp_description = :description,
+                sp_published = :published,
+                sp_date_updated = :updated
+            WHERE sp_id = :id
+            ';
+            $params = array(
+                ':id' => $project->getId(),
+                ':title' => $project->getTitle(),
+                ':description' => $project->getDescription(),
+                ':published' => $project->isPublished(),
+                ':updated' => QueryUtils::FormatDate($project->getDateUpdated())
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update showcase project: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Updates information about a showcase project artifact in the database.
+     *
+     * @param \Model\ShowcaseProjectArtifact $artifact
+     * @return boolean true on success, false otherwise
+     */
+    public function updateProjectArtifact($artifact) {
+        try {
+            $sql = '
+            UPDATE showcase_project_artifact SET
+                spa_name = :name,
+                spa_description = :description,
+                spa_file_uploaded = :file,
+                spa_link = :link,
+                spa_published = :published,
+                spa_updated = :updated
+            WHERE spa_id = :id
+            ';
+            $params = array(
+                ':id' => $artifact->getId(),
+                ':name' => $artifact->getName(),
+                ':description' => $artifact->getDescription(),
+                ':file' => $artifact->isFileUploaded(),
+                ':link' => $artifact->getLink(),
+                ':published' => $artifact->isPublished(),
+                ':updated' => QueryUtils::FormatDate($artifact->getDateUpdated())
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update showcase project artifact: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Uses information from a row in the database to create a ShowcaseProject object.
      *
      * @param mixed[] $row the row from the database
