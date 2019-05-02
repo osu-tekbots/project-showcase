@@ -45,6 +45,7 @@ $pLinkedInLink = $profile->getLinkedInLink();
 
 $pHasResume = $profile->isResumeUploaded();
 $pResumeLink = $pHasResume ? "downloaders/resumes?id=$userId" : '';
+$pResumeDeleteStyle = $pHasResume ? '' : "style='display: none;'";
 $pResumeHtml = $pHasResume ? "
     <p id='resumeText'>You have uploaded a resume. <a href='$pResumeLink'>Download</a></p>
 " : "
@@ -178,6 +179,9 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <h3 id="resume">Resume</h3>
         <div class="form-group">
             <?php echo $pResumeHtml; ?>
+            <button type="button" id="btnResumeDelete" <?php echo $pResumeDeleteStyle; ?> class="btn btn-danger btn-sm">
+                Delete Resume
+            </button>
             <div class="custom-file col-sm-6">
                 <input name="profileResume" type="file" class="custom-file-input" id="profileResume"
                     accept=".pdf, application/pdf">

@@ -132,6 +132,7 @@ function onEditProfileFormSubmit() {
     }
 
     $('#btnEditProfileSubmit').attr('disabled', true);
+    changesDetected = false;
     $('#formEditProfileLoader').show();
     snackbar('Saving profile', 'info');
     return false;
@@ -156,6 +157,7 @@ function onApiResponse(type, success) {
         $('#formEditProfileLoader').hide();
         if (!success) {
             $('#btnEditProfileSubmit').attr('disabled', false);
+            changesDetected = true;
         } else {
             // Replace the profile image text
             if (newProfileImageSelected) {
@@ -169,9 +171,10 @@ function onApiResponse(type, success) {
             // Replace the resume text
             if (newResumeSelected) {
                 $('#resumeText').html(`
-                    You previously uploaded a resume. 
+                    You have uploaded a resume. 
                     <a href='downloaders/resumes?id=${$('#userId').val()}'>Download</a>
                 `);
+                $('#btnResumeDelete').show();
                 newResumeSelected = false;
             }
 
@@ -181,7 +184,7 @@ function onApiResponse(type, success) {
 }
 
 /**
- * Deletes the current profile image after confirming with the user that this is what they want.
+ * Sends a request to delete the current profile image after confirming with the user that this is what they want.
  */
 function onDeleteProfileImage() {
     let body = new FormData();
@@ -203,3 +206,25 @@ function onDeleteProfileImage() {
         });
 }
 $('#btnProfileImageDelete').click(onDeleteProfileImage);
+
+/**
+ * Sends a request to delete the current resume for the profile from the server
+ */
+function onDeleteResume() {
+    let body = new FormData();
+    body.append('action', 'deleteResume');
+    body.append('userId', $('#userId').val());
+
+    api.post('/resumes.php', body, true)
+        .then(res => {
+            $('#resumeText').text(`
+                No resume has been uploaded
+            `);
+            $('#btnResumeDelete').hide();
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+}
+$('#btnResumeDelete').click(onDeleteResume);

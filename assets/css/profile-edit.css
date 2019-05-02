@@ -45,3 +45,8 @@
     height: 100px;
 }
 
+#btnResumeDelete {
+    display: block;
+    margin-bottom: 15px;
+}
+
