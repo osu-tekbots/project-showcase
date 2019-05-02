@@ -7,11 +7,13 @@ php_value auto_prepend_file "/var/www/html/bootstrap.php"
 
 
 RewriteEngine On
-# Prepend `/pages` to the URI if it needs it
-RewriteCond %{REQUEST_URI} !^(/api|/assets|/files|/pages)
-RewriteRule ^(.*)$ pages/$1 
 
 # If the requested file is not a directory or a file, we need to append .php
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} pages/
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+# Prepend `/pages` to the URI if it needs it
+RewriteCond %{REQUEST_URI} !^(/api|/assets|/files|/pages)
+RewriteRule ^(.*)$ pages/$1 
