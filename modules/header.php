@@ -40,6 +40,7 @@ $css = array_merge(
             'integrity' => 'sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf',
             'crossorigin' => 'anonymous'
         ),
+        'assets/shared/css/snackbar.css',
         'assets/css/theme.css',
         'assets/css/global.css',
         'assets/css/bootstrap-overloads.css',
@@ -77,7 +78,9 @@ $js = array_merge(
         array(
             'src' => 'assets/js/header.js',
             'defer' => 'true'
-        )
+        ),
+        'assets/shared/js/api.js',
+        'assets/shared/js/snackbar.js'
     ), $js
 );
 
