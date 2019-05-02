@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS showcase_project_artifact (
     FOREIGN KEY (spa_sp_id) REFERENCES showcase_project (sp_id)
 );
 
-CREATE TABLE IF NOT EXISTS showcase_project_worked_on (
+CREATE TABLE IF NOT EXISTS showcase_worked_on (
     swo_u_id CHAR(16) NOT NULL,
     swo_sp_id CHAR(16) NOT NULL,
 
