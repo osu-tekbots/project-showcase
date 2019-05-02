@@ -1,5 +1,6 @@
 .profile-container {
     position: relative;
+    padding-bottom: 100px;
 }
 
 .profile-banner {
@@ -66,4 +67,10 @@
 
 #btnEditProfile {
     margin-left: 10px;
+}
+
+.projects-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
 }

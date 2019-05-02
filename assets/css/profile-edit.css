@@ -45,8 +45,20 @@
     height: 100px;
 }
 
-#btnResumeDelete {
-    display: block;
-    margin-bottom: 15px;
+#resumeActions {
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    margin-bottom: 12px;
 }
+
+#resumeActions * {
+    margin: 0px 5px;
+}
+
+.form-group-project {
+    padding: 10px;
+    background-color: var(--color-light-grey);
+}
+
 

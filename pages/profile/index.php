@@ -28,7 +28,8 @@ else {
 //
 $title = 'Showcase Profile';
 $css = array(
-    'assets/css/profile.css'
+    'assets/css/profile.css',
+    'assets/css/project.css'
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 
@@ -117,13 +118,13 @@ if (!$profile) {
     } else {
         include_once PUBLIC_FILES . '/modules/project.php';
         
-        $projectsHtml = "<div class='projects-container>";
+        $projectsHtml = "<div class='projects-container'>";
         
         foreach ($projects as $p) {
             $projectsHtml .= createProfileProjectHtml($p, $isOwnProfile);
         }
 
-        $projectsHtml = '</div>';
+        $projectsHtml .= '</div>';
     }
 
     // Render all of the HTML

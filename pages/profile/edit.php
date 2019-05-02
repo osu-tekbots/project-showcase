@@ -1,11 +1,12 @@
 <?php
 use DataAccess\ShowcaseProfilesDao;
+use DataAccess\ShowcaseProjectsDao;
 
-if(!isset($_SESSION)) {
+if (!isset($_SESSION)) {
     session_start();
 }
 
-if(!$isLoggedIn) {
+if (!$isLoggedIn) {
     echo "<script>window.location.replace('');</script>";
     die();
 }
@@ -15,7 +16,7 @@ $userId = $_SESSION['userID'];
 // Get the user profile information
 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
 $profile = $profilesDao->getUserProfileInformation($userId);
-if(!$profile) {
+if (!$profile) {
     echo "<script>window.location.replace('');</script>";
     die();
 }
@@ -45,13 +46,43 @@ $pLinkedInLink = $profile->getLinkedInLink();
 
 $pHasResume = $profile->isResumeUploaded();
 $pResumeLink = $pHasResume ? "downloaders/resumes?id=$userId" : '';
-$pResumeDeleteStyle = $pHasResume ? '' : "style='display: none;'";
+$pResumeButtonsStyle = $pHasResume ? '' : "style='display: none;'";
 $pResumeHtml = $pHasResume ? "
-    <p id='resumeText'>You have uploaded a resume. <a href='$pResumeLink'>Download</a></p>
+    <p id='resumeText'>You have uploaded a resume.</p>
 " : "
     <p id='resumeText'>No resume has been uploaded</p>
 ";
 
+// Generate the HTML for the projects
+$projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
+$projects = $projectsDao->getUserProjects($userId);
+if (!$projects || count($projects) == 0) {
+    $pProjectsMessage = "
+        <p>You haven't created any projects yet.</p>
+    ";
+    $pProjectsHtml = '';
+    $pProjectsStyle = "style='display: none;'";
+} else {
+    $pProjectsMessage = '';
+    $pProjectsHtml = '';
+    foreach ($projects as $p) {
+        $pid = $p->getId();
+        $title = $p->getTitle();
+        $description = $p->getDescription();
+
+        $pProjectsHtml .= "
+            <tr>
+                <td>$title</td>
+                <td>$description</td>
+                <td>
+                    <a href='projects/?id=$pid' class='btn btn-primary'>Edit</a>
+                </td>
+            </tr>
+        ";
+    }
+
+    $pProjectsStyle = '';
+}
 
 
 
@@ -111,7 +142,9 @@ include_once PUBLIC_FILES . '/modules/header.php';
             <div class="col-sm-10">
                 <div class="form-check">
                     <input name="publishContactInfo" id="publishContactInfo" type="checkbox" class="form-check-input" 
-                        value="true" <?php if ($pShowContactInfo) echo 'checked'; ?>>
+                        value="true" <?php if ($pShowContactInfo) {
+    echo 'checked';
+} ?>>
                     <label class="form-check-label" for="publishContactInfo">
                         Allow contact information to be visible on profile
                     </label>
@@ -179,9 +212,14 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <h3 id="resume">Resume</h3>
         <div class="form-group">
             <?php echo $pResumeHtml; ?>
-            <button type="button" id="btnResumeDelete" <?php echo $pResumeDeleteStyle; ?> class="btn btn-danger btn-sm">
-                Delete Resume
-            </button>
+            <div id="resumeActions" <?php echo $pResumeButtonsStyle; ?>>
+                <a href="<?php echo $pResumeLink; ?>" id="aResumeDownload" class="btn btn-primary btn-sm">
+                    Download
+                </a>
+                <button type="button" id="btnResumeDelete" class="btn btn-danger btn-sm">
+                    Delete Resume
+                </button>
+            </div>
             <div class="custom-file col-sm-6">
                 <input name="profileResume" type="file" class="custom-file-input" id="profileResume"
                     accept=".pdf, application/pdf">
@@ -191,6 +229,35 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </div>
         </div>
         <br/>
+
+        <h3 id="projects">Projects</h3>
+        <div class="projects-container col-md-8">
+            <?php echo $pProjectsMessage; ?>
+            <table class="table" <?php echo $pProjectsStyle; ?>>
+                <thead>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th></th>
+                </thead>
+                <tbody id="tableBodyProjects">
+                    <?php echo $pProjectsHtml; ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group form-group-project col-md-6">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" id="newProjectTitle" placeholder="Enter project title" />
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="newProjectDescription" class="form-control" rows="3"
+                    placeholder="Enter a description about your project"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" id="btnAddProject">
+                <i class="fas fa-plus"></i>&nbsp;&nbsp;Add Project
+            </button>
+        </div>
 
     </form>
 </div>

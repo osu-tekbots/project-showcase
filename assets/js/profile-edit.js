@@ -18,6 +18,18 @@ $('#formEditProfile input[type=file]').change(onEditProfileFormInputChange);
 $('#formEditProfile input[type=checkbox]').change(onEditProfileFormInputChange);
 
 /**
+ * Disables the ability for the form to submit on an 'Enter' key press
+ */
+function onFormInputKeyup(e) {
+    var keyCode = e.keyCode || e.which;
+    if (keyCode === 13) {
+        e.preventDefault();
+        return false;
+    }
+}
+$('#formEditProfile').on('keyup', onFormInputKeyup);
+
+/**
  * Changes the label for the profile image input so that it displays the name of the file that was selected. This
  * will also change the preview image.
  *
@@ -171,10 +183,10 @@ function onApiResponse(type, success) {
             // Replace the resume text
             if (newResumeSelected) {
                 $('#resumeText').html(`
-                    You have uploaded a resume. 
-                    <a href='downloaders/resumes?id=${$('#userId').val()}'>Download</a>
+                    You have uploaded a resume.
                 `);
-                $('#btnResumeDelete').show();
+                $('#aResumeDownload').attr('href', $('#userId').val());
+                $('#resumeActions').show();
                 newResumeSelected = false;
             }
 
@@ -220,7 +232,7 @@ function onDeleteResume() {
             $('#resumeText').text(`
                 No resume has been uploaded
             `);
-            $('#btnResumeDelete').hide();
+            $('#resumeActions').hide();
             snackbar(res.message, 'success');
         })
         .catch(err => {
@@ -228,3 +240,57 @@ function onDeleteResume() {
         });
 }
 $('#btnResumeDelete').click(onDeleteResume);
+
+/**
+ * Sends a request to add a new project to the user's profile.
+ */
+function onAddProject() {
+
+    $title = $('#newProjectTitle');
+    $description = $('#newProjectDescription');
+
+    let body = {
+        action: 'createProject',
+        userId: $('#userId').val(),
+        title: $title.val(),
+        description: $description.val()
+    };
+
+    if (body.title == '') {
+        return snackbar('Please enter a project title', 'error');
+    }
+    if (body.description == '') {
+        return snackbar('Please enter a project description', 'error');
+    }
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+            addRowToTableBodyProjects(res.content.id, body.title, body.description);
+            $title.val('');
+            $description.val('');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+}
+$('#btnAddProject').click(onAddProject);
+
+/**
+ * Adds a new row to the projects table in response to a successful additiona (via AJAX) of a new project
+ * 
+ * @param {string} pid the ID of the project to dynamically add to the table
+ * @param {string} title the title of the project
+ * @param {string} description the description for the project
+ */
+function addRowToTableBodyProjects(pid, title, description){
+    $('#tableBodyProjects').append(`
+        <tr>
+            <td>${title}</td>
+            <td>${description}</td>
+            <td>
+                <a href="projects/?id=${pid}" class="btn btn-primary">Edit</a>
+            </td>
+        </tr>
+    `);
+}
