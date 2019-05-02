@@ -64,7 +64,7 @@ class ShowcaseProfilesDao {
             $sql = '
             INSERT INTO showcase_user_profile (
                 sup_u_id, sup_about, sup_show_contact_info, sup_website_link, sup_github_link, sup_linkedin_link,
-                sup_resume_file_name, sup_image_uploaded, sup_date_created, sup_date_updated
+                sup_resume_uploaded, sup_image_uploaded, sup_date_created, sup_date_updated
             ) VALUES (
                 :id,
                 :about,
@@ -84,7 +84,7 @@ class ShowcaseProfilesDao {
                 ':website' => $profile->getWebsiteLink(),
                 ':github' => $profile->getGithubLink(),
                 ':linkedin' => $profile->getLinkedInLink(),
-                ':resume' => $profile->getResumeFileName(),
+                ':resume' => $profile->isResumeUploaded(),
                 ':image' => $profile->isImageUploaded(),
                 ':id' => $profile->getUserId(),
                 ':dcreated' => QueryUtils::FormatDate($profile->getDateCreated()),
@@ -115,7 +115,7 @@ class ShowcaseProfilesDao {
                 sup_website_link = :website,
                 sup_github_link = :github,
                 sup_linkedin_link = :linkedin,
-                sup_resume_file_name = :resume,
+                sup_resume_uploaded = :resume,
                 sup_image_uploaded = :image,
                 sup_date_updated = :dupdated
             WHERE sup_u_id = :id
@@ -126,7 +126,7 @@ class ShowcaseProfilesDao {
                 ':website' => $profile->getWebsiteLink(),
                 ':github' => $profile->getGithubLink(),
                 ':linkedin' => $profile->getLinkedInLink(),
-                ':resume' => $profile->getResumeFileName(),
+                ':resume' => $profile->isResumeUploaded(),
                 ':image' => $profile->isImageUploaded(),
                 ':dupdated' => QueryUtils::FormatDate($profile->getDateUpdated()),
                 ':id' => $profile->getUserId()
@@ -162,7 +162,7 @@ class ShowcaseProfilesDao {
             ->setWebsiteLink($row['sup_website_link'])
             ->setGithubLink($row['sup_github_link'])
             ->setLinkedInLink($row['sup_linkedin_link'])
-            ->setResumeFileName($row['sup_resume_file_name'])
+            ->setResumeUploaded($row['sup_resume_uploaded'] ? true : false)
             ->setImageUploaded($row['sup_image_uploaded'] ? true : false)
             ->setDateUpdated(new \DateTime($row['sup_date_updated']));
         

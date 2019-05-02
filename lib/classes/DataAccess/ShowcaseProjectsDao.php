@@ -42,7 +42,7 @@ class ShowcaseProjectsDao {
             $artifactsPredicate = $includeArtifacts ? 'AND spa_sp_id = sp_id' : '';
             $sql = "
             SELECT * 
-            FROM sup_project, showcase_worked_on $artifactsTable
+            FROM showcase_project, showcase_worked_on $artifactsTable
             WHERE swo_u_id = :id AND swo_sp_id = sp_id $artifactsPredicate
             ORDER BY swo_u_id
             ";
@@ -59,7 +59,6 @@ class ShowcaseProjectsDao {
                 if ($includeArtifacts) {
                     $p = $projects[\count($projects) - 1];
                     $artifact = self::ExtractShowcaseArtifactFromRow($row);
-                    $artifact->setProject($p);
                     $p->addArtifact($artifact);
                 }
             }

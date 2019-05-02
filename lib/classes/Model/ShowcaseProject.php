@@ -168,6 +168,7 @@ class ShowcaseProject {
         if ($this->artifacts == null) {
             $this->artifacts = array();
         }
+        $artifact->setProject($this);
         $this->artifacts[] = $artifact;
         return $this;
     }

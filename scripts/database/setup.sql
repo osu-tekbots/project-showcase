@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS showcase_user_profile (
     sup_website_link VARCHAR(512),
     sup_github_link VARCHAR(128),
     sup_linkedin_link VARCHAR(128),
-    sup_resume_file_name VARCHAR(128),
+    sup_resume_uploaded BOOLEAN NOT NULL DEFAULT FALSE,
     sup_image_uploaded BOOLEAN NOT NULL DEFAULT FALSE,
     sup_date_created DATETIME NOT NULL,
     sup_date_updated DATETIME,

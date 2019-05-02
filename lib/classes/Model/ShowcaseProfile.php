@@ -19,8 +19,8 @@ class ShowcaseProfile {
     private $githubLink;
     /** @var string */
     private $linkedInLink;
-    /** @var string */
-    private $resumeFileName;
+    /** @var bool */
+    private $resumeUploaded;
     /** @var bool */
     private $imageUploaded;
     /** @var \DateTime */
@@ -154,19 +154,19 @@ class ShowcaseProfile {
     }
 
     /**
-     * Get the value of resumeFileName
+     * Check if there is a resume uploaded for the profile
      */ 
-    public function getResumeFileName() {
-        return $this->resumeFileName;
+    public function isResumeUploaded() {
+        return $this->resumeUploaded;
     }
 
     /**
-     * Set the value of resumeFileName
+     * Set the value of resumeUploaded
      *
      * @return  self
      */ 
-    public function setResumeFileName($resumeFileName) {
-        $this->resumeFileName = $resumeFileName;
+    public function setResumeUploaded($resumeUploaded) {
+        $this->resumeUploaded = $resumeUploaded;
 
         return $this;
     }
