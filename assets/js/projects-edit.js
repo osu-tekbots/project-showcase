@@ -62,7 +62,7 @@ $('input[name=artifactType]').change(onArtifactTypeChange);
  */
 function onArtifactFileChange() {
     // Show the name of the file
-    if(this.files.length > 0) {
+    if (this.files.length > 0) {
         $('#labelArtifactFile').text(this.files[0].name);
     }
 }
@@ -78,7 +78,13 @@ function onAddNewArtifactSubmit() {
     api.post('/artifacts.php', form, true)
         .then(res => {
             snackbar(res.message, 'success');
-            // TODO: add new row to table and clear form
+            onAddArtifactSuccess(
+                res.content.id,
+                form.get('name'),
+                form.get('description'),
+                form.get('artifactType'),
+                form.get('artifactLink')
+            );
         })
         .catch(err => {
             snackbar(err.message, 'error');
@@ -87,6 +93,64 @@ function onAddNewArtifactSubmit() {
     return false;
 }
 $('#formAddNewArtifact').submit(onAddNewArtifactSubmit);
+
+/**
+ * Called after a successful response from the server when adding an artifact to a project. Triggers dynamic HTML
+ * rendering and clearing the artifact form.
+ */
+function onAddArtifactSuccess(id, name, description, type, link) {
+    let $tbody = $('#tableBodyArtifacts');
+    if (!$tbody.length) {
+        // The table doesn't exist, we need to create it
+        $('#pNoArtifacts').remove();
+        $('#divAddNewArtifactContainer').before(`
+            <table class='table table-artifacts'>
+                <thead>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Content</th>
+                    <th></th>
+                </thead>
+                <tbody id='tableBodyArtifacts'>
+                </tbody>
+            <table>
+        `);
+        $tbody = $('#tableBodyArtifacts');
+    }
+
+    // Append the artifact to the bottom of the table
+    contentHtml = '';
+    switch (type) {
+        case 'file':
+            contentHtml = `
+                <a href="downloaders/artifacts?id=${id}">Download Artifact File</a>
+            `;
+            break;
+
+        case 'link':
+            contentHtml = `
+                <a href="${link}" target="_blank">Link to artifact</a>
+            `;
+            break;
+    }
+    $tbody.append(`
+        <tr class="artifact-row" id="${id}">
+            <td>${name}</td>
+            <td>${description}</td>
+            <td>${contentHtml}</td>
+            <td>
+                <button type='button' class='btn btn-sm btn-danger btn-delete-artifact' data-id='${id}'
+                    onclick='onDeleteArtifact.call(this)'>
+                    <i class='fas fa-trash'></i>
+                </button>
+            </td>
+        </tr>
+    `);
+
+    $('#formAddNewArtifact')[0].reset();
+    $('#labelArtifactFile').text('Choose artifact file');
+    onArtifactTypeChange.call($('#formAddNewArtifact input[name=artifactType')[0]);
+}
 
 /**
  * Sends a request to the server to delete an artifact when the delete button for an artifact has been clicked.

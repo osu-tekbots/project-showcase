@@ -56,7 +56,7 @@ $pDescription = $project->getDescription();
 
 $pArtifacts =$project->getArtifacts();
 if (count($pArtifacts) == 0) {
-    $pArtifactsHtml = '<p>There are no artifacts associated with this project</p>';
+    $pArtifactsHtml = '<p id="pNoArtifacts">There are no artifacts associated with this project</p>';
 } else {
     $pArtifactsHtml = "
         <table class='table table-artifacts'>
@@ -66,15 +66,15 @@ if (count($pArtifacts) == 0) {
                 <th>Content</th>
                 <th></th>
             </thead>
-            <tbody>
+            <tbody id='tableBodyArtifacts'>
     ";
 
     foreach ($pArtifacts as $artifact) {
         $aId = $artifact->getId();
         $aName = $artifact->getName();
         $aDescription = $artifact->getDescription();
-        if($artifact->isFileUploaded()) {
-             $aContentHtml = "
+        if ($artifact->isFileUploaded()) {
+            $aContentHtml = "
                 <a href='downloaders/artifacts?id=$aId'>Download Artifact File</a>
              ";
         } else {
@@ -156,7 +156,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
         project.</i></p>
     <div class="edit-artifacts-container">
         <?php echo $pArtifactsHtml; ?>
-        <div class="add-new-artifact-container col-sm-7">
+        <div class="add-new-artifact-container col-sm-7" id="divAddNewArtifactContainer">
             <form id="formAddNewArtifact">
                 <input type="hidden" name="projectId" value="<?php echo $projectId; ?>" />
                 <div class="form-group row">
