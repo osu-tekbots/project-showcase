@@ -50,6 +50,35 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to update information in the database about a project.
+     *
+     * @return void
+     */
+    public function handleUpdateProject() {
+        $projectId = $this->getFromBody('projectId');
+        $title = $this->getFromBody('title');
+        $description = $this->getFromBody('description');
+
+        $project = $this->projectsDao->getProject($projectId);
+        // TODO: handle case when project is not found
+
+        $project
+            ->setTitle($title)
+            ->setDescription($description)
+            ->setDateUpdated(new \DateTime());
+        
+        $ok = $this->projectsDao->updateProject($project);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save changes to project'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully saved changes to project'
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -67,6 +96,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'createProject':
                 $this->handleCreateProject();
+
+            case 'updateProject':
+                $this->handleUpdateProject();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));
