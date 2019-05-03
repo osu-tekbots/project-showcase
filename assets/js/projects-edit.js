@@ -58,6 +58,17 @@ function onArtifactTypeChange() {
 $('input[name=artifactType]').change(onArtifactTypeChange);
 
 /**
+ * Handler triggered when a new file for an artifact is selected. Changes the label to display the file name
+ */
+function onArtifactFileChange() {
+    // Show the name of the file
+    if(this.files.length > 0) {
+        $('#labelArtifactFile').text(this.files[0].name);
+    }
+}
+$('#artifactFile').change(onArtifactFileChange);
+
+/**
  * Sends a request to the server to add a new artifact to a project. This AJAX request has content type urlformencoded.
  */
 function onAddNewArtifactSubmit() {

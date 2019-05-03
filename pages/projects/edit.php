@@ -74,7 +74,9 @@ if (count($pArtifacts) == 0) {
         $aName = $artifact->getName();
         $aDescription = $artifact->getDescription();
         if($artifact->isFileUploaded()) {
-             
+             $aContentHtml = "
+                <a href='downloaders/artifacts?id=$aId'>Download Artifact File</a>
+             ";
         } else {
             $aLink = $artifact->getLink();
             $aContentHtml = "
@@ -188,7 +190,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <div class="form-group row custom-file-row" id="divNewArtifactFile">
                     <div class="custom-file col-sm-8">
                         <input required name="artifactFile" type="file" class="custom-file-input" id="artifactFile">
-                        <label class="custom-file-label" for="artifactFile" id="artifactFile">
+                        <label class="custom-file-label" for="artifactFile" id="labelArtifactFile">
                             Choose artifact file
                         </label>
                     </div>
