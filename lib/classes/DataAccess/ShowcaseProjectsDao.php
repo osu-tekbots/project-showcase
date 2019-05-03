@@ -61,7 +61,9 @@ class ShowcaseProjectsDao {
                 if ($includeArtifacts) {
                     $p = $projects[\count($projects) - 1];
                     $artifact = self::ExtractShowcaseArtifactFromRow($row);
-                    $p->addArtifact($artifact);
+                    if ($artifact) {
+                        $p->addArtifact($artifact);
+                    }
                 }
             }
 
@@ -73,6 +75,72 @@ class ShowcaseProjectsDao {
             return $projects;
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch projects for user with id '$userId': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches a single showcase project with the provided ID.
+     * 
+     * This will also fetch all the artifacts associated with the project.
+     *
+     * @param string $projectId the ID of the project to retrieve
+     * @return \Model\ShowcaseProject|boolean the project on success, false if not found or an error occurred
+     */
+    public function getProject($projectId) {
+        try {
+            $sql = '
+            SELECT * 
+            FROM showcase_project
+            LEFT OUTER JOIN showcase_project_artifact ON spa_sp_id = sp_id
+            WHERE sp_id = :id
+            ORDER BY sp_id, spa_date_created
+            ';
+            $params = array(':id' => $projectId);
+
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
+            }
+
+            $project = self::ExtractShowcaseProjectFromRow($results[0]);
+            foreach ($results as $row) {
+                $artifact = self::ExtractShowcaseArtifactFromRow($row);
+                if ($artifact) {
+                    $project->addArtifact($artifact);
+                }
+            }
+
+            return $project;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch project with ID '$projectId': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches a project artifact with the provided ID.
+     *
+     * @param string $artifactId the string ID of the artifact
+     * @return \Model\ShowcaseProjectArtifact the artifact on success, false if not found or an error occurs
+     */
+    public function getProjectArtifact($artifactId) {
+        try {
+            $sql = '
+            SELECT *
+            FROM showcase_project_artifact
+            WHERE spa_id = :id
+            ';  
+            $params = array(':id' => $artifactId);
+
+            $results = $this->conn->query($sql, $params);
+            if(\count($results) == 0) {
+                return false;
+            }
+
+            return self::ExtractShowcaseArtifactFromRow($results[0]);
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch project artifact with ID '$artifactId': " . $e->getMessage());
             return false;
         }
     }
@@ -108,9 +176,9 @@ class ShowcaseProjectsDao {
             );
             $this->conn->execute($sql, $params);
 
-            if($userId != null) {
+            if ($userId != null) {
                 $ok = $this->associateProjectWithUser($project->getId(), $userId);
-                if(!$ok) {
+                if (!$ok) {
                     $this->conn->rollback();
                     return false;
                 }
@@ -127,15 +195,13 @@ class ShowcaseProjectsDao {
     }
 
     /**
-     * Inserts new project artifacts into the database and associates them with their project.
+     * Inserts a new project artifact into the database and associates it with its project.
      *
-     * @param \Model\ShowcaseProjectArtifact[] $artifacts an array of artifacts to insert
+     * @param \Model\ShowcaseProjectArtifact $artifacts an artifacts to insert
      * @return boolean true on success, false otherwise
      */
-    public function addNewProjectArtifacts($artifacts) {
+    public function addNewProjectArtifact($artifacts) {
         try {
-            $this->conn->startTransaction();
-
             $sql = '
             INSERT INTO showcase_project_artifact (
                 spa_id, spa_sp_id, spa_name, spa_description, spa_file_uploaded, spa_link, spa_published,
@@ -144,28 +210,22 @@ class ShowcaseProjectsDao {
                 :id, :pid, :name, :description, :file, :link, :published, :created, :updated
             )
             ';
-
-            foreach ($artifacts as $a) {
-                $params = array(
-                    ':id' => $a->getId(),
-                    ':pid' => $a->getProject()->getId(),
-                    ':name' => $a->getName(),
-                    ':description' => $a->getDescription(),
-                    ':file' => $a->isFileUploaded(),
-                    ':link' => $a->getLink(),
-                    ':published' => $a->isPublished(),
-                    ':created' => QueryUtils::FormatDate($a->getDateCreated()),
-                    ':updated' => QueryUtils::FormatDate($a->getDateUpdated())
-                );
-                $this->conn->execute($sql, $params);
-            }
-
-            $this->conn->commit();
+            $params = array(
+                ':id' => $artifacts->getId(),
+                ':pid' => $artifacts->getProject()->getId(),
+                ':name' => $artifacts->getName(),
+                ':description' => $artifacts->getDescription(),
+                ':file' => $artifacts->isFileUploaded(),
+                ':link' => $artifacts->getLink(),
+                ':published' => $artifacts->isPublished(),
+                ':created' => QueryUtils::FormatDate($artifacts->getDateCreated()),
+                ':updated' => QueryUtils::FormatDate($artifacts->getDateUpdated())
+            );
+            $this->conn->execute($sql, $params);
 
             return true;
         } catch (\Exception $e) {
-            $this->conn->rollback();
-            $this->logger->error('Failed to add new showcase project artifacts: ' . $e->getMessage());
+            $this->logger->error('Failed to add new showcase project artifact: ' . $e->getMessage());
             return false;
         }
     }
@@ -269,6 +329,84 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Deltes a project artifact from the database.
+     *
+     * @param string $artifactId the ID of the artifact to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteProjectArtifact($artifactId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_project_artifact
+            WHERE spa_id = :id
+            ';
+            $params = array(':id' => $artifactId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project artifact: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches the user entries that are connected with the project that has the provided ID.
+     *
+     * @param string $projectId the ID of the project
+     * @return \Model\User[]|boolean an array of users on success, false otherwise
+     */
+    public function getProjectCollaborators($projectId) {
+        try {
+            $sql = '
+            SELECT *
+            FROM user, showcase_worked_on
+            WHERE u_id = swo_u_id AND swo_sp_id = :id
+            ';
+            $params = array(':id' => $projectId);
+            
+            $results = $this->conn->query($sql, $params);
+            
+            $associates = array();
+            foreach ($results as $row) {
+                $associates[] = UsersDao::ExtractUserFromRow($row);
+            }
+
+            return $associates;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch associates of project with ID '$projectId': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Queries the database to determine if a user is a collaborator on a project.
+     *
+     * @param string $projectId the ID of the project
+     * @param string $userId the ID of the user
+     * @return boolean|null true or false if the query is successful, null otherwise
+     */
+    public function verifyUserIsCollaboratorOnProject($projectId, $userId) {
+        try {
+            $sql = '
+            SELECT *
+            FROM showcase_worked_on
+            WHERE swo_u_id = :uid AND swo_sp_id = :pid
+            ';
+            $params = array(':uid' => $userId, ':pid' => $projectId);
+            
+            $results = $this->conn->query($sql, $params);
+
+            return \count($results) != 0;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to determine if user $userId is a collaborator for project $projectId: " . 
+                $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Uses information from a row in the database to create a ShowcaseProject object.
      *
      * @param mixed[] $row the row from the database
@@ -287,26 +425,37 @@ class ShowcaseProjectsDao {
     }
 
     /**
-     * Uses information from a row in the database to create a ShowcaseProjectArtifact object.
+     * Uses information from a row in the database to create a ShowcaseProjectArtifact object. 
      * 
-     * NOTE: the artifact object can have a reference to the project it belongs to. The reference is not set
-     * in this function, however, as it is assumed that the project information is not available. This helps
-     * reduce memory overhead and avoid unnecessary duplicates of project objects.
+     * If no artifact is able to be extracted from the row, the function will return false
+     * 
+     * NOTE: the artifact object can have a reference to the project it belongs to. By default, he reference is not set
+     * in this function, as it is assumed that the project information is not available. This helps
+     * reduce memory overhead and avoid unnecessary duplicates of project objects. To also create a ShowcaseProject
+     * object from information in the row, set the `$projetInRow` argument to `true`.
      *
      * @param mixed[] $row the row from the database
-     * @return \Model\ShowcaseProjectArtifact the extracted artifact
+     * @param boolean $projectInRow determines whether to also create a ShowcaseProject object from the row
+     * @return \Model\ShowcaseProjectArtifact|boolean the extracted artifact if it exists, false otherwise
      */
-    public static function ExtractShowcaseArtifactFromRow($row) {
+    public static function ExtractShowcaseArtifactFromRow($row, $projectInRow = false) {
+        if (!isset($row['spa_id'])) {
+            return false;
+        }
         $artifact = new ShowcaseProjectArtifact($row['spa_id']);
         $artifact
             ->setProjectId($row['spa_sp_id'])
             ->setName($row['spa_name'])
             ->setDescription($row['spa_description'])
-            ->setFileName($row['spa_file_name'])
+            ->setFileUploaded($row['spa_file_uploaded'] ? true : false)
             ->setLink($row['spa_link'])
             ->setPublished($row['spa_published'] ? true : false)
             ->setDateCreated(new \DateTime($row['spa_date_created']))
             ->setDateUpdated($row['spa_date_updated'] ? new \DateTime($row['spa_date_updated']) : null);
+
+        if ($projectInRow) {
+            $artifact->setProject(self::ExtractShowcaseProjectFromRow($row));
+        }
         
         return $artifact;
     }
