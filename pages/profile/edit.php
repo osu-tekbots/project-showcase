@@ -75,7 +75,7 @@ if (!$projects || count($projects) == 0) {
                 <td>$title</td>
                 <td>$description</td>
                 <td>
-                    <a href='projects/?id=$pid' class='btn btn-primary'>Edit</a>
+                    <a href='projects/edit?id=$pid' class='btn btn-primary'>Edit</a>
                 </td>
             </tr>
         ";
