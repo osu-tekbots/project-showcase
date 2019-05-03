@@ -1,0 +1,24 @@
+.container {
+    padding-top: 10px;
+    padding-bottom: 200px;
+}
+
+.add-new-artifact-container {
+    background-color: var(--color-light-grey);
+    border-radius: 3px;
+    padding: 10px;
+}
+
+.custom-file {
+    padding: 0px 12px;
+}
+
+.custom-file-row {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+.table-artifacts td:last-child {
+    width: 100px;
+    text-align: center;
+}
