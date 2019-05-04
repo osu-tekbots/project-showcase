@@ -8,10 +8,10 @@
  * @return string the HTML for rendering a profile project
  */
 function createProfileProjectHtml($project, $isOwnProject) {
-
+    $id = $project->getId();
     $title = $project->getTitle();
     $description = $project->getDescription();
-    if(strlen($description) > 340) {
+    if (strlen($description) > 340) {
         $description = substr($description, 0, 300) . '...';
     }
 
@@ -19,9 +19,9 @@ function createProfileProjectHtml($project, $isOwnProject) {
     <div class='profile-project col-md-4'>
         <h3 class='project-title'>$title</h3>
         <p class='project-description'>$description</p>
-        <button class='btn btn-outline-osu project-details'>
+        <a href='projects/?id=$id' class='btn btn-outline-osu project-details'>
             Details
-        </button>
+        </a>
     </div>
     ";
 }
