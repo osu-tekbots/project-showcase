@@ -3,9 +3,6 @@ use DataAccess\ShowcaseProjectsDao;
 use DataAccess\UsersDao;
 use Model\UserType;
 
-// TODO: remove
-include_once PUBLIC_FILES . '/lib/shared/dev-utils.php';
-
 if (!isset($_SESSION)) {
     session_start();
 }
