@@ -9,6 +9,10 @@
     animation: fadeInDown 0.5s ease-out;
 }
 
+.showcase-project-header a {
+    margin-bottom: 10px;
+}
+
 .showcase-project-collaborators {
     opacity: 0;
     display: flex;

@@ -48,6 +48,7 @@ if (!$project) {
     // Collaborators
     $pCollaborators = $projectsDao->getProjectCollaborators($projectId);
     $pCollaboratorsHtml = '';
+    $collaboratorIsUser = false;
     foreach ($pCollaborators as $c) {
         $name = $c->getFullName();
 
@@ -56,7 +57,17 @@ if (!$project) {
                 <h4>$name</h4>
             </div>
         ";
+
+        if($isLoggedIn && $c->getId() == $_SESSION['userID']) {
+            $collaboratorIsUser = true;
+        }
     }
+    
+    $editButtonHtml = $collaboratorIsUser ? "
+        <a href='projects/edit?id=$projectId' class='btn btn-primary'>
+            <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
+        </a>
+    " : '';
     
     // Artifacts
     $pArtifacts = $project->getArtifacts();
@@ -111,6 +122,7 @@ if (!$project) {
     <div class='container showcase-project-container'>
         <div class='showcase-project-header'>
             <h1>$pTitle</h1>
+            $editButtonHtml
         </div>
         <div class='showcase-project-collaborators'>
             <h6><i>By</i></h6>
