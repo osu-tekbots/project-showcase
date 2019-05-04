@@ -41,6 +41,7 @@ class ShowcaseProfile {
         if($isNew) {
             $this->setShowContactInfo(false);
             $this->setImageUploaded(false);
+            $this->setResumeUploaded(false);
             $this->setDateCreated(new \DateTime());
         }
     }

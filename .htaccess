@@ -15,5 +15,5 @@ RewriteCond %{REQUEST_FILENAME} (pages/|downloaders/|api/)
 RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
 # Prepend `/pages` to the URI if it needs it
-RewriteCond %{REQUEST_URI} !^(/api|/assets|/downloaders|/pages)
+RewriteCond %{REQUEST_URI} !^(/api|/assets|/downloaders|/pages|/masq)
 RewriteRule ^(.*)$ pages/$1 

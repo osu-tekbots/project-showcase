@@ -32,6 +32,7 @@ switch ($action) {
             $user = $dao->getUserByOnid($onid);
             if ($user) {
                 // Make sure the user has a showcase profile. If not, create one
+                $ok = true;
                 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
                 $profile = $profilesDao->getUserProfileInformation($user->getId());
                 if (!$profile) {
