@@ -1,0 +1,78 @@
+.showcase-project-container {
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.showcase-project-header {
+    text-align: center;
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.showcase-project-collaborators {
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeInDown 0.5s ease-out 0.25s;
+    animation-fill-mode: forwards;
+    margin-bottom: 10px;
+}
+
+.collaborators-container {
+    display: flex;
+    justify-content: center;
+}
+
+.showcase-project-description {
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.25s;
+    animation-fill-mode: forwards;
+    margin-bottom: 20px;
+}
+
+.showcase-project-artifacts {
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.25s;
+    animation-fill-mode: forwards;
+}
+
+.table td:first-child {
+    max-width: 200px;
+}
+
+.table td:last-child {
+    width: 150px;
+    text-align: center;
+}
+
+@keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@-webkit-keyframes fadeInDown {
+    0% {
+        opacity: 0;
+        -webkit-transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        -webkit-transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
