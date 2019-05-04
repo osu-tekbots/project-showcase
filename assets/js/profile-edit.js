@@ -284,13 +284,17 @@ $('#btnAddProject').click(onAddProject);
  * @param {string} description the description for the project
  */
 function addRowToTableBodyProjects(pid, title, description){
+    if(description.length > 280) {
+        description = description.substr(0, 280) + '...';
+    }
     $('#tableBodyProjects').append(`
         <tr>
             <td>${title}</td>
             <td>${description}</td>
             <td>
-                <a href="projects/?id=${pid}" class="btn btn-primary">Edit</a>
+                <a href="projects/edit?id=${pid}" class="btn btn-primary">Edit</a>
             </td>
         </tr>
     `);
+    $('#tableProjects').show();
 }

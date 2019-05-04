@@ -69,6 +69,9 @@ if (!$projects || count($projects) == 0) {
         $pid = $p->getId();
         $title = $p->getTitle();
         $description = $p->getDescription();
+        if(strlen($description) > 280) {
+            $description = substr($description, 0, 280) . '...';
+        }
 
         $pProjectsHtml .= "
             <tr>
@@ -104,6 +107,12 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 <div class="container">
     <h1>Edit Profile</h1>
+    <a href="profile/?id=<?php echo $userId; ?>" class="btn btn-sm btn-light">
+        <i class="fas fa-chevron-left"></i>&nbsp;&nbsp;View Profile
+    </a>
+    <br/>
+    <br/>
+
     <form id="formEditProfile">
 
         <input type="hidden" name="userId" id="userId" value="<?php echo $userId; ?>" />
@@ -133,7 +142,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">Major</label>
             <div class="col-sm-5">
-                <input required name="major" type="text" class="form-control" placeholder="Major" 
+                <input name="major" type="text" class="form-control" placeholder="Major" 
                     value="<?php echo $pMajor; ?>" />
             </div>         
         </div>
@@ -233,7 +242,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <h3 id="projects">Projects</h3>
         <div class="projects-container col-md-8">
             <?php echo $pProjectsMessage; ?>
-            <table class="table" <?php echo $pProjectsStyle; ?>>
+            <table class="table" <?php echo $pProjectsStyle; ?> id="tableProjects">
                 <thead>
                     <th>Title</th>
                     <th>Description</th>

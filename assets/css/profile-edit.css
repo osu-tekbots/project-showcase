@@ -61,4 +61,8 @@
     background-color: var(--color-light-grey);
 }
 
+#tableProjects td:nth-child(2) {
+    white-space: pre-wrap;
+}
+
 

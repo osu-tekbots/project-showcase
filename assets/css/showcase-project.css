@@ -35,6 +35,10 @@
     margin-bottom: 20px;
 }
 
+.showcase-project-description p {
+    white-space: pre-wrap;
+}
+
 .showcase-project-artifacts {
     opacity: 0;
     animation: fadeIn 1s ease-out 0.25s;

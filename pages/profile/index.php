@@ -92,7 +92,7 @@ if (!$profile) {
     $about = $profile->getAbout();
     $about = !empty($about) && !is_null($about) ? "
         <h2>About</h2>
-        $about
+        <p>$about</p>
     " : "
         <h2>About</h2>
         <p>Add a brief description about yourself highlighting your skills and experience.</p>

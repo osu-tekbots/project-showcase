@@ -8,11 +8,17 @@
  * @return string the HTML for rendering a profile project
  */
 function createProfileProjectHtml($project, $isOwnProject) {
+
+    $descriptionCharLimit = 280;
+
     $id = $project->getId();
     $title = $project->getTitle();
+    if(strlen($title) > 30) {
+        $descriptionCharLimit = 220;
+    }
     $description = $project->getDescription();
-    if (strlen($description) > 340) {
-        $description = substr($description, 0, 300) . '...';
+    if (strlen($description) > $descriptionCharLimit) {
+        $description = substr($description, 0, $descriptionCharLimit) . '...';
     }
 
     return "

@@ -118,6 +118,11 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 <div class="container">
     <h1>Edit Project</h1>
+    <a href="projects/?id=<?php echo $projectId; ?>" class="btn btn-sm btn-light">
+        <i class="fas fa-chevron-left"></i>&nbsp;&nbsp;View Project
+    </a>
+    <br/>
+    <br/>
 
     <form id="formEditProjectGeneral">
         <input type="hidden" name="projectId" id="projectId" value="<?php echo $projectId; ?>" />

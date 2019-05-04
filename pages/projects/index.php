@@ -64,7 +64,7 @@ if (!$project) {
     }
     
     $editButtonHtml = $collaboratorIsUser ? "
-        <a href='projects/edit?id=$projectId' class='btn btn-primary'>
+        <a href='projects/edit?id=$projectId' class='btn btn-sm btn-light'>
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
         </a>
     " : '';
