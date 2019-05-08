@@ -162,7 +162,7 @@ $navlinks = array(
                 ";
             } else { 
                 echo "
-                <a href='signin'>
+                <a href='signin?provider=onid'>
                     <li>SIGN IN</li>
                 </a>
                 ";
