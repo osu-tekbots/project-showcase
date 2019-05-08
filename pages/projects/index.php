@@ -50,7 +50,7 @@ if (!$project) {
     $pCollaboratorsHtml = '';
     $collaboratorIsUser = false;
     foreach ($pCollaborators as $c) {
-        $name = $c->getFullName();
+        $name = $c->getUser()->getFullName();
 
         $pCollaboratorsHtml .= "
             <div class='collaborator'>
@@ -58,7 +58,7 @@ if (!$project) {
             </div>
         ";
 
-        if($isLoggedIn && $c->getId() == $_SESSION['userID']) {
+        if($isLoggedIn && $c->getUser()->getId() == $_SESSION['userID']) {
             $collaboratorIsUser = true;
         }
     }
