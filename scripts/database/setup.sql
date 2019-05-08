@@ -7,7 +7,8 @@
 CREATE TABLE IF NOT EXISTS showcase_user_profile (
     sup_u_id CHAR(16) NOT NULL,
     sup_about TEXT,
-    sup_show_contact_info BOOLEAN,
+    sup_show_contact_info BOOLEAN NOT NULL DEFAULT FALSE,
+    sup_accepting_invites BOOLEAN NOT NULL DEFAULT TRUE,
     sup_website_link VARCHAR(512),
     sup_github_link VARCHAR(128),
     sup_linkedin_link VARCHAR(128),
@@ -49,6 +50,9 @@ CREATE TABLE IF NOT EXISTS showcase_project_artifact (
 CREATE TABLE IF NOT EXISTS showcase_worked_on (
     swo_u_id CHAR(16) NOT NULL,
     swo_sp_id CHAR(16) NOT NULL,
+    swo_is_visible BOOLEAN NOT NULL DEFAULT TRUE,
+    swo_accepted BOOLEAN NOT NULL DEFAULT FALSE,
+    swo_invited BOOLEAN NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (swo_u_id, swo_sp_id),
     FOREIGN KEY (swo_u_id) REFERENCES user (u_id),
