@@ -11,14 +11,23 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     /** @var \DataAccess\ShowcaseProjectsDao */
     private $projectsDao;
 
+    /** @var \DataAccess\UsersDao */
+    private $usersDao;
+
+    /** @var \Email\CollaborationMailer */
+    private $mailer;
+
     /**
      * Constructs a new instance of the action handler for requests on user resources.
      *
      * @param \DataAccess\ShowcaseProjectsDao $projectsDao the data access object for showcase projects
+     * @param \Email\CollaborationMailer  $mailer the Mailer class providing email functionality for collaboration
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($projectsDao, $logger) {
+    public function __construct($projectsDao, $usersDao, $mailer, $logger) {
         parent::__construct($logger);
+        $this->mailer = $mailer;
+        $this->usersDao = $usersDao;
         $this->projectsDao = $projectsDao;
     }
 
@@ -79,6 +88,33 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles inviting a user to collaborate on a project.
+     *
+     * @return void
+     */
+    public function handleInviteUserToProject() {
+        $projectId = $this->getFromBody('projectId');
+        $userId = $this->getFromBody('userId');
+        $email = $this->getFromBody('email');
+
+        $user = $this->usersDao->getUser($userId);
+        // TODO: handle case when user is not found
+
+        $project = $this->projectsDao->getProject($projectId);
+        // TODO: handle case when showcase project is not found
+
+        $sent = $this->mailer->sendInvite($user, $email, $project);
+        if(!$sent) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            "Successfully sent invitation to $email"
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -99,6 +135,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'updateProject':
                 $this->handleUpdateProject();
+
+            case 'inviteUser':
+                $this->handleInviteUserToProject();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

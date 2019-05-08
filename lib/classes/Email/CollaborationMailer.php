@@ -18,8 +18,8 @@ class CollaborationMailer extends Mailer {
      * @param \Util\ConfigurationManager $config configuration that allows us to construct links to resources sent
      * in the email.
      */
-    public function __construct($from, $subjectTag, $config) {
-        parent::__construct($from, $subjectTag);
+    public function __construct($from, $subjectTag, $logger, $config) {
+        parent::__construct($from, $subjectTag, $logger);
         $this->config = $config;
     }
 
