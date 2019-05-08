@@ -56,3 +56,13 @@ CREATE TABLE IF NOT EXISTS showcase_worked_on (
     FOREIGN KEY (swo_u_id) REFERENCES user (u_id),
     FOREIGN KEY (swo_sp_id) REFERENCES showcase_project (sp_id)
 );
+
+CREATE TABLE IF NOT EXISTS showcase_collaboration_invite (
+    sci_id CHAR(16) NOT NULL,
+    sci_sp_id CHAR(16) NOT NULL,
+    sci_email VARCHAR(128) NOT NULL,
+    sci_date_created DATETIME NOT NULL,
+
+    PRIMARY KEY (sci_id),
+    FOREIGN KEY (sci_sp_id) REFERENCES showcase_project (sp_id)
+);
