@@ -2,6 +2,7 @@
 namespace Api;
 
 use Model\ShowcaseProject;
+use Model\CollaborationInvitation;
 
 /**
  * Defines the logic for how to handle AJAX requests with JSON bodies made to modify showcase project information.
@@ -103,14 +104,67 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         $project = $this->projectsDao->getProject($projectId);
         // TODO: handle case when showcase project is not found
 
-        $sent = $this->mailer->sendInvite($user, $email, $project);
-        if(!$sent) {
-            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
+        $invitation = new CollaborationInvitation();
+        $invitation
+            ->setProjectId($projectId)
+            ->setEmail($email);
+
+        $sent = $this->mailer->sendInvite($user, $email, $project, $invitation->getId());
+        // if (!$sent) {
+        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
+        // }
+
+        $ok = $this->projectsDao->addInvitationToCollaborateOnProject($invitation);
+        if (!$ok) {
+            $this->response(new Response(
+                Response::INTERNAL_SERVER_ERROR, 
+                'Failed to save invitation. You may have to send another invite.'
+            ));
         }
 
         $this->respond(new Response(
             Response::OK,
             "Successfully sent invitation to $email"
+        ));
+    }
+
+    /**
+     * Handles a request to not show a user as a project associate publically.
+     *
+     * @return void
+     */
+    public function handleHideUserFromProject() {
+        $userId = $this->getFromBody('userId');
+        $projectId = $this->getFromBody('projectId');
+
+        $ok = $this->projectsDao->updateVisibilityOfUserForProject($projectId, $userId, false);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update privacy preferences'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully updated privacy preferences'
+        ));
+    }
+
+    /**
+     * Handles a request to show a user as a project associate publically.
+     *
+     * @return void
+     */
+    public function handleShowUserOnProject() {
+        $userId = $this->getFromBody('userId');
+        $projectId = $this->getFromBody('projectId');
+
+        $ok = $this->projectsDao->updateVisibilityOfUserForProject($projectId, $userId, true);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update privacy preferences'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully updated privacy preferences'
         ));
     }
 
@@ -138,6 +192,12 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'inviteUser':
                 $this->handleInviteUserToProject();
+
+            case 'hideUserFromProject':
+                $this->handleHideUserFromProject();
+
+            case 'showUserOnProject':
+                $this->handleShowUserOnProject();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

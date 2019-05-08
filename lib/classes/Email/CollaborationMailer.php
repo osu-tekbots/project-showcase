@@ -29,9 +29,10 @@ class CollaborationMailer extends Mailer {
      * @param \Model\User $fromUser the user to send the invite to
      * @param \Model\User|string $toUser the user (or user email address) to send the invite to
      * @param \Model\ShowcaseProject $project the project the user is invited to collaborate on
+     * @param string $invitationId the ID of the invitation for the user
      * @return boolean true if the email is sent successfully, false otherwise
      */
-    public function sendInvite($fromUser, $toUser, $project) {
+    public function sendInvite($fromUser, $toUser, $project, $invitationId) {
         $isString = \is_string($toUser);
 
         $fromUserName = $fromUser->getFullName();
@@ -44,11 +45,11 @@ class CollaborationMailer extends Mailer {
             $projectDescription = \substr($projectDescription, 0, 300) . '...';
         }
 
-        $relativeLink = "projects/invite/?pid=$projectId";
+        $relativeLink = "projects/invite/?pid=$projectId&iid=$invitationId";
 
         $link = $this->getAbsoluteUrlTo($relativeLink);
 
-        $subject = "Invitation to Join $projectTitle";
+        $subject = "Invitation to Join";
 
         $message = "
         <p>Hello$toUserName,</p>

@@ -3,6 +3,7 @@ namespace DataAccess;
 
 use Model\ShowcaseProject;
 use Model\ShowcaseProjectArtifact;
+use Model\CollaborationInvitation;
 
 /**
  * Handles database interactions for showcase project and artifact data.
@@ -246,23 +247,20 @@ class ShowcaseProjectsDao {
      * when the user is the creator of the project. Invitations should be set to false. Defaults to false.
      * @return boolean true on success, false otherwise
      */
-    public function associateProjectWithUser($projectId, $userId, $accepted = false) {
+    public function associateProjectWithUser($projectId, $userId) {
         try {
             $sql = '
             INSERT INTO showcase_worked_on (
-                swo_sp_id, swo_u_id, swo_accepted, swo_is_visible
+                swo_sp_id, swo_u_id, swo_is_visible
             ) VALUES (
                 :pid,
                 :uid,
-                :invited,
-                :accepted,
                 :visible
             )
             ';
             $params = array(
                 ':pid' => $projectId,
                 ':uid' => $userId,
-                ':accepted' => $accepted,
                 ':visible' => true
             );
             $this->conn->execute($sql, $params);
@@ -275,30 +273,65 @@ class ShowcaseProjectsDao {
     }
 
     /**
-     * Sets the accepted field of the project association of the user to true.
+     * Updates the visibility of a user, meaning whether or not the user will be publically associated with the
+     * project or not.
      *
-     * @param string $projectId the ID of the project the invitation is being accepted for
-     * @param string $userId the ID of the user accepting the invitation
-     * @return boolean true on success, false otherwise
+     * @param string $projectId the ID of the project the user is associated with
+     * @param string $userId the ID of the user
+     * @param bool $visible whether the user should be visible or not
+     * @return bool true on success, false otherwise
      */
-    public function acceptInvitationToCollaborateOnProject($projectId, $userId) {
+    public function updateVisibilityOfUserForProject($projectId, $userId, $visible) {
         try {
             $sql = '
             UPDATE showcase_worked_on SET
-                swo_accepted = :accepted
+                swo_is_visible = :visible
             WHERE swo_sp_id = :pid AND swo_u_id = :uid
             ';
             $params = array(
                 ':pid' => $projectId,
                 ':uid' => $userId,
-                ':accepted' => true
+                ':visible' => $visible
             );
             $this->conn->execute($sql, $params);
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error("Failed to accept invitation for project $projectId with user $userId: " .
-                 $e->getMessage());
+            $this->logger->error("Failed to associated user $userId with project $projectId: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Accepts an invitation for collaborating on a project.
+     *
+     * @param string $projectId the ID of the project the user is joining
+     * @param string $userId the ID of the user joining the project
+     * @param string $invitationId the ID of the invitation used to invite the user to join the project
+     * @return boolean true on success, false otherwise
+     */
+    public function acceptInvitationToCollaborateOnProject($projectId, $userId, $invitationId) {
+        try {
+            $this->conn->startTransaction();
+            // First create the new entry   
+            $ok = $this->associateProjectWithUser($projectId, $userId);
+            if(!$ok) {
+                throw new Exception('Failed to associate project with user');
+            }
+
+            // Remove the invitation
+            $ok = $this->removeInvitationToCollaborateOnProject($invitationId);
+            if(!$ok) {
+                throw new \Exception('Failed to remove invitation after accepting');
+            }
+
+            // Commit the transaction
+            $this->conn->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->conn->rollback();
+            $this->logger->error("Failed to accept collaboration invitates for user $userId with project $projectId: " 
+            . $e->getMessage());
             return false;
         }
     }
@@ -400,14 +433,18 @@ class ShowcaseProjectsDao {
      * @param string $projectId the ID of the project
      * @return \Model\ShowcaseProfile[]|boolean an array of profiles on success, false otherwise
      */
-    public function getProjectCollaborators($projectId) {
+    public function getProjectCollaborators($projectId, $visibleOnly = false) {
         try {
-            $sql = '
+            $visibleSql = $visibleOnly ? 'AND swo_is_visible = :visible' : '';
+            $sql = "
             SELECT *
             FROM user, showcase_user_profile, showcase_worked_on
-            WHERE u_id = swo_u_id AND swo_sp_id = :id AND sup_u_id = u_id
-            ';
+            WHERE u_id = swo_u_id AND swo_sp_id = :id AND sup_u_id = u_id $visibleSql
+            ";
             $params = array(':id' => $projectId);
+            if($visibleOnly) {
+                $params[':visible'] = true;
+            }
             
             $results = $this->conn->query($sql, $params);
             
@@ -428,16 +465,22 @@ class ShowcaseProjectsDao {
      *
      * @param string $projectId the ID of the project
      * @param string $userId the ID of the user
+     * @param boolean $checkVisibility indicates whether to also check if the collaborator has preferred that their
+     * association with the project is not publically visible (if the association exists)
      * @return boolean|null true or false if the query is successful, null otherwise
      */
-    public function verifyUserIsCollaboratorOnProject($projectId, $userId) {
+    public function verifyUserIsCollaboratorOnProject($projectId, $userId, $checkVisibility = false) {
         try {
-            $sql = '
+            $checkVisibilitySql = $checkVisibility ? ' AND swo_is_visible = :visible' : '';
+            $sql = "
             SELECT *
             FROM showcase_worked_on
-            WHERE swo_u_id = :uid AND swo_sp_id = :pid
-            ';
+            WHERE swo_u_id = :uid AND swo_sp_id = :pid $checkVisibilitySql
+            ";
             $params = array(':uid' => $userId, ':pid' => $projectId);
+            if ($checkVisibility) {
+                $params[':visible'] = true;
+            }
             
             $results = $this->conn->query($sql, $params);
 
@@ -445,47 +488,98 @@ class ShowcaseProjectsDao {
         } catch (\Exception $e) {
             $this->logger->error("Failed to determine if user $userId is a collaborator for project $projectId: " . 
                 $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Stores metadata about an invitation in the database.
+     *
+     * @param \Model\CollaborationInvitation $invitation the invitation to add
+     * @return boolean true on success, false otherwise
+     */
+    public function addInvitationToCollaborateOnProject($invitation) {
+        try {
+            $sql = '
+            INSERT INTO showcase_collaboration_invite (
+                sci_id, sci_sp_id, sci_email, sci_date_created
+            ) VALUES (
+                :id, :pid, :email, :created
+            )
+            ';
+            $params = array(
+                ':id' => $invitation->getId(),
+                ':pid' => $invitation->getProjectId(),
+                ':email' => $invitation->getEmail(),
+                ':created' => QueryUtils::FormatDate($invitation->getDateCreated())
+            );
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new invitation: ' . $e->getMessage());
             return false;
         }
     }
 
     /**
-     * Fetches additional metadata about how a user is associated with a project they are collaborating on.
+     * Fetches a collaboration invitation with the provided ID.
      * 
-     * The returned result will be an associative array with the following keys:
-     * - `isVisible`
-     * - `invited`
-     * - `acceptedInvitation`
+     * If no invitation is found, the function will return false.
      *
-     * @param string $projectId the ID of the project the user is associated with
-     * @param string $userId the ID the user
-     * @return bool[]|bool the metadata as an array on success, false if not found or an error occurs
+     * @param string $invitationId the ID of the invitation to fetch
+     * @return \Model\CollaborationInvitation|bool the invitation on success, false otherwise
      */
-    public function getProjectCollaborationMetadataForUser($projectId, $userId) {
+    public function getInvitationToCollaborateOnProject($invitationId) {
         try {
             $sql = '
             SELECT *
-            FROM showcase_worked_on
-            WHERE swo_sp_id = :pid AND swo_u_id = :uid
+            FROM showcase_collaboration_invite, showcase_project
+            WHERE sci_sp_id = sp_id AND sci_id = :id
             ';
-            $params = array(':uid' => $userId, ':pid' => $projectId);
+            $params = array(
+                ':id' => $invitationId
+            );
 
             $results = $this->conn->query($sql, $params);
-
             if (\count($results) == 0) {
                 return false;
             }
 
-            return array(
-                'isVisible' => $results[0]['swo_is_visible'],
-                'acceptedInvitation' => $results[0]['swo_accepted']
-            );
+            return self::ExtractCollaborationInvitationFromRow($results[0], true);
         } catch (\Exception $e) {
-            $this->logger->error("Failed to fetch metadata for user $userId on project $projectId: " . 
-                $e->getMessage());
+            $this->logger->error('Failed to add new invitation: ' . $e->getMessage());
             return false;
         }
     }
+
+    /**
+     * Removes an invitation to collaborate on a project.
+     * 
+     * This function should be used whether an individual accepts or declines the invitation.
+     *
+     * @param string $invitationId the ID of the invitation to remove
+     * @return boolean true on success, false otherwise
+     */
+    public function removeInvitationToCollaborateOnProject($invitationId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_collaboration_invite WHERE sci_id = :id
+            ';
+            $params = array(
+                ':id' => $invitationId
+            );
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to remove the invitation with ID $invitationId: " . $e->getMessage());
+            return false;
+        }
+    } 
+
 
     /**
      * Uses information from a row in the database to create a ShowcaseProject object.
@@ -539,5 +633,25 @@ class ShowcaseProjectsDao {
         }
         
         return $artifact;
+    }
+
+    /**
+     * Users information from a row in the database to create a CollaborationInvitation object.
+     *
+     * @param mixed[] $row the row from the database
+     * @param boolean $projectInRow indicates whether the project information is also in the row and should be
+     * extracted.
+     * @return \Model\CollaborationInvitation the invitation
+     */
+    public static function ExtractCollaborationInvitationFromRow($row, $projectInRow = false) {
+        $invitation = new CollaborationInvitation($row['sci_id']);
+        $invitation
+            ->setProjectId($row['sci_sp_id'])
+            ->setEmail($row['sci_email'])
+            ->setDateCreated(new \DateTime($row['sci_date_created']));
+        if ($projectInRow) {
+            $invitation->setProject(self::ExtractShowcaseProjectFromRow($row));
+        }
+        return $invitation;
     }
 }
