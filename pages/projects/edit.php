@@ -10,8 +10,11 @@ if (!isset($_SESSION)) {
 // Make sure we have the project ID.
 // Also redirect if the user is not logged in.
 $projectId = isset($_GET['id']) && !empty($_GET['id']) ? $_GET['id'] : false;
+
+$baseUrl = $configManager->getBaseUrl();
+
 if (!$projectId || !$isLoggedIn) {
-    echo "<script>window.location.replace('');</script>";
+    echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
 
@@ -34,7 +37,7 @@ if ($associates) {
     }
 }
 if (!$found && $user->getType()->getId() != UserType::ADMIN) {
-    echo "<script>window.location.replace('');</script>";
+    echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
 
@@ -51,6 +54,7 @@ $project = $projectsDao->getProject($projectId);
 $pTitle = $project->getTitle();
 $pDescription = $project->getDescription();
 
+// Fetch the artifacts for the project
 $pArtifacts =$project->getArtifacts();
 if (count($pArtifacts) == 0) {
     $pArtifactsHtml = '<p id="pNoArtifacts">There are no artifacts associated with this project</p>';
@@ -101,6 +105,30 @@ if (count($pArtifacts) == 0) {
         </table>
     ';
 }
+
+// Fetch all of the collaborators on this project
+$collaborators = $projectsDao->getProjectCollaborators($projectId);
+$collaboratorsRowsHtml = '';
+foreach ($collaborators as $c) {
+    $cId = $c->getUser()->getId();
+    $cName = $c->getUser()->getFullName();
+    
+    $metadata = $projectsDao->getProjectCollaborationMetadataForUser($projectId, $cId);
+    $cVisible = $metadata['isVisible'] ? '<i class="fas fa-check"></i>' : '';
+
+    $collaboratorsRowsHtml .= "
+    <tr>
+        <td>$cName</td>
+        <td class='publically-visible'>$cVisible</td>
+        <td class='actions'>
+            <a href='profile/id=$cId' class='btn btn-sm btn-light'>
+                View Profile
+            </a>
+        </td>
+    </tr>
+    ";
+}
+
 
 
 $title = 'Edit Project';
@@ -153,7 +181,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
     </form>
 
     <h3 id="artifacts">Artifacts</h3>
-    <p class="col-sm-7"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>Artifacts represent the concrete results 
+    <p><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>Artifacts represent the concrete results 
         of a project. These results can be documents, links, videos, pictures, or other files associated with the 
         project.</i></p>
     <div class="edit-artifacts-container">
@@ -215,9 +243,45 @@ include_once PUBLIC_FILES . '/modules/header.php';
     </div>
     <br/>
 
-        <h3 id="collaborators">Collaborators</h3>
-
-    </form>
+    <h3 id="collaborators">Collaborators</h3>
+    <p class="col-sm-8"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>Collaborators are other students who
+        participated in the development of the project and should share credit for the project in the showcase.
+        Students who are invited to participate will have the opportunity to accept the invitation and have the
+        project appear on their profile.
+    </i></p>
+    <div class="form-group row">
+        <div class="col-md-8">
+            <table class="table table-collaborators">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th class="publically-visible">Publically Visible?</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php echo $collaboratorsRowsHtml; ?>
+                </tbody>
+                <tfoot>
+                    <form id="formSendInvite">
+                        <input type="hidden" name="projectId" value="<?php echo $projectId; ?>" />
+                        <input type="hidden" name="userId" value="<?php echo $userId; ?>" />
+                        <tr>
+                            <td colspan="2">
+                                <input required type="email" class="form-control" name="email" value=""  
+                                    placeholder="Enter email address" />
+                            </td>
+                            <td class="actions">
+                                <button type="submit" id="btnSendInvite" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-paper-plane"></i>&nbsp;&nbsp;Send Invite
+                                </button>
+                            </td>
+                        </tr>
+                    </form>
+                </tfoot>
+            </table>
+        </div>
+    </div> 
     
 </div>
 

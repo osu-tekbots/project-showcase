@@ -22,3 +22,11 @@
     width: 100px;
     text-align: center;
 }
+
+.table-collaborators .publically-visible {
+    text-align: center;
+}
+
+.table-collaborators .actions {
+    text-align: right;
+}

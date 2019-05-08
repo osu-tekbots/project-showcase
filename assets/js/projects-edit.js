@@ -173,3 +173,29 @@ function onDeleteArtifact() {
         });
 }
 $('.btn-delete-artifact').click(onDeleteArtifact);
+
+/**
+ * Sends an request to invite a user to collaborate on a project
+ */
+function onSendInviteFormSubmit() {
+    let body = {
+        action: 'inviteUser'
+    };
+
+    let form = new FormData(this);
+
+    for (const [key, value] of form.entries()) {
+        body[key] = value;
+    }
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+    return false;
+}
+$('#formSendInvite').submit(onSendInviteFormSubmit);
