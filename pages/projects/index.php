@@ -7,8 +7,9 @@ if (!isset($_SESSION)) {
 
 // Make sure we have the project ID
 $projectId = isset($_GET['id']) && !empty($_GET['id']) ? $_GET['id'] : false;
+$baseUrl = $configManager->getBaseUrl();
 if (!$projectId) {
-    echo "<script>window.location.replace('');</script>";
+    echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
 

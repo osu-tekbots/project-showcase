@@ -56,7 +56,7 @@ class ShowcaseProjectsDao {
                 if ($row['swo_u_id'] != $uid || $row['swo_sp_id'] != $pid) {
                     $uid = $row['swo_u_id'];
                     $pid = $row['swo_sp_id'];
-                    $projects[] = self::ExtractShowcaseProjectFromRow($row, true);
+                    $projects[] = self::ExtractShowcaseProjectFromRow($row);
                 }
                 if ($includeArtifacts) {
                     $p = $projects[\count($projects) - 1];
@@ -85,11 +85,9 @@ class ShowcaseProjectsDao {
      * This will also fetch all the artifacts associated with the project.
      *
      * @param string $projectId the ID of the project to retrieve
-     * @param bool $includeUserMetadata indicates whether to also extract user metadata about the project (such as
-     * the visibility and invitation status) into the ShowcaseProject object. Defaults to false.
      * @return \Model\ShowcaseProject|boolean the project on success, false if not found or an error occurred
      */
-    public function getProject($projectId, $includeUserMetadata = false) {
+    public function getProject($projectId) {
         try {
             $sql = '
             SELECT * 
@@ -106,7 +104,7 @@ class ShowcaseProjectsDao {
                 return false;
             }
 
-            $project = self::ExtractShowcaseProjectFromRow($results[0], $includeUserMetadata);
+            $project = self::ExtractShowcaseProjectFromRow($results[0]);
 
             // When we loop over the rows to extract the artifacts, we also need to make sure that we don't duplicate
             // artifacts when there are multiple users collaborating on a single project. So we capture the user ID
@@ -114,7 +112,7 @@ class ShowcaseProjectsDao {
             // artifacts and break the loop
             $uid = $results[0]['swo_u_id'];
             foreach ($results as $row) {
-                if($row['swo_u_id'] != $uid) {
+                if ($row['swo_u_id'] != $uid) {
                     break;
                 }
                 $artifact = self::ExtractShowcaseArtifactFromRow($row);
@@ -160,15 +158,14 @@ class ShowcaseProjectsDao {
     /**
      * Inserts a new showcase project into the database.
      * 
-     * This does not add artifacts to the project. It does optionally take a user ID which it will use to associate
-     * a user with a project. If no user ID is provided, a corresponding entry in the `showcase_worked_on` table
-     * will not be created.
+     * This does not add artifacts to the project. It does take a user ID which it will use to associate
+     * a user with a project. All projects must be associated with a user, so this argument is required.
      *
      * @param \Model\ShowcaseProject $project the project to add
      * @param string|null $userId the ID of the user to associate with the project.
      * @return boolean true on success, false otherwise
      */
-    public function addNewProject($project, $userId = null) {
+    public function addNewProject($project, $userId) {
         try {
             $this->conn->startTransaction();
             $sql = '
@@ -188,12 +185,10 @@ class ShowcaseProjectsDao {
             );
             $this->conn->execute($sql, $params);
 
-            if ($userId != null) {
-                $ok = $this->associateProjectWithUser($project, $userId);
-                if (!$ok) {
-                    $this->conn->rollback();
-                    return false;
-                }
+            $ok = $this->associateProjectWithUser($project->getId(), $userId);
+            if (!$ok) {
+                $this->conn->rollback();
+                return false;
             }
 
             $this->conn->commit();
@@ -245,15 +240,17 @@ class ShowcaseProjectsDao {
     /**
      * Adds a user as a collaborator on a project, inserting a new entry into the `showcase_worked_on` table.
      *
-     * @param \Model\ShowcaseProject $project
-     * @param string $userId
+     * @param string $projectId the ID of the project
+     * @param string $userId the ID of the user
+     * @param bool $accepted indicates whether the user has 'accepted' an invitation. This should only be set to true
+     * when the user is the creator of the project. Invitations should be set to false. Defaults to false.
      * @return boolean true on success, false otherwise
      */
-    public function associateProjectWithUser($project, $userId) {
+    public function associateProjectWithUser($projectId, $userId, $accepted = false) {
         try {
             $sql = '
             INSERT INTO showcase_worked_on (
-                swo_sp_id, swo_u_id, swo_invited, swo_accepted, swo_is_visible
+                swo_sp_id, swo_u_id, swo_accepted, swo_is_visible
             ) VALUES (
                 :pid,
                 :uid,
@@ -263,17 +260,45 @@ class ShowcaseProjectsDao {
             )
             ';
             $params = array(
-                ':pid' => $project->getId(),
+                ':pid' => $projectId,
                 ':uid' => $userId,
-                ':invited' => $project->isUserInvited(),
-                ':accepted' => $project->hasUserAcceptedInvitation(),
-                ':visible' => $project->isUserVisible()
+                ':accepted' => $accepted,
+                ':visible' => true
             );
             $this->conn->execute($sql, $params);
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error("Failed to associated user $userId with project: " . $e->getMessage());
+            $this->logger->error("Failed to associated user $userId with project $projectId: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Sets the accepted field of the project association of the user to true.
+     *
+     * @param string $projectId the ID of the project the invitation is being accepted for
+     * @param string $userId the ID of the user accepting the invitation
+     * @return boolean true on success, false otherwise
+     */
+    public function acceptInvitationToCollaborateOnProject($projectId, $userId) {
+        try {
+            $sql = '
+            UPDATE showcase_worked_on SET
+                swo_accepted = :accepted
+            WHERE swo_sp_id = :pid AND swo_u_id = :uid
+            ';
+            $params = array(
+                ':pid' => $projectId,
+                ':uid' => $userId,
+                ':accepted' => true
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to accept invitation for project $projectId with user $userId: " .
+                 $e->getMessage());
             return false;
         }
     }
@@ -453,7 +478,6 @@ class ShowcaseProjectsDao {
 
             return array(
                 'isVisible' => $results[0]['swo_is_visible'],
-                'invited' => $results[0]['swo_invited'],
                 'acceptedInvitation' => $results[0]['swo_accepted']
             );
         } catch (\Exception $e) {
@@ -467,11 +491,9 @@ class ShowcaseProjectsDao {
      * Uses information from a row in the database to create a ShowcaseProject object.
      *
      * @param mixed[] $row the row from the database
-     * @param bool $includeUserMetadata includes metadata about the user associated with the project, such as whether
-     * they indicated the project is visible, or have been invited/accepted an invitation to the project
      * @return \Model\ShowcaseProject the extracted project
      */
-    public static function ExtractShowcaseProjectFromRow($row, $includeUserMetadata = false) {
+    public static function ExtractShowcaseProjectFromRow($row) {
         $project = new ShowcaseProject($row['sp_id']);
         $project
             ->setTitle($row['sp_title'])
@@ -479,13 +501,6 @@ class ShowcaseProjectsDao {
             ->setPublished($row['sp_published'] ? true : false)
             ->setDateCreated(new \DateTime($row['sp_date_created']))
             ->setDateUpdated($row['sp_date_updated'] ? new \DateTime($row['sp_date_updated']) : null);
-
-        if ($includeUserMetadata) {
-            $project
-                ->setUserInvited($row['swo_invited'])
-                ->setUserAcceptedInvitation($row['swo_accepted'])
-                ->setUserVisible($row['swo_is_visible']);
-        }
 
         return $project;
     }
