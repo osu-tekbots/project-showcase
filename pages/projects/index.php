@@ -13,6 +13,8 @@ if (!$projectId) {
     die();
 }
 
+$userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
+
 //
 // Include the header in case we need to render a 'Not Found' message
 //
@@ -49,7 +51,7 @@ if (!$project) {
     // Collaborators
     $pCollaborators = $projectsDao->getProjectCollaborators($projectId, true);
     $pCollaboratorsHtml = '<h4>';
-    $collaboratorIsUser = false;
+    $collaboratorIsUser = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId);
     $numCollaborators = count($pCollaborators);
     for ($i = 0; $i < $numCollaborators ; $i++) {
 
@@ -67,9 +69,6 @@ if (!$project) {
 
         $pCollaboratorsHtml .= $name;
 
-        if($isLoggedIn && $c->getUser()->getId() == $_SESSION['userID']) {
-            $collaboratorIsUser = true;
-        }
     }
     $pCollaboratorsHtml .= '</h4>';
     
