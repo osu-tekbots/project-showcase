@@ -110,9 +110,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             ->setEmail($email);
 
         $sent = $this->mailer->sendInvite($user, $email, $project, $invitation->getId());
-        // if (!$sent) {
-        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
-        // }
+        if (!$sent) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
+        }
 
         $ok = $this->projectsDao->addInvitationToCollaborateOnProject($invitation);
         if (!$ok) {
