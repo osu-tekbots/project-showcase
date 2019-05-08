@@ -47,22 +47,31 @@ if (!$project) {
     $pDescription = $project->getDescription();
 
     // Collaborators
-    $pCollaborators = $projectsDao->getProjectCollaborators($projectId);
-    $pCollaboratorsHtml = '';
+    $pCollaborators = $projectsDao->getProjectCollaborators($projectId, true);
+    $pCollaboratorsHtml = '<h4>';
     $collaboratorIsUser = false;
-    foreach ($pCollaborators as $c) {
+    $numCollaborators = count($pCollaborators);
+    for ($i = 0; $i < $numCollaborators ; $i++) {
+
+        if($numCollaborators > 1) {
+            if($i == $numCollaborators - 1) {
+                $pCollaboratorsHtml .= ' <span class="small-font">and</span> ';
+            } elseif ($i != 0) {
+                $pCollaboratorsHtml .= '<span class="small-font">,</span> ';
+            }
+        }
+        
+
+        $c = $pCollaborators[$i];
         $name = $c->getUser()->getFullName();
 
-        $pCollaboratorsHtml .= "
-            <div class='collaborator'>
-                <h4>$name</h4>
-            </div>
-        ";
+        $pCollaboratorsHtml .= $name;
 
         if($isLoggedIn && $c->getUser()->getId() == $_SESSION['userID']) {
             $collaboratorIsUser = true;
         }
     }
+    $pCollaboratorsHtml .= '</h4>';
     
     $editButtonHtml = $collaboratorIsUser ? "
         <a href='projects/edit?id=$projectId' class='btn btn-sm btn-light'>

@@ -107,26 +107,53 @@ if (count($pArtifacts) == 0) {
 }
 
 // Fetch all of the collaborators on this project
-$collaborators = $projectsDao->getProjectCollaborators($projectId);
+$collaborators = $projectsDao->getProjectCollaborators($projectId, true);
 $collaboratorsRowsHtml = '';
+// The first row is the current user. We should allow them to edit their visibility
+$cName = $user->getFullName();
+$cId = $user->getId();
+$cVisibleButton = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId, true) ? "
+    <button type='button' class='btn btn-sm btn-success' id='btnToggleVisibility' data-visible='true' 
+        data-toggle='tooltip' data-placement='right' title='Toggle visibility'>
+        <i class='far fa-check-circle'></i>&nbsp;&nbsp;Visible
+    </button>
+" : "
+    <button type='button' class='btn btn-sm btn-light' id='btnToggleVisibility' data-visible='false'
+        data-toggle='tooltip' data-placement='right' title='Toggle visibility'>
+        <i class='far fa-times-circle'></i>&nbsp;&nbsp;Not Visible
+    </button>
+";
+
+$collaboratorsRowsHtml .= "
+<tr>
+    <td><strong>$cName</strong></td>
+    <td class='publically-visible'>
+        $cVisibleButton
+    </td>
+    <td class='actions'>
+        <a href='profile/?id=$cId' class='btn btn-sm btn-light'>
+            View Profile
+        </a>
+    </td>
+</tr>
+";
 foreach ($collaborators as $c) {
     $cId = $c->getUser()->getId();
     $cName = $c->getUser()->getFullName();
-    
-    $metadata = $projectsDao->getProjectCollaborationMetadataForUser($projectId, $cId);
-    $cVisible = $metadata['isVisible'] ? '<i class="fas fa-check"></i>' : '';
 
-    $collaboratorsRowsHtml .= "
-    <tr>
-        <td>$cName</td>
-        <td class='publically-visible'>$cVisible</td>
-        <td class='actions'>
-            <a href='profile/id=$cId' class='btn btn-sm btn-light'>
-                View Profile
-            </a>
-        </td>
-    </tr>
-    ";
+    if ($cId != $userId) {
+        $collaboratorsRowsHtml .= "
+        <tr>
+            <td>$cName</td>
+            <td class='publically-visible'></td>
+            <td class='actions'>
+                <a href='profile/?id=$cId' class='btn btn-sm btn-light'>
+                    View Profile
+                </a>
+            </td>
+        </tr>
+        ";
+    }
 }
 
 
@@ -255,7 +282,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th class="publically-visible">Publically Visible?</th>
+                        <th class="publically-visible"></th>
                         <th></th>
                     </tr>
                 </thead>
@@ -265,7 +292,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <tfoot>
                     <form id="formSendInvite">
                         <input type="hidden" name="projectId" value="<?php echo $projectId; ?>" />
-                        <input type="hidden" name="userId" value="<?php echo $userId; ?>" />
+                        <input type="hidden" name="userId" id="userId" value="<?php echo $userId; ?>" />
                         <tr>
                             <td colspan="2">
                                 <input required type="email" class="form-control" name="email" value=""  

@@ -54,6 +54,10 @@
     text-align: center;
 }
 
+.small-font {
+    font-size: 0.7em;
+}
+
 @keyframes fadeInDown {
     0% {
         opacity: 0;

@@ -199,3 +199,68 @@ function onSendInviteFormSubmit() {
     return false;
 }
 $('#formSendInvite').submit(onSendInviteFormSubmit);
+
+/**
+ * Sends a request to the server to update the visibility of the user on the project
+ */
+function onToggleVisibility() {
+    let visible = $(this).data('visible');
+    let userId = $('#userId').val();
+    let projectId = $('#projectId').val();
+    if (visible) {
+        // Send a request to hide the user from the project
+        let body = {
+            action: 'hideUserFromProject',
+            userId,
+            projectId
+        };
+
+        api.post('/showcase-projects.php', body)
+            .then(res => {
+                snackbar(res.message, 'success');
+                onToggleVisibilitySuccess(false);
+            })
+            .catch(err => {
+                snackbar(err.message, 'error');
+            });
+    } else {
+        // send a request to show the user on the project
+        // Send a request to hide the user from the project
+        let body = {
+            action: 'showUserOnProject',
+            userId,
+            projectId
+        };
+
+        api.post('/showcase-projects.php', body)
+            .then(res => {
+                snackbar(res.message, 'success');
+                onToggleVisibilitySuccess(true);
+            })
+            .catch(err => {
+                snackbar(err.message, 'error');
+            });
+    }
+}
+$('#btnToggleVisibility').click(onToggleVisibility);
+
+/**
+ * Updates the HTML button displaying whether the user is visible on the project or not
+ * @param {boolean} isVisible indicates whether the user is NOW visible or not
+ */
+function onToggleVisibilitySuccess(isVisible) {
+    $button = $('#btnToggleVisibility');
+    if (isVisible) {
+        $button.attr('class', 'btn btn-sm btn-success');
+        $button.data('visible', true);
+        $button.html(`
+            <i class='far fa-check-circle'></i>&nbsp;&nbsp;Visible
+        `);
+    } else {
+        $button.attr('class', 'btn btn-sm btn-light');
+        $button.data('visible', false);
+        $button.html(`
+            <i class='far fa-times-circle'></i>&nbsp;&nbsp;Not Visible
+        `);
+    }
+}
