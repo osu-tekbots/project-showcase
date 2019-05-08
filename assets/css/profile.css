@@ -69,6 +69,10 @@
     margin-left: 10px;
 }
 
+#btnSignOut {
+    margin-left: 10px;
+}
+
 .projects-container {
     margin-top: 20px;
     display: flex;

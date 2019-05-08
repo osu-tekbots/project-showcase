@@ -18,7 +18,8 @@ elseif ($isLoggedIn) {
 }
 // The user is not logged in and no ID is provided, so redirect to the home page 
 else {
-    echo "<script>window.location.href('');</script>";
+    $baseUrl = $configManager->getBaseUrl();
+    echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
 
@@ -57,6 +58,12 @@ if (!$profile) {
     $editButton = !$isOwnProfile ? '' : "
         <a href='profile/edit' id='btnEditProfile' class='btn btn-primary'>
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
+        </a>
+    ";
+
+    $signoutButton = !$isOwnProfile ? '' : "
+        <a href='signout' id='btnSignOut' class='btn btn-light'>
+            <i class='fas fa-sign-out-alt'></i>&nbsp;&nbsp;Sign Out
         </a>
     ";
 
@@ -147,6 +154,7 @@ if (!$profile) {
                     </div>
                     $resumeHtml
                     $editButton
+                    $signoutButton
                 </div>
                 <div class='profile-content'>
                     <section class='profile-about'>
