@@ -51,8 +51,6 @@ CREATE TABLE IF NOT EXISTS showcase_worked_on (
     swo_u_id CHAR(16) NOT NULL,
     swo_sp_id CHAR(16) NOT NULL,
     swo_is_visible BOOLEAN NOT NULL DEFAULT TRUE,
-    swo_accepted BOOLEAN NOT NULL DEFAULT FALSE,
-    swo_invited BOOLEAN NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (swo_u_id, swo_sp_id),
     FOREIGN KEY (swo_u_id) REFERENCES user (u_id),
