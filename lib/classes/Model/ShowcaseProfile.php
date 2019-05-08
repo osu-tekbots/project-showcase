@@ -13,6 +13,8 @@ class ShowcaseProfile {
     private $about;
     /** @var bool */
     private $showContactInfo;
+    /** @var bool */
+    private $acceptingInvites;
     /** @var string */
     private $websiteLink;
     /** @var string */
@@ -38,8 +40,9 @@ class ShowcaseProfile {
      */
     public function __construct($userId, $isNew = false) {
         $this->setUserId($userId);
-        if($isNew) {
+        if ($isNew) {
             $this->setShowContactInfo(false);
+            $this->setAcceptingInvites(true);
             $this->setImageUploaded(false);
             $this->setResumeUploaded(false);
             $this->setDateCreated(new \DateTime());
@@ -240,6 +243,24 @@ class ShowcaseProfile {
      */ 
     public function setDateCreated($dateCreated) {
         $this->dateCreated = $dateCreated;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of acceptingInvites
+     */ 
+    public function isAcceptingInvites() {
+        return $this->acceptingInvites;
+    }
+
+    /**
+     * Set the value of acceptingInvites
+     *
+     * @return  self
+     */ 
+    public function setAcceptingInvites($acceptingInvites) {
+        $this->acceptingInvites = $acceptingInvites;
 
         return $this;
     }

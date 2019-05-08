@@ -63,12 +63,13 @@ class ShowcaseProfilesDao {
         try {
             $sql = '
             INSERT INTO showcase_user_profile (
-                sup_u_id, sup_about, sup_show_contact_info, sup_website_link, sup_github_link, sup_linkedin_link,
-                sup_resume_uploaded, sup_image_uploaded, sup_date_created, sup_date_updated
+                sup_u_id, sup_about, sup_show_contact_info, sup_accepting_invites, sup_website_link, sup_github_link,
+                sup_linkedin_link, sup_resume_uploaded, sup_image_uploaded, sup_date_created, sup_date_updated
             ) VALUES (
                 :id,
                 :about,
                 :contact,
+                :invites,
                 :website,
                 :github,
                 :linkedin,
@@ -81,6 +82,7 @@ class ShowcaseProfilesDao {
             $params = array(
                 ':about' => $profile->getAbout(),
                 ':contact' => $profile->canShowContactInfo(),
+                ':invites' => $profile->isAcceptingInvites(),
                 ':website' => $profile->getWebsiteLink(),
                 ':github' => $profile->getGithubLink(),
                 ':linkedin' => $profile->getLinkedInLink(),
@@ -112,6 +114,7 @@ class ShowcaseProfilesDao {
             UPDATE showcase_user_profile SET
                 sup_about = :about,
                 sup_show_contact_info = :contact,
+                sup_accepting_invites = :invites,
                 sup_website_link = :website,
                 sup_github_link = :github,
                 sup_linkedin_link = :linkedin,
@@ -123,6 +126,7 @@ class ShowcaseProfilesDao {
             $params = array(
                 ':about' => $profile->getAbout(),
                 ':contact' => $profile->canShowContactInfo(),
+                ':invites' => $profile->isAcceptingInvites(),
                 ':website' => $profile->getWebsiteLink(),
                 ':github' => $profile->getGithubLink(),
                 ':linkedin' => $profile->getLinkedInLink(),
@@ -159,6 +163,7 @@ class ShowcaseProfilesDao {
         $profile
             ->setAbout($row['sup_about'])
             ->setShowContactInfo($row['sup_show_contact_info'] ? true : false)
+            ->setAcceptingInvites($row['sup_accepting_invites'])
             ->setWebsiteLink($row['sup_website_link'])
             ->setGithubLink($row['sup_github_link'])
             ->setLinkedInLink($row['sup_linkedin_link'])

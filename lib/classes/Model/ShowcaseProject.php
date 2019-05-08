@@ -15,6 +15,12 @@ class ShowcaseProject {
     private $description;
     /** @var bool */
     private $published;
+    /** @var bool */
+    private $userVisible;
+    /** @var bool */
+    private $userInvited;
+    /** @var bool */
+    private $userAcceptedInvitation;
     /** @var \DateTime */
     private $dateCreated;
     /** @var \DateTime */
@@ -28,6 +34,9 @@ class ShowcaseProject {
             $this->setDateCreated(new \DateTime());
             $this->setArtifacts(array());
             $this->setPublished(true);
+            $this->setUserVisible(true);
+            $this->setUserInvited(true);
+            $this->setUserAcceptedInvitation(true);
         }
         $this->setId($id);
     }
@@ -170,6 +179,60 @@ class ShowcaseProject {
         }
         $artifact->setProject($this);
         $this->artifacts[] = $artifact;
+        return $this;
+    }
+
+    /**
+     * Get the value of userVisible
+     */ 
+    public function isUserVisible() {
+        return $this->userVisible;
+    }
+
+    /**
+     * Set the value of userVisible
+     *
+     * @return  self
+     */ 
+    public function setUserVisible($userVisible) {
+        $this->userVisible = $userVisible;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of userInvited
+     */ 
+    public function isUserInvited() {
+        return $this->userInvited;
+    }
+
+    /**
+     * Set the value of userInvited
+     *
+     * @return  self
+     */ 
+    public function setUserInvited($userInvited) {
+        $this->userInvited = $userInvited;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of userAcceptedInvitation
+     */ 
+    public function hasUserAcceptedInvitation() {
+        return $this->userAcceptedInvitation;
+    }
+
+    /**
+     * Set the value of userAcceptedInvitation
+     *
+     * @return  self
+     */ 
+    public function setUserAcceptedInvitation($userAcceptedInvitation) {
+        $this->userAcceptedInvitation = $userAcceptedInvitation;
+
         return $this;
     }
 }
