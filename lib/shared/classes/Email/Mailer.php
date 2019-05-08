@@ -30,9 +30,10 @@ class Mailer {
      * @param string|string[] $to the email address or addresses to send the message to
      * @param string $subject the subject of the email
      * @param string $message the email content to send
+     * @param boolean $html indicates whether the message content is HTML or plain text
      * @return boolean true on success, false otherwise
      */
-    public function sendEmail($to, $subject, $message) {
+    public function sendEmail($to, $subject, $message, $html = false) {
         if ($this->subjectTag != null) {
             $subject = $this->subjectTag . ' ' . $subject;
         }
@@ -40,8 +41,23 @@ class Mailer {
         $from = $this->from;
 
         $headers = array(
-            "From: $from"
+            "From: $from",
         );
+
+        if($html) {
+
+            $message = "
+            <!DOCTYPE html>
+            <html>
+            <body>
+            $message
+            </body>
+            </html>
+            ";
+
+            $headers[] = "MIME-Version: 1.0";
+            $headers[] = "Content-Type: text/html;charset=UTF-8";
+        }
 
         $headersStr = \implode('\r\n', $headers);
         
