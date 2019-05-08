@@ -27,7 +27,7 @@ $associates = $projectsDao->getProjectCollaborators($projectId);
 $found = false;
 if ($associates) {
     foreach ($associates as $a) {
-        if ($a->getId() == $user->getId()) {
+        if ($a->getUser()->getId() == $user->getId()) {
             $found = true;
             break;
         }
