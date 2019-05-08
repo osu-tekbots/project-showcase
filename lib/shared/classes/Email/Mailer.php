@@ -13,15 +13,20 @@ class Mailer {
     /** @var string */
     private $subjectTag;
 
+    /** @var \Util\Logger */
+    protected $logger;
+
     /**
      * Creates a new mailer to send emails.
      *
      * @param string $from the from address for the email
      * @param string|null $subjectTag an optional tag to prefix the email subject with
+     * @param \Util\Logger|null $logger an optional logger to capture error messages from the mail() function
      */
-    public function __construct($from, $subjectTag = null) {
+    public function __construct($from, $subjectTag = null, $logger = null) {
         $this->from = $from;
         $this->subjectTag = $subjectTag;
+        $this->logger = $logger;
     }
 
     /**
@@ -35,38 +40,43 @@ class Mailer {
      */
     public function sendEmail($to, $subject, $message, $html = false) {
         if ($this->subjectTag != null) {
-            $subject = $this->subjectTag . ' ' . $subject;
+            $subject = '[' . $this->subjectTag . '] ' . $subject;
         }
 
         $from = $this->from;
 
-        $headers = array(
-            "From: $from",
-        );
+        $headers = array();
 
-        if($html) {
-
+        if ($html) {
             $message = "
-            <!DOCTYPE html>
             <html>
+            <head> 
+                <title>$subject</title>
+            </head>
             <body>
-            $message
+                $message
             </body>
             </html>
             ";
 
-            $headers[] = "MIME-Version: 1.0";
-            $headers[] = "Content-Type: text/html;charset=UTF-8";
+            $headers[] = 'MIME-Version: 1.0';
+            $headers[] = 'Content-Type: text/html;charset=UTF-8';
         }
+
+        $headers[] = "From: $from";
 
         $headersStr = \implode('\r\n', $headers);
         
-        if(\is_array($to)) {  
+        if (\is_array($to)) {
             $to = \implode(',', $to);
         }
 
         $accepted = \mail($to, $subject, $message, $headersStr);
         if (!$accepted) {
+            if ($this->logger != null) {
+                $this->logger->error("Failed to send email to $to from $from: " . error_get_last()['message']);
+                $this->logger->error($message);
+            }
             return false;
         }
 
