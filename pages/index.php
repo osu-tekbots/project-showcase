@@ -1,4 +1,14 @@
 <?php
+
+$heroButtonHtml = $isLoggedIn ? "
+    <a href='profile/' class='btn btn-lg btn-primary'>
+    <i class='fas fa-user'></i>&nbsp;&nbsp;View Your Profile
+    </a>
+" : "
+    <a href='signin' class='btn btn-lg btn-primary'>
+        <i class='fas fa-sign-in-alt'></i>&nbsp;&nbsp;Sign In
+    </a>
+";
 $css = array(
     'assets/css/home.css'
 );
@@ -8,6 +18,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 <div class="hero-home">
     <h1 class="hero-title">Where Education Meets Application</h1>
     <p class="hero-subtitle">Show employers you have what it takes</p>
+    <p><?php echo $heroButtonHtml; ?></p>
 </div>
 
 <div class="container-fluid">
