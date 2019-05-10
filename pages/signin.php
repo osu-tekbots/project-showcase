@@ -79,6 +79,8 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $provider, $authId) {
                 $exists = false;
             }
 
+            break;
+
         default:
             return false;
     }
@@ -100,7 +102,7 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $provider, $authId) {
     $profile = $profilesDao->getUserProfileInformation($user->getId());
     if(!$profile) {
         // The profile does not exist. Create one.
-        $profile = new ShowcaseProfile($user->getId());
+        $profile = new ShowcaseProfile($user->getId(), true);
         $ok = $profilesDao->addNewShowcaseProfile($profile);
         if(!$ok) {
             return false;
@@ -108,6 +110,8 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $provider, $authId) {
     }
 
     // The user and profile existed or were created successfully
+    // Set the SESSION and return true
+    $_SESSION['userID'] = $user->getId();
     return true;
 
 }
