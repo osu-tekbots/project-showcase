@@ -25,7 +25,8 @@ if(!$invitationId) {
 // If we don't have a user ID, the user may need to log in/create a new account
 if(!$userId) {
     $loginRedirect = $baseUrl . "projects/invite/?pid=$projectId&iid=$invitationId";
-    echo "<script>window.location.replace('auth/login?provider=onid&redirect=$loginRedirect');</script>";
+    $redirect = $baseUrl . "signin?provider=onid&redirect=$loginRedirect";
+    echo "<script>window.location.replace('$redirect');</script>";
     die();
 }
 
