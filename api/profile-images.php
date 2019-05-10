@@ -74,7 +74,8 @@ switch ($_POST['action']) {
 
         // Check the mime type
         $mime = mime_content_type($fileTmpName);
-        if (explode('/', $mime)[0] != 'image') {
+        $mimeParts = explode('/', $mime);
+        if ($mimeParts[0] != 'image') {
             respond(400, 'File must be an image');
         }
 
