@@ -57,18 +57,26 @@ class CollaborationMailer extends Mailer {
         <p>$fromUserName has invited you to join a showcase project as a collaborator. See the information below for
         details:</p>
 
-        <table>
+        <table style='margin: 10px;'>
             <tr>
-                <th>Title</th>
-                <td>$projectTitle</td>
+                <th style='padding: 10px; text-align: right;'>Title</th>
+                <td style='padding: 10px;'>$projectTitle</td>
             </tr>
             <tr>
-                <th>Description</th>
-                <td>$projectDescription</td>
+                <th style='padding: 10px; text-align: right;'>Description</th>
+                <td style='padding: 10px;'>$projectDescription</td>
             </tr>
             <tr>
-                <td colspan='2'>
-                    <a href='$link' class='button'>
+                <td colspan='2' style='padding: 10px;'>
+                    <a href='$link' style='
+                        cursor: pointer;
+                        text-decoration: none;
+                        color: white;
+                        padding: 5px;
+                        margin: 10px;
+                        background-color: #dc4405;
+                        font-weight: bold;
+                    '>
                         View Invitation
                     </a>
                 </td>
@@ -81,43 +89,7 @@ class CollaborationMailer extends Mailer {
         </p>
         ";
 
-        $message = $this->prependStylesTo($message);
-
         return $this->sendEmail($toEmail, $subject, $message, true);
-    }
-
-    /**
-     * Applies CSS styling to an HTML formatted email body.
-     *
-     * @param string $message the HTML email message body to apply the styles to
-     * @return string the message with CSS styles applied
-     */
-    private function prependStylesTo($message) {
-        return '
-        <style>
-        table {
-            margin: 10px;
-        }
-
-        table th,
-        table td {
-            padding: 10px;
-            border: 1px solid #ccc;
-        }
-
-        .button {
-            cursor: pointer;
-            text-decoration: none;
-            color: white;
-            padding: 5px;
-            margin: 10px;
-            background-color: #dc4405;
-        }
-        .button:hover {
-            text-decoration: none;
-        }
-        </style>
-        ' . $message;
     }
 
     /**
