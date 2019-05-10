@@ -65,4 +65,8 @@
     white-space: pre-wrap;
 }
 
+#tableProjects th:first-child {
+    min-width: 200px;
+}
+
 

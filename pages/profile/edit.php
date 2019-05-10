@@ -83,7 +83,10 @@ if (!$projects || count($projects) == 0) {
                 <td>$title</td>
                 <td>$description</td>
                 <td>
-                    <a href='projects/edit?id=$pid' class='btn btn-primary'>Edit</a>
+                    <a href='projects/edit?id=$pid' class='btn btn-sm btn-light' data-toggle='tooltip'
+                        data-placement='right' title='Edit'>
+                        <i class='fas fa-edit'></i>
+                    </a>
                 </td>
             </tr>
         ";
