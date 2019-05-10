@@ -65,8 +65,8 @@ class Mailer {
 
         $headers[] = "From: $from";
 
-        $headersStr = \implode('\r\n', $headers);
-        $headersStr .= '\r\n';
+        $headersStr = \implode("\r\n", $headers);
+        $headersStr .= "\r\n";
         
         if (\is_array($to)) {
             $to = \implode(',', $to);
