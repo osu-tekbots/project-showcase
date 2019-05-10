@@ -4,13 +4,15 @@ use Model\User;
 use DataAccess\ShowcaseProfilesDao;
 use Model\ShowcaseProfile;
 
+$baseUrl = $configManager->getBaseUrl();
+
 if ($isLoggedIn) {
-    echo "<script>window.location.replace('profile/')</script>";
+    $redirect = $baseUrl . 'profile/';
+    echo "<script>window.location.replace('$redirect')</script>";
     die();
 }
 
 $provider = isset($_GET['provider']) ? $_GET['provider'] : false;
-$baseUrl = $configManager->getBaseUrl();
 
 if (!$provider) {
     echo "<script>window.location.replace('$baseUrl')</script>";
@@ -24,7 +26,12 @@ switch ($provider) {
 
         $ok = createUserAndProfileIfNeeded($dbConn, $logger, $provider, $onid);
         if (!$ok) {
-            echo "<script>window.location.replace('login?error=true');</script>";
+            $_SESSION['error'] = "
+                We were unable to authenticate your sign-in request successfully. Please try again later or contact
+                the Tekbots Webdev team if the problem persists.
+            ";
+            $redirect = $baseUrl . 'error';
+            echo "<script>window.location.replace('$redirect');</script>";
             die();
         }
 
@@ -37,7 +44,7 @@ switch ($provider) {
 
 // Once we have made it to this point, we have successfully logged in. Navigate to the user's profile or to the
 // location specified in the URL
-$redirect = isset($_GET['redirect'])? $_GET['redirect'] : 'profile/';
+$redirect = isset($_GET['redirect'])? $_GET['redirect'] : $baseUrl . 'profile/';
 echo "<script>window.location.replace('$redirect')</script>";
 die();
 
