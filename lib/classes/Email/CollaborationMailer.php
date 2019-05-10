@@ -74,7 +74,7 @@ class CollaborationMailer extends Mailer {
                         text-decoration: none;
                         color: white;
                         padding: 10px;
-                        margin: 10px;
+                        margin: 10px 0px;
                         background-color: #dc4405;
                         font-weight: bold;
                         border-radius: 3px;
