@@ -2,6 +2,7 @@
 use DataAccess\ShowcaseProjectsDao;
 use DataAccess\UsersDao;
 use Model\UserType;
+use Util\Security;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -79,7 +80,7 @@ if (count($pArtifacts) == 0) {
                 <a href='downloaders/artifacts?id=$aId'>Download Artifact File</a>
              ";
         } else {
-            $aLink = $artifact->getLink();
+            $aLink = Security::ValidateUrl($artifact->getLink());
             $aContentHtml = "
                 <a href='$aLink' target='_blank'>Link to Artifact</a>
             ";
@@ -110,7 +111,7 @@ if (count($pArtifacts) == 0) {
 $collaborators = $projectsDao->getProjectCollaborators($projectId, true);
 $collaboratorsRowsHtml = '';
 // The first row is the current user. We should allow them to edit their visibility
-$cName = $user->getFullName();
+$cName = Security::HtmlEntitiesEncode($user->getFullName());
 $cId = $user->getId();
 $cVisibleButton = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId, true) ? "
     <button type='button' class='btn btn-sm btn-success' id='btnToggleVisibility' data-visible='true' 
@@ -139,7 +140,7 @@ $collaboratorsRowsHtml .= "
 ";
 foreach ($collaborators as $c) {
     $cId = $c->getUser()->getId();
-    $cName = $c->getUser()->getFullName();
+    $cName = Security::HtmlEntitiesEncode($c->getUser()->getFullName());
 
     if ($cId != $userId) {
         $collaboratorsRowsHtml .= "

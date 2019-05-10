@@ -1,5 +1,6 @@
 <?php
 use DataAccess\ShowcaseProjectsDao;
+use Util\Security;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -45,8 +46,8 @@ if (!$project) {
     ";
 } else {
     // General information
-    $pTitle = $project->getTitle();
-    $pDescription = $project->getDescription();
+    $pTitle = Security::HtmlEntitiesEncode($project->getTitle());
+    $pDescription = Security::HtmlEntitiesEncode($project->getDescription());
 
     // Collaborators
     $pCollaborators = $projectsDao->getProjectCollaborators($projectId, true);
@@ -65,7 +66,7 @@ if (!$project) {
         
 
         $c = $pCollaborators[$i];
-        $name = $c->getUser()->getFullName();
+        $name = Security::HtmlEntitiesEncode($c->getUser()->getFullName());
 
         $pCollaboratorsHtml .= $name;
 
@@ -98,9 +99,9 @@ if (!$project) {
 
         foreach ($pArtifacts as $a) {
             $id = $a->getId();
-            $name = $a->getName();
-            $description = $a->getDescription();
-            $link = $a->getLink();
+            $name = Security::HtmlEntitiesEncode($a->getName());
+            $description = Security::HtmlEntitiesEncode($a->getDescription());
+            $link = Security::ValidateUrl($a->getLink());
             $linkHtml = $a->isFileUploaded() ? "
                 <a href='downloaders/artifacts?id=$id' class='btn btn-sm btn-primary'>
                     <i class='fas fa-download'></i>&nbsp;&nbsp;Download

@@ -1,6 +1,7 @@
 <?php
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
+use Util\Security;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -67,11 +68,12 @@ if (!$projects || count($projects) == 0) {
     $pProjectsHtml = '';
     foreach ($projects as $p) {
         $pid = $p->getId();
-        $title = $p->getTitle();
+        $title = Security::HtmlEntitiesEncode($p->getTitle());
         $description = $p->getDescription();
         if(strlen($description) > 280) {
             $description = substr($description, 0, 280) . '...';
         }
+        $description = Security::HtmlEntitiesEncode($description);
 
         $pProjectsHtml .= "
             <tr>

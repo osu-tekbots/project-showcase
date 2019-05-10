@@ -1,6 +1,7 @@
 <?php
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
+use Util\Security;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -52,8 +53,8 @@ if (!$profile) {
     $image = $profile->isImageUploaded() 
         ? "<img class='profile-image' src='downloaders/profile-images?id=$userId' />" 
         : '';
-    $name = $profile->getUser()->getFirstName() . ' ' . $profile->getUser()->getLastName();
-    $major = $profile->getUser()->getMajor();
+    $name = Security::HtmlEntitiesEncode($profile->getUser()->getFullName());
+    $major = Security::HtmlEntitiesEncode($profile->getUser()->getMajor());
 
     $editButton = !$isOwnProfile ? '' : "
         <a href='profile/edit' id='btnEditProfile' class='btn btn-primary'>
@@ -68,19 +69,19 @@ if (!$profile) {
     ";
 
     // Create HTML for external links if the user has any
-    $websiteLink = $profile->getWebsiteLink();
+    $websiteLink = Security::ValidateUrl($profile->getWebsiteLink());
     $websiteHtml = !is_null($websiteLink) && !empty($websiteLink) ? "
         <a href='$websiteLink' target='_blank'>
             <i class='fas fa-globe fa-2x'></i>
         </a>
     " : '';
-    $githubLink = $profile->getGithubLink();
+    $githubLink = Security::ValidateUrl($profile->getGithubLink());
     $githubHtml = !empty($githubLink) && !is_null($githubLink) ? "
         <a href='$githubLink' target='_blank'>
             <i class='fab fa-github fa-2x'></i>
         </a>
     " : '';
-    $linkedinLink = $profile->getLinkedInLink();
+    $linkedinLink = Security::ValidateUrl($profile->getLinkedInLink());
     $linkedinHtml = !is_null($linkedinLink) && !empty($linkedinLink) ? "
         <a href='$linkedinLink' target='_blank'>
             <i class='fab fa-linkedin fa-2x'></i>
@@ -96,7 +97,7 @@ if (!$profile) {
     " : '';
 
     // Create the HTML for the 'About' section
-    $about = $profile->getAbout();
+    $about = Security::HtmlEntitiesEncode($profile->getAbout());
     $about = !empty($about) && !is_null($about) ? "
         <h2>About</h2>
         <p>$about</p>

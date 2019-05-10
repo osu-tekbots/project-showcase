@@ -1,4 +1,5 @@
 <?php
+use Util\Security;
 
 /**
  * Generates the HTML for a project card on a user's profile
@@ -20,6 +21,9 @@ function createProfileProjectHtml($project, $isOwnProject) {
     if (strlen($description) > $descriptionCharLimit) {
         $description = substr($description, 0, $descriptionCharLimit) . '...';
     }
+
+    $title = Security::HtmlEntitiesEncode($title);
+    $description = Security::HtmlEntitiesEncode($description);
 
     return "
     <div class='profile-project col-md-4'>
