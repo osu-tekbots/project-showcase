@@ -12,6 +12,8 @@ if(!$message) {
     die();
 }
 
+unset($_SESSION['error']);
+
 $title = 'An Error Occurred';
 include_once PUBLIC_FILES . '/modules/header.php';
 
