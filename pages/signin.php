@@ -7,34 +7,18 @@ use Model\ShowcaseProfile;
 $baseUrl = $configManager->getBaseUrl();
 
 if (!$isLoggedIn) {
-    $provider = isset($_GET['provider']) ? $_GET['provider'] : false;
+    include_once PUBLIC_FILES . '/lib/shared/auth/onid.php';
+    $onid = authenticateWithONID();
 
-    if (!$provider) {
-        echo "<script>window.location.replace('$baseUrl')</script>";
+    $ok = createUserAndProfileIfNeeded($dbConn, $logger, $provider, $onid);
+    if (!$ok) {
+        $_SESSION['error'] = '
+        We were unable to authenticate your sign-in request successfully. Please try again later or contact
+        the Tekbots Webdev team if the problem persists.
+    ';
+        $redirect = $baseUrl . 'error';
+        echo "<script>window.location.replace('$redirect');</script>";
         die();
-    }
-
-    switch ($provider) {
-        case 'onid':
-            include_once PUBLIC_FILES . '/lib/shared/auth/onid.php';
-            $onid = authenticateWithONID();
-
-            $ok = createUserAndProfileIfNeeded($dbConn, $logger, $provider, $onid);
-            if (!$ok) {
-                $_SESSION['error'] = '
-                    We were unable to authenticate your sign-in request successfully. Please try again later or contact
-                    the Tekbots Webdev team if the problem persists.
-                ';
-                $redirect = $baseUrl . 'error';
-                echo "<script>window.location.replace('$redirect');</script>";
-                die();
-            }
-
-            break;
-
-        default:
-            echo "<script>window.location.replace('$baseUrl')</script>";
-            die();
     }
 }
 
@@ -61,28 +45,15 @@ die();
  * @param string $authId the ID provided by the provider
  * @return bool true if an entry was created or one exists, false otherwise
  */
-function createUserAndProfileIfNeeded($dbConn, $logger, $provider, $authId) {
+function createUserAndProfileIfNeeded($dbConn, $logger, $onid) {
 
     // First check if the user was created
     $usersDao = new UsersDao($dbConn, $logger);
-    $exists = true;
-    switch ($provider) {
-        case 'onid':
-            $user = $usersDao->getUserByOnid($authId);
-            if (!$user) {
-                $user = new User();
-                $user->setOnid($authId);
-                $exists = false;
-            }
-
-            break;
-
-        default:
-            return false;
-    }
-
-    if (!$exists) {
+    $user = $usersDao->getUserByOnid($onid);
+    if (!$user) {
+        $user = new User();
         $user
+            ->setOnid($onid)
             ->setFirstName($_SESSION['auth']['firstName'])
             ->setLastName($_SESSION['auth']['lastName'])
             ->setEmail($_SESSION['auth']['email']);

@@ -2,11 +2,9 @@
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 
-$title = 'Project Invitation';
-$css = array(
-    'assets/css/invite.css'
-);
-include_once PUBLIC_FILES . '/modules/header.php';
+if (!isset($_SESSION)) {
+    session_start();
+}
 
 // Get what we need from the URL and the SESSION (the user must be logged in to accept invitations)
 $projectId = isset($_GET['pid']) ? $_GET['pid'] : false;
@@ -18,14 +16,19 @@ $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $baseUrl = $configManager->getBaseUrl();
 
 // If we don't have an invitation ID, then the URL is not valid. Display a message.
-if(!$invitationId) {
-    renderInvalidInvitationHtml();
+if (!$invitationId) {
+    $_SESSION['error'] = '
+        This is not a valid invitation.
+    ';
+    $redirect = $baseUrl . 'error';
+    echo "<script>window.location.replace('$redirect');</script>";
+    die();
 }
 
 // If we don't have a user ID, the user may need to log in/create a new account
-if(!$userId) {
+if (!$userId) {
     $loginRedirect = urlencode($baseUrl . "projects/invite/?pid=$projectId&iid=$invitationId");
-    $redirect = $baseUrl . "signin?provider=onid&redirect=$loginRedirect";
+    $redirect = $baseUrl . "signin?redirect=$loginRedirect";
     echo "<script>window.location.replace('$redirect');</script>";
     die();
 }
@@ -33,38 +36,24 @@ if(!$userId) {
 // Check if the project exists
 $project = $projectsDao->getProject($projectId);
 if (!$project) {
-    echo "
-    <div class='container'>
-        <div class='row'>
-            <div class='col'>
-                <h1>Whoops!</h1>
-                <p>Looks like we couldn't find the project for this invitation. Try <a href='$baseUrl'>returning to the home 
-                page</a></p>
-            </div>
-        </div>
-    </div>
+    $_SESSION['error'] = "
+        Looks like we couldn't find the project for this invitation.
     ";
-
-    dieWithFooter();
+    $redirect = $baseUrl . 'error';
+    echo "<script>window.location.replace('$redirect');</script>";
+    die();
 } 
 
 // Check to make sure the profile exists
 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
 $profile = $profilesDao->getUserProfileInformation($userId);
 if (!$profile) {
-    echo "
-    <div class='container'>
-        <div class='row'>
-            <div class='col'>
-                <h1>Whoops!</h1>
-                <p>Looks like we couldn't find a valid user for this invitation. Try <a href='$baseUrl'>returning to the home 
-                page</a></p>
-            </div>
-        </div>
-    </div>
+    $_SESSION['error'] = "
+        Looks like we couldn't find a valid user for this invitation.
     ";
-
-    dieWithFooter();
+    $redirect = $baseUrl . 'error';
+    echo "<script>window.location.replace('$redirect');</script>";
+    die();
 }
 
 //
@@ -75,7 +64,7 @@ if (!$profile) {
 
 $isCollaborator = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId);
 
-if($isCollaborator) {
+if ($isCollaborator) {
     // The user has already accepted the invitation. Redirect to the project page.
     $redirect = $baseUrl . "projects/?id=$projectId";
     echo "<script>window.location.replace('$redirect');</script>";
@@ -85,13 +74,24 @@ if($isCollaborator) {
 // The user is not a collaborator, so make sure they have an invitation.
 // TODO: consider adding an expiration date to invitations and checking it here as well
 $invitation = $projectsDao->getInvitationToCollaborateOnProject($invitationId);
-if(!$invitation) {
-    renderInvalidInvitationHtml();
+if (!$invitation) {
+    $_SESSION['error'] = '
+        Looks like the invitation is no longer valid.
+    ';
+    $redirect = $baseUrl . 'error';
+    echo "<script>window.location.replace('$redirect');</script>";
+    die();
 }
 
 //
 // All checks pass. Display the invitation.
 //
+
+$title = 'Project Invitation';
+$css = array(
+    'assets/css/invite.css'
+);
+include_once PUBLIC_FILES . '/modules/header.php';
 
 $title = $project->getTitle();
 
@@ -126,36 +126,4 @@ echo "
 </div>
 ";
 
-dieWithFooter();
-
-
-/**
- * Terminates the script after printing the footer to the output buffer
- *
- * @return void
- */
-function dieWithFooter() {
-    include_once PUBLIC_FILES . '/modules/footer.php';
-    die();
-}
-
-/**
- * Prints a message to the screen for the user indicating the invitation is not valid.
- *
- * @return void
- */
-function renderInvalidInvitationHtml() {
-    global $baseUrl;
-    echo "
-    <div class='container'>
-        <div class='row'>
-            <div class='col'>
-                <h1>Whoops!</h1>
-                <p>Looks like this isn't a valid invitation. Try checking the link or <a href='$baseUrl'>returning to the home 
-                page</a></p>
-            </div>
-        </div>
-    </div>
-    ";
-    dieWithFooter();
-}
+include_once PUBLIC_FILES . '/modules/footer.php';

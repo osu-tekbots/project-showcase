@@ -86,7 +86,6 @@ $js = array_merge(
 
 // Setup the navigation links
 $navlinks = array(
-    'BROWSE' => 'browse',
 );
 
 ?>
@@ -162,7 +161,7 @@ $navlinks = array(
                 ";
             } else { 
                 echo "
-                <a href='signin?provider=onid'>
+                <a href='signin'>
                     <li>SIGN IN</li>
                 </a>
                 ";

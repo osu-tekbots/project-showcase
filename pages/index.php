@@ -5,7 +5,7 @@ $heroButtonHtml = $isLoggedIn ? "
     <i class='fas fa-user'></i>&nbsp;&nbsp;View Your Profile
     </a>
 " : "
-    <a href='signin?provider=onid' class='btn btn-lg btn-primary'>
+    <a href='signin' class='btn btn-lg btn-primary'>
         <i class='fas fa-sign-in-alt'></i>&nbsp;&nbsp;Sign In
     </a>
 ";
