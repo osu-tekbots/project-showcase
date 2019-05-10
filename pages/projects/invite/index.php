@@ -15,6 +15,8 @@ $userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 
+$baseUrl = $configManager->getBaseUrl();
+
 // If we don't have an invitation ID, then the URL is not valid. Display a message.
 if(!$invitationId) {
     renderInvalidInvitationHtml();
@@ -22,7 +24,7 @@ if(!$invitationId) {
 
 // If we don't have a user ID, the user may need to log in/create a new account
 if(!$userId) {
-    $loginRedirect = $configManager->getBaseUrl() . "projects/invite/?pid=$projectId";
+    $loginRedirect = $baseUrl . "projects/invite/?pid=$projectId&iid=$invitationId";
     echo "<script>window.location.replace('auth/login?provider=onid&redirect=$loginRedirect');</script>";
     die();
 }
@@ -35,7 +37,7 @@ if (!$project) {
         <div class='row'>
             <div class='col'>
                 <h1>Whoops!</h1>
-                <p>Looks like we couldn't find the project for this invitation. Try <a href=''>returning to the home 
+                <p>Looks like we couldn't find the project for this invitation. Try <a href='$baseUrl'>returning to the home 
                 page</a></p>
             </div>
         </div>
@@ -54,7 +56,7 @@ if (!$profile) {
         <div class='row'>
             <div class='col'>
                 <h1>Whoops!</h1>
-                <p>Looks like we couldn't find a valid user for this invitation. Try <a href=''>returning to the home 
+                <p>Looks like we couldn't find a valid user for this invitation. Try <a href='$baseUrl'>returning to the home 
                 page</a></p>
             </div>
         </div>
@@ -74,7 +76,8 @@ $isCollaborator = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $u
 
 if($isCollaborator) {
     // The user has already accepted the invitation. Redirect to the project page.
-    echo "<script>window.location.replace('projects/?id=$projectId');</script>";
+    $redirect = $baseUrl . "projects/?id=$projectId";
+    echo "<script>window.location.replace('$redirect');</script>";
     die();
 }
 
@@ -141,12 +144,13 @@ function dieWithFooter() {
  * @return void
  */
 function renderInvalidInvitationHtml() {
+    global $baseUrl;
     echo "
     <div class='container'>
         <div class='row'>
             <div class='col'>
                 <h1>Whoops!</h1>
-                <p>Looks like this isn't a valid invitation. Try checking the link or <a href=''>returning to the home 
+                <p>Looks like this isn't a valid invitation. Try checking the link or <a href='$baseUrl'>returning to the home 
                 page</a></p>
             </div>
         </div>
