@@ -73,8 +73,9 @@ class Mailer {
 
         $accepted = \mail($to, $subject, $message, $headersStr);
         if (!$accepted) {
+            $lastError = error_get_last();
             if ($this->logger != null) {
-                $this->logger->error("Failed to send email to $to from $from: " . error_get_last()['message']);
+                $this->logger->error("Failed to send email to $to from $from: " . $lastError['message']);
                 $this->logger->error($message);
             }
             return false;
