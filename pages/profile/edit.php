@@ -25,8 +25,11 @@ if (!$profile) {
 $pFirstname = $profile->getUser()->getFirstName();
 $pLastName = $profile->getUser()->getLastName();
 $pMajor = $profile->getUser()->getMajor();
+$pPhoneNumber = $profile->getUser()->getPhone();
+$pEmail = Security::ValidateEmail($profile->getUser()->getEmail());
 
 $pShowContactInfo = $profile->canShowContactInfo();
+$pContactInfoHtmlDisplay = $pShowContactInfo ? '' : "style='display: none;'";
 
 $pAbout = $profile->getAbout();
 
@@ -70,7 +73,7 @@ if (!$projects || count($projects) == 0) {
         $pid = $p->getId();
         $title = Security::HtmlEntitiesEncode($p->getTitle());
         $description = $p->getDescription();
-        if(strlen($description) > 280) {
+        if (strlen($description) > 280) {
             $description = substr($description, 0, 280) . '...';
         }
         $description = Security::HtmlEntitiesEncode($description);
@@ -150,15 +153,31 @@ include_once PUBLIC_FILES . '/modules/header.php';
         </div>
         <div class="form-group row">
             <label class="col-sm-2">Contact Information</label>
-            <div class="col-sm-10">
+            <div class="col-sm-5">
                 <div class="form-check">
                     <input name="publishContactInfo" id="publishContactInfo" type="checkbox" class="form-check-input" 
-                        value="true" <?php if ($pShowContactInfo) {
-    echo 'checked';
-} ?>>
+                        value="true" 
+                        <?php 
+                        if ($pShowContactInfo) {
+                            echo 'checked';
+                        } ?> />
                     <label class="form-check-label" for="publishContactInfo">
                         Allow contact information to be visible on profile
                     </label>
+                </div>
+            </div>
+        </div>
+        <div id="divContactInfo" <?php echo $pContactInfoHtmlDisplay; ?>>
+            <div class="form-group row">
+                <label class="col-sm-2">Phone Number</label>
+                <div class="col-sm-5">
+                    <input type="tel" class="form-control" name="phone" value="<?php echo $pPhoneNumber; ?>" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2">Email</label>
+                <div class="col-sm-5">
+                    <input type="email" class="form-control" name="email" value="<?php echo $pEmail; ?>" />
                 </div>
             </div>
         </div>

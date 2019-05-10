@@ -14,6 +14,8 @@ function onEditProfileFormInputChange() {
 }
 $('#formEditProfile input[type=text]').keyup(onEditProfileFormInputChange);
 $('#formEditProfile textarea').keyup(onEditProfileFormInputChange);
+$('#formEditProfile input[type=email]').keyup(onEditProfileFormInputChange);
+$('#formEditProfile input[type=tel]').keyup(onEditProfileFormInputChange);
 $('#formEditProfile input[type=file]').change(onEditProfileFormInputChange);
 $('#formEditProfile input[type=checkbox]').change(onEditProfileFormInputChange);
 
@@ -146,7 +148,6 @@ function onEditProfileFormSubmit() {
     $('#btnEditProfileSubmit').attr('disabled', true);
     changesDetected = false;
     $('#formEditProfileLoader').show();
-    snackbar('Saving profile', 'info');
     return false;
 }
 $('#formEditProfile').on('submit', onEditProfileFormSubmit);
@@ -298,3 +299,12 @@ function addRowToTableBodyProjects(pid, title, description){
     `);
     $('#tableProjects').show();
 }
+
+function onShowContactInfoChange() {
+    if($(this).prop('checked')) {
+        $('#divContactInfo').show();
+    } else {
+        $('#divContactInfo').hide();
+    }
+}
+$('#publishContactInfo').change(onShowContactInfoChange);

@@ -38,7 +38,6 @@
     flex-grow: 1;
     margin-left: 15px;
     align-self: flex-end;
-    margin-bottom: 25px;
 }
 
 .profile-links {
@@ -81,4 +80,14 @@
 
 .profile-about p {
     white-space: pre-wrap;
+}
+
+.profile-contact {
+    color: var(--color-black);
+    margin-top: 5px;
+    height: 25px;
+}
+
+.profile-contact a {
+    color: var(--color-black);
 }

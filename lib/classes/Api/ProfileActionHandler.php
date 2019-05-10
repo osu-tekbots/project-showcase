@@ -17,8 +17,7 @@ class ProfileActionHandler extends ActionHandler {
      * @param \DataAccess\UsersDao $dao the data access object for users
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($profilesDao, $usersDao, $logger)
-    {
+    public function __construct($profilesDao, $usersDao, $logger) {
         parent::__construct($logger);
         $this->profilesDao = $profilesDao;
         $this->usersDao = $usersDao;
@@ -43,6 +42,9 @@ class ProfileActionHandler extends ActionHandler {
         $githubLink = $this->getFromBody('githubLink');
         $linkedinLink = $this->getFromBody('linkedInLink');
 
+        $phone = $this->getFromBody('phone', false);
+        $email = $this->getFromBody('email', false);
+
         $profile = $this->profilesDao->getUserProfileInformation($userId);
         // TODO: handle case when profile is not found
 
@@ -59,13 +61,21 @@ class ProfileActionHandler extends ActionHandler {
             ->setLastName($lastName)
             ->setMajor($major);
 
+        if ($phone) {
+            $profile->getUser()->setPhone($phone);
+        }
+
+        if ($email) {
+            $profile->getUser()->setEmail($email);
+        }
+
         $ok = $this->profilesDao->updateShowcaseProfile($profile);
-        if(!$ok) {
+        if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update profile information'));
         }
 
         $ok = $this->usersDao->updateUser($profile->getUser());
-        if(!$ok) {
+        if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update user information'));
         }
 
@@ -73,7 +83,6 @@ class ProfileActionHandler extends ActionHandler {
             Response::OK,
             'Successfully saved profile information'
         ));
-
     }
 
     /**
@@ -90,7 +99,7 @@ class ProfileActionHandler extends ActionHandler {
         $this->requireParam('action');
 
         // Call the correct handler based on the action
-        switch($this->requestBody['action']) {
+        switch ($this->requestBody['action']) {
 
             case 'saveProfile':
                 $this->saveUserProfile();
@@ -99,5 +108,4 @@ class ProfileActionHandler extends ActionHandler {
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on user resource'));
         }
     }
-
 }

@@ -56,6 +56,15 @@ if (!$profile) {
     $name = Security::HtmlEntitiesEncode($profile->getUser()->getFullName());
     $major = Security::HtmlEntitiesEncode($profile->getUser()->getMajor());
 
+    $contactHtml = '';
+    if($profile->canShowContactInfo()){
+        $phone = $profile->getUser()->getPhone();
+        $email = Security::ValidateEmail($profile->getUser()->getEmail());
+        $contactHtml = "
+            <i><a href='mailto:$email'>$email</a></i>&nbsp;&nbsp;|&nbsp;&nbsp;<i>$phone</i>
+        ";
+    }
+
     $editButton = !$isOwnProfile ? '' : "
         <a href='profile/edit' id='btnEditProfile' class='btn btn-primary'>
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
@@ -87,6 +96,11 @@ if (!$profile) {
             <i class='fab fa-linkedin fa-2x'></i>
         </a>
     ": '';
+
+    $contactStyle = '';
+    if(empty($websiteHtml) && empty($githubHtml) && empty($linkedinHtml)) {
+        $contactStyle = "style='padding-bottom: 60px; margin-top: -35px;'";
+    }
 
     // Create the HTML to render a resume download link if the user has a resume uploaded
     $resumeUploaded = $profile->isResumeUploaded();
@@ -151,6 +165,9 @@ if (!$profile) {
                             $websiteHtml
                             $githubHtml
                             $linkedinHtml
+                        </div>
+                        <div class='profile-contact' $contactStyle>
+                            $contactHtml
                         </div>
                     </div>
                     $resumeHtml
