@@ -122,7 +122,7 @@ class User {
      * @return  self
      */ 
     public function setFirstName($firstName) {
-        $this->firstName = $firstName;
+        $this->firstName = \htmlspecialchars($firstName);
 
         return $this;
     }
@@ -140,9 +140,18 @@ class User {
      * @return  self
      */ 
     public function setLastName($lastName) {
-        $this->lastName = $lastName;
+        $this->lastName = \htmlspecialchars($lastName);
 
         return $this;
+    }
+
+    /**
+     * Returns the combination of the user's first and last name.
+     *
+     * @return string
+     */
+    public function getFullName() {
+        return $this->getFirstName() . ' ' . $this->getLastName();
     }
 
     /**
@@ -176,7 +185,7 @@ class User {
      * @return  self
      */ 
     public function setEmail($email) {
-        $this->email = $email;
+        $this->email = \urlencode($email);
 
         return $this;
     }
@@ -212,7 +221,7 @@ class User {
      * @return  self
      */ 
     public function setMajor($major) {
-        $this->major = $major;
+        $this->major = \htmlspecialchars($major);
 
         return $this;
     }
@@ -248,7 +257,7 @@ class User {
      * @return  self
      */ 
     public function setOnid($onid) {
-        $this->onid = $onid;
+        $this->onid = \htmlspecialchars($onid);
 
         return $this;
     }
