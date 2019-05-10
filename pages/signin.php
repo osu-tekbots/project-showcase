@@ -7,7 +7,7 @@ use Model\ShowcaseProfile;
 $baseUrl = $configManager->getBaseUrl();
 
 if ($isLoggedIn) {
-    $redirect = $baseUrl . 'profile/';
+    $redirect = isset($_GET['redirect'])? $_GET['redirect'] : $baseUrl . 'profile/';
     echo "<script>window.location.replace('$redirect')</script>";
     die();
 }
