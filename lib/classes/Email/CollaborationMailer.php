@@ -67,15 +67,17 @@ class CollaborationMailer extends Mailer {
                 <td style='padding: 10px;'>$projectDescription</td>
             </tr>
             <tr>
-                <td colspan='2' style='padding: 10px;'>
+                <td></td>
+                <td style='padding: 10px;'>
                     <a href='$link' style='
                         cursor: pointer;
                         text-decoration: none;
                         color: white;
-                        padding: 5px;
+                        padding: 10px;
                         margin: 10px;
                         background-color: #dc4405;
                         font-weight: bold;
+                        border-radius: 3px;
                     '>
                         View Invitation
                     </a>
