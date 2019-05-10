@@ -1,0 +1,26 @@
+.hero-home {
+    height: 450px;
+    width: 100vw;
+    background-color: var(--color-black);
+    color: var(--color-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-title {
+    font-size: 4.0rem;
+}
+
+.hero-subtitle {
+    font-size: 2.0rem;
+}
+
+p {
+    font-size: 1.3rem;
+}
+
+.container-fluid {
+    margin-top: 20px;
+}
