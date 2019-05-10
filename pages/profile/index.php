@@ -112,16 +112,24 @@ if (!$profile) {
 
     // Create the HTML for the 'About' section
     $about = Security::HtmlEntitiesEncode($profile->getAbout());
-    $about = !empty($about) && !is_null($about) ? "
+    if(empty($about) || is_null($about)) {
+        if($isOwnProfile) {
+            $aboutHtml = "
+            <h2>About</h2>
+            <p>Add a brief description about yourself highlighting your skills and experience.</p>
+            <a href='profile/edit' class='btn btn-primary'>
+                <i class='fas fa-handshake'></i>&nbsp;&nbsp;Introduce Yourself
+            </a>
+            ";
+        } else {
+            $aboutHtml = '';
+        }
+    } else {
+        $aboutHtml = "
         <h2>About</h2>
         <p>$about</p>
-    " : "
-        <h2>About</h2>
-        <p>Add a brief description about yourself highlighting your skills and experience.</p>
-        <a href='profile/edit' class='btn btn-primary'>
-            <i class='fas fa-handshake'></i>&nbsp;&nbsp;Introduce Yourself
-        </a>
-    ";
+        ";
+    }
 
     // Create the HTML for the 'Projects' section
     $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
@@ -176,7 +184,7 @@ if (!$profile) {
                 </div>
                 <div class='profile-content'>
                     <section class='profile-about'>
-                        $about
+                        $aboutHtml
                     </section>
                     <section class='profile-projects-section'>
                         <h2>Projects</h2>
