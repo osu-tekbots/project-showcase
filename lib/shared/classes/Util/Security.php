@@ -17,7 +17,8 @@ class Security {
      * @return string the escaped content
      */
     public static function HtmlEntitiesEncode($string, $encoding = 'UTF-8') {
-        return \preg_replace('/\R/', '', \htmlentities($string, \ENT_QUOTES | \ENT_HTML5, $encoding));
+        $quoteStyle = defined('ENT_HTML5') ? \ENT_QUOTES | \ENT_HTML5 : \ENT_QUOTES;
+        return \preg_replace('/\R/', '', \htmlentities($string, $quoteStyle, $encoding));
     }
 
     /**
@@ -29,7 +30,7 @@ class Security {
      * @return string the encoded URL link
      */
     public static function UrlEncode($string, $validate = true) {
-        if($validate) {
+        if ($validate) {
             return \urlencode(self::ValidateUrl($string));
         }
         return \urlencode($string);
@@ -43,7 +44,7 @@ class Security {
      * @return void
      */
     public static function ValidateUrl($url, $allowedSchemes = array('http', 'https')) {
-        if($url == null) {
+        if ($url == null) {
             return null;
         }
         $parsed = \parse_url($url);
