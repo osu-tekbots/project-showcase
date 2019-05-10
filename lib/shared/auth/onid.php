@@ -29,10 +29,8 @@ function authenticateWithONID() {
     $pageURL .= '?provider=onid';
 
     if (isset($_REQUEST['redirect']) && !empty($_REQUEST['redirect'])) {
-        $pageURL .= '&redirect=' . $_REQUEST['redirect'];
+        $pageURL .= '&redirect=' . urlencode($_REQUEST['redirect']);
     }
-
-    $pageURL = urlencode($pageURL);
 
     $ticket = $_REQUEST['ticket'];
 
