@@ -15,22 +15,37 @@ $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 
 $baseUrl = $configManager->getBaseUrl();
 
-// If we don't have an invitation ID, then the URL is not valid. Display a message.
-if (!$invitationId) {
-    $_SESSION['error'] = '
-        This is not a valid invitation.
-    ';
-    $redirect = $baseUrl . 'error';
-    echo "<script>window.location.replace('$redirect');</script>";
-    die();
-}
-
 // If we don't have a user ID, the user may need to log in/create a new account
 if (!$userId) {
-    include_once PUBLIC_FILES . '/lib/auth-onid.php';
 
+    // First we need to save the IDs provided in the URL so that they aren't lost during the authentication process
+    $_SESSION['iInvitationId'] = $invitationId;
+    $_SESSION['iProjectId'] = $projectId;
+
+    // Authenticate using ONID
+    include_once PUBLIC_FILES . '/lib/auth-onid.php';
     authenticate();
 
+}
+
+// If we don't have an invitation ID, they may have been lost during authentication. Attempt to recover them. If they
+// still are not present, display an error.
+if (!$invitationId || !$projectId) {
+    $invitationId = isset($_SESSION['iInvitationId']) ? $_SESSION['invitationId'] : false;
+    $projectId = isset($_SESSION['iProjectId']) ? $_SESSION['iProjectId'] : false;
+
+    if(!$invitationId || !$projectId) {
+        $_SESSION['error'] = '
+        This is not a valid invitation.
+        ';
+        $redirect = $baseUrl . 'error';
+        echo "<script>window.location.replace('$redirect');</script>";
+        die();
+    } else {
+        $redirect = $baseUrl . "projects/invite/?pid=$projectId&iid=$invitationId";
+        echo "<script>window.location.replace('$redirect');</script>";
+        die();
+    }
 }
 
 // Check if the project exists
