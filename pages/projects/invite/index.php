@@ -31,7 +31,7 @@ if (!$userId) {
 // If we don't have an invitation ID, they may have been lost during authentication. Attempt to recover them. If they
 // still are not present, display an error.
 if (!$invitationId || !$projectId) {
-    $invitationId = isset($_SESSION['iInvitationId']) ? $_SESSION['invitationId'] : false;
+    $invitationId = isset($_SESSION['iInvitationId']) ? $_SESSION['iInvitationId'] : false;
     $projectId = isset($_SESSION['iProjectId']) ? $_SESSION['iProjectId'] : false;
 
     if(!$invitationId || !$projectId) {
