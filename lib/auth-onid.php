@@ -24,9 +24,9 @@ function authenticate() {
         $ok = createUserAndProfileIfNeeded($dbConn, $logger, $onid);
         if (!$ok) {
             $_SESSION['error'] = '
-            We were unable to authenticate your sign-in request successfully. Please try again later or contact
-            the Tekbots Webdev team if the problem persists.
-        ';
+                We were unable to authenticate your sign-in request successfully. Please try again later or contact
+                the Tekbots Webdev team if the problem persists.
+            ';
             $redirect = $baseUrl . 'error';
             echo "<script>window.location.replace('$redirect');</script>";
             die();

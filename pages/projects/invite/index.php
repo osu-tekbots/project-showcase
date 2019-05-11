@@ -19,8 +19,10 @@ $baseUrl = $configManager->getBaseUrl();
 if (!$userId) {
 
     // First we need to save the IDs provided in the URL so that they aren't lost during the authentication process
-    $_SESSION['iInvitationId'] = $invitationId;
-    $_SESSION['iProjectId'] = $projectId;
+    if(!isset($_SESSION['iInvitationId'])) {
+        $_SESSION['iInvitationId'] = $invitationId;
+        $_SESSION['iProjectId'] = $projectId;
+    }
 
     // Authenticate using ONID
     include_once PUBLIC_FILES . '/lib/auth-onid.php';
@@ -36,12 +38,14 @@ if (!$invitationId || !$projectId) {
 
     if(!$invitationId || !$projectId) {
         $_SESSION['error'] = '
-        This is not a valid invitation.
+            This is not a valid invitation.
         ';
         $redirect = $baseUrl . 'error';
         echo "<script>window.location.replace('$redirect');</script>";
         die();
     } else {
+        unset($_SESSION['iInvitationId']);
+        unset($_SESSION['iProjectId']);
         $redirect = $baseUrl . "projects/invite/?pid=$projectId&iid=$invitationId";
         echo "<script>window.location.replace('$redirect');</script>";
         die();
