@@ -26,14 +26,10 @@ function authenticateWithONID() {
         $pageURL .= $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME'];
     }
 
-    if (isset($_REQUEST['redirect']) && !empty($_REQUEST['redirect'])) {
-        $pageURL .= '?redirect=' . urlencode($_REQUEST['redirect']);
-    }
-
     $ticket = $_REQUEST['ticket'];
 
     if ($ticket . '' != '') {
-        $url = 'https://login.oregonstate.edu/cas/serviceValidate?ticket=' . $ticket . '&service=' . $pageURL;
+        $url = 'https://login.oregonstate.edu/cas/serviceValidate?ticket=' . $ticket . '&service=' . urlencode($pageURL);
         $html = file_get_contents($url);
 
         $_SESSION['auth'] = array(
@@ -46,7 +42,7 @@ function authenticateWithONID() {
 
         return $_SESSION['auth']['id'];
     } else {
-        $url = 'https://login.oregonstate.edu/cas/login?service=' . $pageURL;
+        $url = 'https://login.oregonstate.edu/cas/login?service=' . urlencode($pageURL);
         echo "<script>location.replace('" . $url . "');</script>";
         die();
     }

@@ -27,10 +27,10 @@ if (!$invitationId) {
 
 // If we don't have a user ID, the user may need to log in/create a new account
 if (!$userId) {
-    $loginRedirect = urlencode($baseUrl . "projects/invite/?pid=$projectId&iid=$invitationId");
-    $redirect = $baseUrl . "signin?redirect=$loginRedirect";
-    echo "<script>window.location.replace('$redirect');</script>";
-    die();
+    include_once PUBLIC_FILES . '/lib/auth-onid.php';
+
+    authenticate();
+
 }
 
 // Check if the project exists
