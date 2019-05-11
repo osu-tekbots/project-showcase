@@ -37,7 +37,8 @@ if (!$artifact) {
 
 // Construct a name for the file
 $mime = mime_content_type($filepath);
-$filename = $artifact->getName() . '.' . explode('/', $mime)[1];
+$mimeParts = explode('/', $mime);
+$filename = $artifact->getName() . '.' . $mimeParts[1];
 
 // Send the file contents
 header("Content-Type: $mime");

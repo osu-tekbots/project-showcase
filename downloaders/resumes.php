@@ -35,11 +35,12 @@ if(!$profile) {
 
 // Construct a name for the file
 $mime = mime_content_type($filepath);
+$mimeParts = explode('/', $mime);
 $filename = 
     strtolower($profile->getUser()->getFirstName()) . '-' .
     strtolower($profile->getUser()->getLastName()) . '-' .
     'resume.' .
-    explode('/', $mime)[1];
+    $mimeParts[1];
 
 // Send the file contents
 header("Content-Type: $mime");
