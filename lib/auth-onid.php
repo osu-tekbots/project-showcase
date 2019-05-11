@@ -15,13 +15,13 @@ $baseUrl = $configManager->getBaseUrl();
  * @return void
  */
 function authenticate() {
-    global $isLoggedIn, $baseUrl;
+    global $isLoggedIn, $baseUrl, $dbConn, $logger;
 
     if (!$isLoggedIn) {
         include_once PUBLIC_FILES . '/lib/shared/auth/onid.php';
         $onid = authenticateWithONID();
     
-        $ok = createUserAndProfileIfNeeded($dbConn, $logger, $provider, $onid);
+        $ok = createUserAndProfileIfNeeded($dbConn, $logger, $onid);
         if (!$ok) {
             $_SESSION['error'] = '
             We were unable to authenticate your sign-in request successfully. Please try again later or contact
