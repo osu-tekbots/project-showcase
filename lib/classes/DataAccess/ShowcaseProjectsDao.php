@@ -131,6 +131,13 @@ class ShowcaseProjectsDao {
                 }
             }
 
+            // Finally sort the images by their create date (since we can't sort it in the query)
+            $images = $project->getImages();
+            \usort($images, function($i1, $i2) {
+                return $i1->getDateCreated() > $i2->getDateCreated();
+            });
+            $project->setImages($images);
+
             return $project;
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch project with ID '$projectId': " . $e->getMessage());
@@ -185,7 +192,7 @@ class ShowcaseProjectsDao {
                 return false;
             }
 
-            return self::ExtractShowcaseArtifactFromRow($results[0]);
+            return self::ExtractShowcaseProjectImageFromRow($results[0]);
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch project image with ID '$imageId': " . $e->getMessage());
             return false;

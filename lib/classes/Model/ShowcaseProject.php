@@ -28,10 +28,11 @@ class ShowcaseProject {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
             $this->setDateCreated(new \DateTime());
-            $this->setArtifacts(array());
             $this->setPublished(true);
         }
         $this->setId($id);
+        $this->setArtifacts(array());
+        $this->setImages(array());
     }
 
     /**
