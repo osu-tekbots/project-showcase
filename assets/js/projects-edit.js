@@ -56,12 +56,15 @@ $('#imageFile').change(onImageFileChange);
 /**
  * Initiate the image picker
  */
-$('#selectProjectImages').imagepicker({
-    selected: onImagePickerOptionChange
-});
-$('#selectProjectImages')
-    .data('picker')
-    .sync_picker_with_select();
+function initializeImagePicker() {
+    $('#selectProjectImages').imagepicker({
+        selected: onImagePickerOptionChange
+    });
+    $('#selectProjectImages')
+        .data('picker')
+        .sync_picker_with_select();
+}
+initializeImagePicker();
 
 /**
  * Handles rendering the new image preview when the image picker option has changed.
@@ -79,6 +82,7 @@ function onAddNewImageFormSubmit() {
 
     api.post('/project-images.php', form, true)
         .then(res => {
+            snackbar(res.message, 'success');
             onUploadImageSuccess(res.content.id);
         })
         .catch(err => {
@@ -101,10 +105,12 @@ $('#formAddNewImage').submit(onAddNewImageFormSubmit);
 function onUploadImageSuccess(id) {
     $('#btnUploadImage').attr('disabled', false);
     $('#formAddNewImageLoader').hide();
+    $('#btnDeleteSelectedImage').show();
     let name = $('#labelImageFile').text();
     $('#selectProjectImages').append(
         $(`
         <option
+            id='${id}'
             data-img-src='downloaders/project-images?id=${id}'
             data-img-class='project-image-thumbnail'
             data-img-alt='${name}'
@@ -114,8 +120,35 @@ function onUploadImageSuccess(id) {
     `)
     );
     $('#selectProjectImages').val(id);
-    $('#selectProjectImages').imagepicker();
+    initializeImagePicker();
 }
+
+function onDeleteSelectedImageButtonClick() {
+    let res = confirm('You are about to delete the currently selected image. This action is not reversible');
+    if (!res) return;
+
+    let form = new FormData();
+    let id = $('#selectProjectImages').val();
+    form.append('action', 'deleteProjectImage');
+    form.append('projectId', $('#projectId').val());
+    form.append('imageId', id);
+
+    api.post('/project-images.php', form, true)
+        .then(res => {
+            $(`option[id=${id}]`).remove();
+            initializeImagePicker();
+            snackbar(res.message, 'success');
+            $('#labelImageFile').text('Choose a new file to upload');
+            $('#projectImagePreview').attr('srt', '');
+            if($('#selectProjectImages option').length == 0) {
+                $('#btnDeleteSelectedImage').hide();
+            }
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+}
+$('#btnDeleteSelectedImage').click(onDeleteSelectedImageButtonClick);
 
 /**
  * Detects a change in the radio button select for artifact types and hides/shows the appropriate input

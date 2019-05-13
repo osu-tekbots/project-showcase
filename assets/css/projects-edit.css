@@ -45,3 +45,8 @@
     margin: 10px;
     align-self: center;
 }
+
+#btnDeleteSelectedImage {
+    align-self: flex-start;
+    margin-bottom: 10px;
+}

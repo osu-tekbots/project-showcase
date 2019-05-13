@@ -57,6 +57,7 @@ $pDescription = $project->getDescription();
 
 // Fetch any images for the project
 $pImagePreviewSrc = '';
+$pButtonImageDeleteStyle = 'style="display: none;"';
 $pProjectImagesSelectHtml = "
     <select class='image-picker' id='selectProjectImages'>
 ";
@@ -69,6 +70,7 @@ foreach ($pImages as $i) {
     $pProjectImagesSelectHtml .= "
         <option 
             $selected
+            id='$id'
             data-img-src='downloaders/project-images?id=$id'
             data-img-class='project-image-thumbnail'
             data-img-alt='$name'
@@ -77,6 +79,7 @@ foreach ($pImages as $i) {
         </option>
     ";
     if ($first) {
+        $pButtonImageDeleteStyle = '';
         $pImagePreviewSrc = "downloaders/project-images?id=$id";
         $first = false;
     }
@@ -241,7 +244,14 @@ include_once PUBLIC_FILES . '/modules/header.php';
     </form>
 
     <h3 id="images">Images</h3>
+    <p><i class="fas fa-info-circle"></i><i>&nbsp;&nbsp;You can upload images to accompany your project's profile.
+        Images must be no larger than 5MB. Please limit the number of images per project to 10.
+    </p>
     <div class="edit-project-images-container">
+        <button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 
+            <?php echo $pButtonImageDeleteStyle; ?>>
+            <i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
+        </button>
         <div class="project-images-select-container">
             <?php echo $pProjectImagesSelectHtml; ?>
         </div>
@@ -251,7 +261,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <div class="custom-file col-md-4">
                     <input required name="imageFile" type="file" class="custom-file-input" id="imageFile">
                     <label class="custom-file-label" for="imageFile" id="labelImageFile">
-                        Choose new image to upload
+                        Choose a new image to upload
                     </label>
                 </div>
             </div>
@@ -264,6 +274,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 </div>
             </div>
         </form>
+        <h6>Image Preview</h6>
         <img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>">
     </div>
 
