@@ -66,3 +66,13 @@ CREATE TABLE IF NOT EXISTS showcase_collaboration_invite (
     PRIMARY KEY (sci_id),
     FOREIGN KEY (sci_sp_id) REFERENCES showcase_project (sp_id)
 );
+
+CREATE TABLE IF NOT EXISTS showcase_project_image (
+    spi_id CHAR(16) NOT NULL,
+    spi_sp_id CHAR(16) NOT NULL,
+    spi_file_name VARCHAR(128) NOT NULL,
+    spi_date_created DATETIME NOT NULL,
+
+    PRIMARY KEY (spi_id),
+    FOREIGN KEY (spi_sp_id) REFERENCES showcase_project (sp_id)
+);

@@ -21,6 +21,8 @@ class ShowcaseProject {
     private $dateUpdated;
     /** @var ShowcaseProjectArtifact[] */
     private $artifacts;
+    /** @var ShowcaseProjectImage[] */
+    private $images;
 
     public function __construct($id = null) {
         if ($id == null) {
@@ -172,4 +174,39 @@ class ShowcaseProject {
         $this->artifacts[] = $artifact;
         return $this;
     }
+
+    /**
+     * Get the value of images
+     */ 
+    public function getImages() {
+        return $this->images;
+    }
+
+    /**
+     * Set the value of images
+     *
+     * @return  self
+     */ 
+    public function setImages($images) {
+        $this->images = $images;
+
+        return $this;
+    }
+
+    /**
+     * Adds an image to the project and sets the image's project reference to this project.
+     *
+     * @param ShowcaseProjectImage $image the image to add
+     * @return self
+     */
+    public function addImage($image) {
+        $image->setProject($this);
+        if($this->images == null) {
+            $this->images = array($image);
+        } else {
+            $this->images[] = $image;
+        }
+        return $this;
+    }
+
 }

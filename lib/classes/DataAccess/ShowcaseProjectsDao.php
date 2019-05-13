@@ -4,6 +4,7 @@ namespace DataAccess;
 use Model\ShowcaseProject;
 use Model\ShowcaseProjectArtifact;
 use Model\CollaborationInvitation;
+use Model\ShowcaseProjectImage;
 
 /**
  * Handles database interactions for showcase project and artifact data.
@@ -94,6 +95,7 @@ class ShowcaseProjectsDao {
             SELECT * 
             FROM showcase_project
             LEFT OUTER JOIN showcase_project_artifact ON spa_sp_id = sp_id
+            LEFT OUTER JOIN showcase_project_image ON spi_sp_id = sp_id
             INNER JOIN showcase_worked_on ON swo_sp_id = sp_id
             WHERE sp_id = :id
             ORDER BY sp_id, swo_u_id, spa_date_created
@@ -116,9 +118,16 @@ class ShowcaseProjectsDao {
                 if ($row['swo_u_id'] != $uid) {
                     break;
                 }
+                // Check to see if there is an artifact in this row. If there is, extract it.
                 $artifact = self::ExtractShowcaseArtifactFromRow($row);
                 if ($artifact) {
                     $project->addArtifact($artifact);
+                }
+
+                // Check to see if there is an image in this row. If there is, extract it.
+                $image = self::ExtractShowcaseProjectImageFromRow($row);
+                if ($image) {
+                    $project->addImage($image);
                 }
             }
 
@@ -152,6 +161,33 @@ class ShowcaseProjectsDao {
             return self::ExtractShowcaseArtifactFromRow($results[0]);
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch project artifact with ID '$artifactId': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches project image metadata from the database.
+     *
+     * @param string $imageId the ID of the image to fetch
+     * @return \Model\ShowcaseProjectImage|boolean the image on success, false if not found or an error occurs
+     */
+    public function getProjectImage($imageId) {
+        try {
+            $sql = '
+            SELECT *
+            FROM showcase_project_image
+            WHERE spi_id = :id
+            ';  
+            $params = array(':id' => $imageId);
+
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
+            }
+
+            return self::ExtractShowcaseArtifactFromRow($results[0]);
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch project image with ID '$imageId': " . $e->getMessage());
             return false;
         }
     }
@@ -239,6 +275,36 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Inserts new metadata about an image for a showcase project in the database.
+     *
+     * @param \Model\ShowcaseProjectImage $image
+     * @return boolean true on success, false otherwise
+     */
+    public function addNewProjectImage($image) {
+        try {
+            $sql = '
+            INSERT INTO showcase_project_image (
+                spi_id, spi_sp_id, spi_file_name, spi_date_created
+            ) VALUES (
+                :id, :pid, :name, :created
+            )
+            ';
+            $params = array(
+                ':id' => $image->getId(),
+                ':pid' => $image->getProjectId(),
+                ':name' => $image->getFileName(),
+                ':created' => QueryUtils::FormatDate($image->getDateCreated())
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to add new showcase project image: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Adds a user as a collaborator on a project, inserting a new entry into the `showcase_worked_on` table.
      *
      * @param string $projectId the ID of the project
@@ -315,13 +381,13 @@ class ShowcaseProjectsDao {
             $this->conn->startTransaction();
             // First create the new entry   
             $ok = $this->associateProjectWithUser($projectId, $userId);
-            if(!$ok) {
+            if (!$ok) {
                 throw new Exception('Failed to associate project with user');
             }
 
             // Remove the invitation
             $ok = $this->removeInvitationToCollaborateOnProject($invitationId);
-            if(!$ok) {
+            if (!$ok) {
                 throw new \Exception('Failed to remove invitation after accepting');
             }
 
@@ -405,7 +471,7 @@ class ShowcaseProjectsDao {
     }
 
     /**
-     * Deltes a project artifact from the database.
+     * Deletes a project artifact from the database.
      *
      * @param string $artifactId the ID of the artifact to delete
      * @return boolean true on success, false otherwise
@@ -428,6 +494,29 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Deletes project image metadata from the database.
+     *
+     * @param string $imageId the ID of the image to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteProjectImage($imageId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_project_image
+            WHERE spa_id = :id
+            ';
+            $params = array(':id' => $imageId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project image: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches the user profile entries that are connected with the project that has the provided ID.
      *
      * @param string $projectId the ID of the project
@@ -442,7 +531,7 @@ class ShowcaseProjectsDao {
             WHERE u_id = swo_u_id AND swo_sp_id = :id AND sup_u_id = u_id $visibleSql
             ";
             $params = array(':id' => $projectId);
-            if($visibleOnly) {
+            if ($visibleOnly) {
                 $params[':visible'] = true;
             }
             
@@ -633,6 +722,26 @@ class ShowcaseProjectsDao {
         }
         
         return $artifact;
+    }
+
+    /**
+     * Uses information from a row in the database to create a ShowcaseProjectImage object.
+     * 
+     * If there is no image available in the row then the function will return false.
+     *
+     * @param mixed[] $row the row from the databsae
+     * @return \Model\ShowcaseProjectImage|boolean the extracted image if it exists, false otherwise
+     */
+    public static function ExtractShowcaseProjectImageFromRow($row) {
+        if (!isset($row['spi_id'])) {
+            return false;
+        }
+        $image = new ShowcaseProjectImage($row['spi_id']);
+        $image
+            ->setProjectId($row['spi_sp_id'])
+            ->setFileName($row['spi_file_name'])
+            ->setDateCreated(new \DateTime($row['spi_date_created']));
+        return $image;
     }
 
     /**
