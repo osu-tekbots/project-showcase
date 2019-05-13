@@ -123,6 +123,9 @@ function onUploadImageSuccess(id) {
     initializeImagePicker();
 }
 
+/**
+ * Handles deleting an image from the project by sending a request to the server for the project image to be deleted.
+ */
 function onDeleteSelectedImageButtonClick() {
     let res = confirm('You are about to delete the currently selected image. This action is not reversible');
     if (!res) return;
@@ -139,7 +142,7 @@ function onDeleteSelectedImageButtonClick() {
             initializeImagePicker();
             snackbar(res.message, 'success');
             $('#labelImageFile').text('Choose a new file to upload');
-            $('#projectImagePreview').attr('srt', '');
+            $('#projectImagePreview').attr('src', '');
             if($('#selectProjectImages option').length == 0) {
                 $('#btnDeleteSelectedImage').hide();
             }
