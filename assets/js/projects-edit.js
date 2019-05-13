@@ -30,6 +30,94 @@ function onEditProjectGeneralSubmit() {
 $('#formEditProjectGeneral').submit(onEditProjectGeneralSubmit);
 
 /**
+ * Detects when there is a change to the image input and changes the label text to match the name of the file to
+ * upload. This will also change the image preview src.
+ */
+function onImageFileChange() {
+    // Show the name of the file
+    if (this.files.length > 0) {
+        // Get a preview of the selected files
+        let reader = new FileReader();
+        reader.onload = e => {
+            let $preview = $('#projectImagePreview');
+            $preview.attr('src', e.target.result);
+            $preview.show();
+        };
+        reader.readAsDataURL(this.files[0]);
+        $('#labelImageFile').text(this.files[0].name);
+        $('#selectProjectImages').val('');
+        $('#selectProjectImages')
+            .data('picker')
+            .sync_picker_with_select();
+    }
+}
+$('#imageFile').change(onImageFileChange);
+
+/**
+ * Initiate the image picker
+ */
+$('#selectProjectImages').imagepicker({
+    selected: onImagePickerOptionChange
+});
+$('#selectProjectImages')
+    .data('picker')
+    .sync_picker_with_select();
+
+/**
+ * Handles rendering the new image preview when the image picker option has changed.
+ */
+function onImagePickerOptionChange(pickerOption) {
+    $('#projectImagePreview').attr('src', $(pickerOption.option[0]).data('img-src'));
+}
+
+/**
+ * Handles a form submission for uploading a new image to associate with the project.
+ */
+function onAddNewImageFormSubmit() {
+    let form = new FormData(this);
+    form.append('action', 'addProjectImage');
+
+    api.post('/project-images.php', form, true)
+        .then(res => {
+            onUploadImageSuccess(res.content.id);
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+            $('#btnUploadImage').attr('disabled', false);
+            $('#formAddNewImageLoader').hide();
+        });
+
+    $('#btnUploadImage').attr('disabled', true);
+    $('#formAddNewImageLoader').show();
+
+    return false;
+}
+$('#formAddNewImage').submit(onAddNewImageFormSubmit);
+
+/**
+ * Handles HTML rendering DOM manipulation after a successful upload of a new project image
+ * @param {string} id the ID of the newly uploaded image
+ */
+function onUploadImageSuccess(id) {
+    $('#btnUploadImage').attr('disabled', false);
+    $('#formAddNewImageLoader').hide();
+    let name = $('#labelImageFile').text();
+    $('#selectProjectImages').append(
+        $(`
+        <option
+            data-img-src='downloaders/project-images?id=${id}'
+            data-img-class='project-image-thumbnail'
+            data-img-alt='${name}'
+            value='${id}'>
+            ${name}
+        </option>
+    `)
+    );
+    $('#selectProjectImages').val(id);
+    $('#selectProjectImages').imagepicker();
+}
+
+/**
  * Detects a change in the radio button select for artifact types and hides/shows the appropriate input
  */
 function onArtifactTypeChange() {

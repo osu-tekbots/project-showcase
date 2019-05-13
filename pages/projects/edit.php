@@ -55,6 +55,36 @@ $project = $projectsDao->getProject($projectId);
 $pTitle = $project->getTitle();
 $pDescription = $project->getDescription();
 
+// Fetch any images for the project
+$pImagePreviewSrc = '';
+$pProjectImagesSelectHtml = "
+    <select class='image-picker' id='selectProjectImages'>
+";
+$pImages = $project->getImages();
+$first = true;
+foreach ($pImages as $i) {
+    $id = $i->getId();
+    $name = $i->getFileName();
+    $selected = $first ? 'selected' : '';
+    $pProjectImagesSelectHtml .= "
+        <option 
+            $selected
+            data-img-src='downloaders/project-images?id=$id'
+            data-img-class='project-image-thumbnail'
+            data-img-alt='$name'
+            value='$id'>
+            $name
+        </option>
+    ";
+    if ($first) {
+        $pImagePreviewSrc = "downloaders/project-images?id=$id";
+        $first = false;
+    }
+}
+$pProjectImagesSelectHtml .= '
+    </select>
+';
+
 // Fetch the artifacts for the project
 $pArtifacts =$project->getArtifacts();
 if (count($pArtifacts) == 0) {
@@ -161,9 +191,11 @@ foreach ($collaborators as $c) {
 
 $title = 'Edit Project';
 $css = array(
+    'assets/css/image-picker.css',
     'assets/css/projects-edit.css'
 );
 $js = array(
+    'assets/js/image-picker.min.js',
     array(
         'src' => 'assets/js/projects-edit.js',
         'defer' => 'true'
@@ -207,6 +239,33 @@ include_once PUBLIC_FILES . '/modules/header.php';
         </div>
         <br/>
     </form>
+
+    <h3 id="images">Images</h3>
+    <div class="edit-project-images-container">
+        <div class="project-images-select-container">
+            <?php echo $pProjectImagesSelectHtml; ?>
+        </div>
+        <form id="formAddNewImage">
+            <input type="hidden" name="projectId" value="<?php echo $projectId; ?>" />
+            <div class="form-group row custom-file-row" id="divNewArtifactFile">
+                <div class="custom-file col-md-4">
+                    <input required name="imageFile" type="file" class="custom-file-input" id="imageFile">
+                    <label class="custom-file-label" for="imageFile" id="labelImageFile">
+                        Choose new image to upload
+                    </label>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4 row-project-image-submit">
+                    <button type="submit" id="btnUploadImage" class="btn btn-primary btn-sm">
+                        <i class="fas fa-upload"></i>&nbsp;&nbsp;Upload
+                    </button>
+                    <div class="loader" id="formAddNewImageLoader"></div>
+                </div>
+            </div>
+        </form>
+        <img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>">
+    </div>
 
     <h3 id="artifacts">Artifacts</h3>
     <p><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>Artifacts represent the concrete results 

@@ -30,3 +30,18 @@
 .table-collaborators .actions {
     text-align: right;
 }
+
+.edit-project-images-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.project-image-thumbnail img {
+    height: 100px;
+}
+
+#projectImagePreview {
+    height: 400px;
+    margin: 10px;
+    align-self: center;
+}
