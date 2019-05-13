@@ -10,12 +10,12 @@ use Util\Security;
  */
 function createProfileProjectHtml($project, $isOwnProject) {
 
-    $descriptionCharLimit = 280;
+    $descriptionCharLimit = 250;
 
     $id = $project->getId();
     $title = $project->getTitle();
     if(strlen($title) > 30) {
-        $descriptionCharLimit = 220;
+        $descriptionCharLimit = 200;
     }
     $description = $project->getDescription();
     if (strlen($description) > $descriptionCharLimit) {
@@ -26,7 +26,7 @@ function createProfileProjectHtml($project, $isOwnProject) {
     $description = Security::HtmlEntitiesEncode($description);
 
     return "
-    <div class='profile-project col-md-4'>
+    <div class='profile-project'>
         <h3 class='project-title'>$title</h3>
         <p class='project-description'>$description</p>
         <a href='projects/?id=$id' class='btn btn-outline-osu project-details'>
