@@ -516,7 +516,7 @@ class ShowcaseProjectsDao {
         try {
             $sql = '
             DELETE FROM showcase_project_image
-            WHERE spa_id = :id
+            WHERE spi_id = :id
             ';
             $params = array(':id' => $imageId);
 
