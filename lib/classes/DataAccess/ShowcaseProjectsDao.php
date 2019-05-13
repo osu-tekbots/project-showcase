@@ -95,7 +95,6 @@ class ShowcaseProjectsDao {
             SELECT * 
             FROM showcase_project
             LEFT OUTER JOIN showcase_project_artifact ON spa_sp_id = sp_id
-            LEFT OUTER JOIN showcase_project_image ON spi_sp_id = sp_id
             INNER JOIN showcase_worked_on ON swo_sp_id = sp_id
             WHERE sp_id = :id
             ORDER BY sp_id, swo_u_id, spa_date_created
@@ -123,16 +122,23 @@ class ShowcaseProjectsDao {
                 if ($artifact) {
                     $project->addArtifact($artifact);
                 }
-
-                // Check to see if there is an image in this row. If there is, extract it.
-                $image = self::ExtractShowcaseProjectImageFromRow($row);
-                if ($image) {
-                    $project->addImage($image);
-                }
             }
 
-            // Finally sort the images by their create date (since we can't sort it in the query)
-            $images = $project->getImages();
+            // Now get the images. We do this separately to simplify the query.
+            $sql = '
+            SELECT *
+            FROM showcase_project_image
+            WHERE spi_sp_id = :id
+            ORDER BY spi_date_created
+            ';
+            $results = $this->conn->query($sql, $params);
+
+            $images = array();
+            foreach($results as $row) {
+                $image = self::ExtractShowcaseProjectImageFromRow($row);
+                $image->setProject($project);
+                $images[] = $image;
+            }
             \usort($images, function($i1, $i2) {
                 return $i1->getDateCreated() > $i2->getDateCreated();
             });
