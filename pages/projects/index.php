@@ -21,7 +21,14 @@ $userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
 //
 $title = 'Showcase Project';
 $css = array(
-    'assets/css/showcase-project.css'
+    'assets/css/showcase-project.css',
+    'assets/css/slideshow.css'
+);
+$js = array(
+    array(
+        'src' => 'assets/js/slideshow.js',
+        'defer' => 'true'
+    )
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 
@@ -55,9 +62,8 @@ if (!$project) {
     $collaboratorIsUser = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId);
     $numCollaborators = count($pCollaborators);
     for ($i = 0; $i < $numCollaborators ; $i++) {
-
-        if($numCollaborators > 1) {
-            if($i == $numCollaborators - 1) {
+        if ($numCollaborators > 1) {
+            if ($i == $numCollaborators - 1) {
                 $pCollaboratorsHtml .= ' <span class="small-font">and</span> ';
             } elseif ($i != 0) {
                 $pCollaboratorsHtml .= '<span class="small-font">,</span> ';
@@ -69,7 +75,6 @@ if (!$project) {
         $name = Security::HtmlEntitiesEncode($c->getUser()->getFullName());
 
         $pCollaboratorsHtml .= $name;
-
     }
     $pCollaboratorsHtml .= '</h4>';
     
@@ -78,6 +83,47 @@ if (!$project) {
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
         </a>
     " : '';
+
+    // Gather the images and generate the HTML to render them in a slideshow
+    $pImagesHtml = '';
+    $pImagesDotsHtml = '';
+    $pImagesHeaderHtml = '';
+    $i = 1;
+    $numImages = count($project->getImages());
+    foreach ($project->getImages() as $image) {
+        $count = $i . ' / ' . $numImages;
+        $imageId = $image->getId();
+
+        $pImagesHtml .= "
+            <div class='slide fade'>
+                <img src='downloaders/project-images?id=$imageId' />
+            </div>
+        ";
+
+        if($numImages > 1) {
+            if ($i == 1) {
+                $pImagesDotsHtml = "
+                    <div class='dot-container'>
+                ";
+            }
+    
+            $pImagesDotsHtml .= "
+                <span class='dot' onclick='currentSlide($i)'></span>
+            ";
+        }
+
+        $i++;
+    }
+
+    if ($numImages > 1) {
+        $pImagesDotsHtml .= '
+            </div>
+        ';
+        $pImagesHtml .= "
+            <a class='prev' onclick='plusSlides(-1)'>&#10094;</a>
+            <a class='next' onclick='plusSlides(1)'>&#10095;</a>
+        ";
+    }
     
     // Artifacts
     $pArtifacts = $project->getArtifacts();
@@ -143,6 +189,15 @@ if (!$project) {
         <div class='showcase-project-description row justify-content-md-center'>
             <div class='col-md-8'>
                 <p>$pDescription</p>
+            </div>
+        </div>
+        <div class='showcase-project-images row justify-content-md-center'>
+            <div class='col-md-8'>
+                $pImagesHeaderHtml
+                <div class='slideshow-container'>
+                    $pImagesHtml
+                    $pImagesDotsHtml
+                </div>
             </div>
         </div>
         <div class='showcase-project-artifacts  row justify-content-md-center'>

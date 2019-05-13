@@ -58,6 +58,7 @@ $pDescription = $project->getDescription();
 // Fetch any images for the project
 $pImagePreviewSrc = '';
 $pButtonImageDeleteStyle = 'style="display: none;"';
+$pButtonImagePreviewStyle = $pButtonImageDeleteStyle;
 $pProjectImagesSelectHtml = "
     <select class='image-picker' id='selectProjectImages'>
 ";
@@ -80,6 +81,7 @@ foreach ($pImages as $i) {
     ";
     if ($first) {
         $pButtonImageDeleteStyle = '';
+        $pButtonImagePreviewStyle = '';
         $pImagePreviewSrc = "downloaders/project-images?id=$id";
         $first = false;
     }
@@ -275,7 +277,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </div>
         </form>
         <h6>Image Preview</h6>
-        <img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>">
+        <img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>" <?php echo $pButtonImagePreviewStyle; ?>>
     </div>
 
     <h3 id="artifacts">Artifacts</h3>
