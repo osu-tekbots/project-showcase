@@ -1,0 +1,4 @@
+# Ignore any configuration files in the root of the public directory. These will be host-specific
+*.ini
+**/.htpasswd
+.htaccess
