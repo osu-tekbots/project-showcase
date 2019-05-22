@@ -7,7 +7,7 @@ define('PUBLIC_FILES', __DIR__);
 include PUBLIC_FILES . '/lib/shared/autoload.php';
 
 // Load configuration
-$configManager = new Util\ConfigManager(PUBLIC_FILES . '/config' );
+$configManager = new Util\ConfigManager(__DIR__);
 
 $dbConn = DataAccess\DatabaseConnection::FromConfig($configManager->getDatabaseConfig());
 
