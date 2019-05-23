@@ -12,8 +12,8 @@ if (!isset($_SESSION)) {
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
 $mailer = new CollaborationMailer(
-    $configManager->getEmailFromAddress(), 
-    $configManager->getEmailSubjectTag(), 
+    $configManager->get('email.subject_tag'), 
+    $configManager->get('email.from_address'), 
     $logger, 
     $configManager
 );

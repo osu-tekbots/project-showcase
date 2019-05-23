@@ -169,6 +169,34 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request for showcase projects that match the query in the body
+     *
+     * @return void
+     */
+    public function handleBrowseProjects() {
+        $query = $this->getFromBody('query', false);
+
+        $projects = $this->projectsDao->getProjectsWithQuery($query);
+
+        if($projects == false) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to fetch projects for query'));
+        }
+
+        // Map the projects to an array we can represent as JSON
+        include_once PUBLIC_FILES . '/modules/project.php';
+        $body = array('html' => '');
+        foreach($projects as $p) {
+            $body['html'] .= createProfileProjectHtml($p, false);
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully fetched projects with query',
+            $body
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -198,6 +226,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'showUserOnProject':
                 $this->handleShowUserOnProject();
+
+            case 'browseProjects':
+                $this->handleBrowseProjects();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

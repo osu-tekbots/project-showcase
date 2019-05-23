@@ -82,6 +82,44 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Fetches projects that match the constraints specified in the query.
+     * 
+     * The `$query` parameter should be a string or an associative array with the following keys:
+     * - `query`: the string query used to search project titles, description, and collaborator names
+     *
+     * @param string|mixed[] $query the string or associative array specifying the query/parameters
+     * @return \Model\ShowcaseProject[]|boolean an array of projects on success, false otherwise
+     */
+    public function getProjectsWithQuery($query) {
+        try {
+            $sql = '
+            SELECT *
+            FROM showcase_project, showcase_worked_on, user
+            WHERE sp_id = swo_sp_id AND u_id = swo_u_id AND (
+                u_fname LIKE :query
+                OR u_lname LIKE :query
+                OR sp_title LIKE :query
+                OR sp_description LIKE :query
+            )
+            GROUP BY sp_id
+            ';
+            $params = array(':query' => "%$query%");
+            
+            $results = $this->conn->query($sql, $params);
+
+            $projects = array();
+            foreach ($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+            return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch projects with query '$query': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches a single showcase project with the provided ID.
      * 
      * This will also fetch all the artifacts associated with the project.
@@ -134,7 +172,7 @@ class ShowcaseProjectsDao {
             $results = $this->conn->query($sql, $params);
 
             $images = array();
-            foreach($results as $row) {
+            foreach ($results as $row) {
                 $image = self::ExtractShowcaseProjectImageFromRow($row);
                 $image->setProject($project);
                 $images[] = $image;

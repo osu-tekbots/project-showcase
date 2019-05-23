@@ -17,7 +17,7 @@ $baseUrl = $configManager->getBaseUrl();
 $title = (isset($title) ? $title : 'Project Showcase') . ' | OSU';
 
 // If the URL contains a query string parameter 'contentOnly=true', then we won't display a header or a footer
-if(!isset($contentOnly)) {
+if (!isset($contentOnly)) {
     $contentOnly = isset($_GET['contentOnly']) && $_GET['contentOnly'] == 'true';
 }
 
@@ -86,6 +86,7 @@ $js = array_merge(
 
 // Setup the navigation links
 $navlinks = array(
+    'BROWSE' => 'browse'
 );
 
 ?>
@@ -131,7 +132,7 @@ $navlinks = array(
 </head>
 <body>
     <?php 
-    if(!$contentOnly): 
+    if (!$contentOnly): 
     ?>
 
     <header id="header" class="dark">
@@ -153,13 +154,13 @@ $navlinks = array(
             }
 
             // The last link is the SIGN IN or the PROFILE link
-            if($isLoggedIn) {
+            if ($isLoggedIn) {
                 echo "
                 <a href='profile/'>
                     <li>PROFILE</li>
                 </a>
                 ";
-            } else { 
+            } else {
                 echo "
                 <a href='signin'>
                     <li>SIGN IN</li>
@@ -176,4 +177,6 @@ $navlinks = array(
     endif;
     ?>
     
-    <main <?php if(!$contentOnly) echo 'class="extra-padding"'; ?>>
+    <main <?php if (!$contentOnly) {
+        echo 'class="extra-padding"';
+    } ?>>
