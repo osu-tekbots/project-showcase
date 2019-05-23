@@ -48,3 +48,20 @@ function request(method, url, data, encoded) {
         }
     });
 }
+
+/**
+ * Serializes an HTML form as a JSON object.
+ * 
+ * The `name` attribute values of the `<input>` elements in the form will be the properties of the resulting object.
+ * 
+ * @param {string} formId the ID of the form element to serialize as JSON
+ * @returns {object} the JSON representation of the form
+ */
+function serializeFormAsJson(formId) {
+    let data = {};
+    let form = new FormData(document.getElementById(formId));
+    for(const [name, value] of form.entries()) {
+        data[name] = value;
+    }
+    return data;
+}
