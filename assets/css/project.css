@@ -7,8 +7,8 @@
     align-items: stretch;
     margin: 5px;
     border-radius: 3px;
-    min-width: 300px;
-    max-width: 30%;
+    width: 315px;
+    min-width: 315px;
 }
 
 .project-title {
