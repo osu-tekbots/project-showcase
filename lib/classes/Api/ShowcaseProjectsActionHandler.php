@@ -213,6 +213,8 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         include_once PUBLIC_FILES . '/modules/project.php';
         $body = array('html' => '');
         foreach ($projects as $p) {
+            $keywords = $this->keywordsDao->getKeywordsForEntity($p->getId());
+            $p->setKeywords($keywords);
             $body['html'] .= createProfileProjectHtml($p, false);
         }
 

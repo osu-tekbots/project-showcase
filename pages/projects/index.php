@@ -1,6 +1,7 @@
 <?php
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
+use DataAccess\KeywordsDao;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -55,6 +56,27 @@ if (!$project) {
     // General information
     $pTitle = Security::HtmlEntitiesEncode($project->getTitle());
     $pDescription = Security::HtmlEntitiesEncode($project->getDescription());
+
+    // Keywords
+    $keywordsDao = new KeywordsDao($dbConn, $logger);
+    $keywords = $keywordsDao->getKeywordsForEntity($project->getId());
+    $keywordsHtml = "";
+    if(count($keywords) > 0) {
+        $keywordsHtml = "
+            <div class='row justify-content-center fade-in'>
+                <div class='col-md-8 keywords'>
+        ";
+
+        foreach($keywords as $k) {
+            $kName = $k->getName();
+            $keywordsHtml .= "<div>$kName</div>";
+        }
+
+        $keywordsHtml .= "
+                </div>
+            </div>
+        ";
+    }
 
     // Collaborators
     $pCollaborators = $projectsDao->getProjectCollaborators($projectId, true);
@@ -186,6 +208,7 @@ if (!$project) {
                 $pCollaboratorsHtml
             </div>
         </div>
+        $keywordsHtml
         <div class='showcase-project-description row justify-content-md-center'>
             <div class='col-md-8'>
                 <p>$pDescription</p>

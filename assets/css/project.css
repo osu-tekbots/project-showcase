@@ -23,4 +23,44 @@
 
 .project-details {
     flex-shrink: 1;
+    display: flex;
+    align-items: center;
+}
+
+.project-details a {
+    margin-left: auto;
+}
+
+.project-tile-keywords {
+    display: flex;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.project-tile-keywords::-webkit-scrollbar {
+    width: 0 !important;
+    display: none;
+}
+
+.project-tile-keywords:after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    right: 0;
+    pointer-events: none;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1) 90%);
+    width: 50%;
+    height: 4em;
+}
+
+.project-tile-keywords div {
+    font-size: 0.7rem;
+    border-radius: 5px;
+    background-color: var(--color-light-grey);
+    color: var(--color-black);
+    padding: 3px 7px;
+    margin: 3px;
+    white-space: nowrap;
 }

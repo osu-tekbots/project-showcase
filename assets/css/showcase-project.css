@@ -70,6 +70,29 @@
     height: 400px;
 }
 
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.25s;
+    animation-fill-mode: forwards;
+}
+
+.keywords {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px;
+}
+
+.keywords div {
+    font-size: 0.7rem;
+    border-radius: 5px;
+    background-color: var(--color-light-grey);
+    color: var(--color-black);
+    padding: 3px 7px;
+    margin: 3px;
+    white-space: nowrap;
+}
+
 @keyframes fadeInDown {
     0% {
         opacity: 0;

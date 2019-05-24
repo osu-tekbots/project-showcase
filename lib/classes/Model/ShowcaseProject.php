@@ -23,6 +23,8 @@ class ShowcaseProject {
     private $artifacts;
     /** @var ShowcaseProjectImage[] */
     private $images;
+    /** @var Keyword[] */
+    private $keywords;
 
     public function __construct($id = null) {
         if ($id == null) {
@@ -33,6 +35,7 @@ class ShowcaseProject {
         $this->setId($id);
         $this->setArtifacts(array());
         $this->setImages(array());
+        $this->setKeywords(array());
     }
 
     /**
@@ -202,7 +205,7 @@ class ShowcaseProject {
      */
     public function addImage($image) {
         $image->setProject($this);
-        if($this->images == null) {
+        if ($this->images == null) {
             $this->images = array($image);
         } else {
             $this->images[] = $image;
@@ -210,4 +213,22 @@ class ShowcaseProject {
         return $this;
     }
 
+
+    /**
+     * Get the value of keywords
+     */ 
+    public function getKeywords() {
+        return $this->keywords;
+    }
+
+    /**
+     * Set the value of keywords
+     *
+     * @return  self
+     */ 
+    public function setKeywords($keywords) {
+        $this->keywords = $keywords;
+
+        return $this;
+    }
 }

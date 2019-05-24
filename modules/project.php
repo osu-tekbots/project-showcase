@@ -14,7 +14,7 @@ function createProfileProjectHtml($project, $isOwnProject) {
 
     $id = $project->getId();
     $title = $project->getTitle();
-    if(strlen($title) > 30) {
+    if(strlen($title) > 20) {
         $descriptionCharLimit = 200;
     }
     $description = $project->getDescription();
@@ -25,13 +25,30 @@ function createProfileProjectHtml($project, $isOwnProject) {
     $title = Security::HtmlEntitiesEncode($title);
     $description = Security::HtmlEntitiesEncode($description);
 
+    $keywords = $project->getKeywords();
+    $keywordsHtml = '';
+    if(count($keywords) > 0) {
+        foreach($keywords as $k) {
+            $kName = $k->getName();
+            $keywordsHtml .= "
+            <div>$kName</div>
+            ";
+        }
+    }
+
     return "
     <div class='profile-project'>
         <h3 class='project-title'>$title</h3>
         <p class='project-description'>$description</p>
-        <a href='projects/?id=$id' class='btn btn-outline-osu project-details'>
-            Details
-        </a>
+        <div class='project-details'>
+            <div class='project-tile-keywords'>
+                $keywordsHtml
+            </div>
+            <a href='projects/?id=$id' class='btn btn-outline-osu'>
+                Details
+            </a>
+        </div>
+        
     </div>
     ";
 }

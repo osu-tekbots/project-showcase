@@ -2,6 +2,7 @@
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
+use DataAccess\KeywordsDao;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -147,10 +148,14 @@ if (!$profile) {
         }
     } else {
         include_once PUBLIC_FILES . '/modules/project.php';
+
+        $keywordsDao = new KeywordsDao($dbConn, $logger);
         
         $projectsHtml = "<div class='projects-container'>";
         
         foreach ($projects as $p) {
+            $keywords = $keywordsDao->getKeywordsForEntity($p->getId());
+            $p->setKeywords($keywords);
             $projectsHtml .= createProfileProjectHtml($p, $isOwnProfile);
         }
 
