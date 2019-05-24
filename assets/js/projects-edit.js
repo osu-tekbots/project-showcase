@@ -143,7 +143,7 @@ function onDeleteSelectedImageButtonClick() {
             snackbar(res.message, 'success');
             $('#labelImageFile').text('Choose a new file to upload');
             $('#projectImagePreview').attr('src', '');
-            if($('#selectProjectImages option').length == 0) {
+            if ($('#selectProjectImages option').length == 0) {
                 $('#btnDeleteSelectedImage').hide();
             }
         })
@@ -387,4 +387,128 @@ function onToggleVisibilitySuccess(isVisible) {
             <i class='far fa-times-circle'></i>&nbsp;&nbsp;Not Visible
         `);
     }
+}
+
+autocomplete('keywords', keywords, item => {
+    let $kInput = $('input[name=keywords]');
+    if($kInput.val().includes(item.id)) {
+        return false;
+    }
+    if ($kInput.val() === '') {
+        $kInput.val(item.id);
+    } else {
+        $kInput.val($kInput.val() + ',' + item.id);
+    }
+    $('#noKeywordsText').hide();
+    let $keyword = $(`
+    <div class="keyword" id="${item.id}">
+        ${item.name}
+        <i class="fas fa-times-circle" data-id="${item.id}"></i>
+    </div>
+    `);
+    $keyword.find('i').click(function() {
+        onDeleteTag($(this).data('id'));
+    });
+    $('.project-keywords').append($keyword);
+});
+
+/**
+ * Removes a keyword and its associated chip element from the DOM.
+ * 
+ * @param {number} id the ID of the keywords to remove
+ */
+function onDeleteTag(id) {
+    let re = new RegExp(id + '(,)?', 'g');
+    let $keywords = $('input[name=keywords]');
+    $keywords.val($keywords.val().replace(re, ''));
+    $(`#${id}`).remove();
+    if($keywords.val() == '') {
+        $('#noKeywordsText').show();
+    }
+}
+$('.keyword i').click(function() {
+    onDeleteTag($(this).data('id'));
+});
+
+/**
+ * Function for using autocomplete for keywords. Requires jQuery/
+ *
+ *
+ * @param {string} inputId the input element ID
+ * @param {array} values the array of possible values to display. Each value is an object of the form { id, name }
+ * @param {string} valueInputId the ID of the hidden input element keeping track of the selected values
+ */
+function autocomplete(inputId, values, onItemSelectCb) {
+    // Capture the currently 'focused' item in the autocomplete list with a variable
+    let currentFocus = -1;
+    let $inp = $(`#${inputId}`);
+
+    $inp.on('input', function() {
+        let $autocompleteItems = $('.autocomplete-items');
+
+        // Empty any currently displayed values
+        if ($autocompleteItems) {
+            $autocompleteItems.remove();
+        }
+
+        if (!this.value) {
+            return false;
+        }
+        currentFocus = -1;
+        $autocompleteItems = $("<div class='autocomplete-items'></div>");
+        $(this.parentNode).append($autocompleteItems);
+
+        // Loop through the possible values and look for a match in names
+        for (let val of values) {
+            if (this.value.toLowerCase() === val.name.toLowerCase().substr(0, this.value.length)) {
+                // Found a substring match, add it as an option
+                let $item = $(`<div id="${val.id}"><strong>${val.name}</strong></div>`);
+                $item.click(() => {
+                    // The item was selected. Invoke the callback with the value. If not callback is defined, set
+                    // the input's value to the name of the object
+                    if (onItemSelectCb) {
+                        onItemSelectCb(val);
+                    } else {
+                        this.value = val.name;
+                    }
+                    // Close the autocomplete list
+                    $autocompleteItems.remove();
+                    this.value = '';
+                });
+                $autocompleteItems.append($item);
+            }
+        }
+    });
+    $inp.keydown(function(event) {
+        let $items = $('.autocomplete-items div');
+        switch (event.keyCode) {
+            // Down
+            case 40:
+                currentFocus++;
+                setActive($items);
+                break;
+
+            // Up
+            case 38:
+                currentFocus--;
+                setActive($items);
+                break;
+
+            // Enter
+            case 13:
+                event.preventDefault();
+                if (currentFocus > -1) {
+                    $items[currentFocus].click();
+                }
+                return false;
+        }
+    });
+    function setActive($items) {
+        $items.removeClass('autocomplete-active');
+        $($items[currentFocus]).addClass('autocomplete-active');
+    }
+    $(document).click(() => {
+        $('.autocomplete-items').remove();
+        $inp.val('');
+    });
 }

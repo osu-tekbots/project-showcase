@@ -4,6 +4,7 @@ use DataAccess\ShowcaseProjectsDao;
 use Api\ShowcaseProjectsActionHandler;
 use DataAccess\UsersDao;
 use Email\CollaborationMailer;
+use DataAccess\KeywordsDao;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -11,13 +12,14 @@ if (!isset($_SESSION)) {
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
+$keywordsDao = new KeywordsDao($dbConn, $logger);
 $mailer = new CollaborationMailer(
     $configManager->get('email.subject_tag'), 
     $configManager->get('email.from_address'), 
     $logger, 
     $configManager
 );
-$handler = new ShowcaseProjectsActionHandler($projectsDao, $usersDao, $mailer, $logger);
+$handler = new ShowcaseProjectsActionHandler($projectsDao, $usersDao, $keywordsDao, $mailer, $logger);
 
 if ($isLoggedIn) {
     $handler->handleRequest();

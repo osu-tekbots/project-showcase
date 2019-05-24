@@ -3,6 +3,7 @@ use DataAccess\ShowcaseProjectsDao;
 use DataAccess\UsersDao;
 use Model\UserType;
 use Util\Security;
+use DataAccess\KeywordsDao;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -54,6 +55,38 @@ $project = $projectsDao->getProject($projectId);
 
 $pTitle = $project->getTitle();
 $pDescription = $project->getDescription();
+
+// Get the tags for the project
+$keywordsDao = new KeywordsDao($dbConn, $logger);
+$keywords = $keywordsDao->getKeywordsForEntity($projectId);
+$noKeywordsTextStyle = "";
+$keywordsHtml = "";
+$keywordsInputIds = "";
+if(count($keywords) > 0) {
+    $noKeywordsTextStyle = "style='display: none;'";
+    $keywordsInputIds = array();
+    $keywordsHtml = "";
+    foreach($keywords as $k) {
+        $kId = $k->getId();
+        $kName = $k->getName();
+        $keywordsHtml .= "
+        <div class='keyword' id='$kId'>
+            $kName
+            <i class='fas fa-times-circle' data-id='$kId'></i>
+        </div>
+        ";
+        $keywordsInputIds[] = $kId;
+    }
+    $keywordsInputIds = join(",", $keywordsInputIds);
+}
+
+$allKeywords = $keywordsDao->getAllKeywords();
+$allKeywords = array_map(function($k) { 
+    $kName = $k->getName();
+    $kId = $k->getId();
+    return "{id: $kId, name: '$kName' }";
+}, $allKeywords);
+$allKeywords = join(',', $allKeywords);
 
 // Fetch any images for the project
 $pImagePreviewSrc = '';
@@ -236,6 +269,21 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </div>         
         </div>
         <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Keywords</label>
+            <div class="col-sm-7 autocomplete">
+                <div class="project-keywords">
+                    <i id="noKeywordsText" <?php echo $noKeywordsTextStyle; ?>>
+                    No keywords have been associated with this project</i>
+                    <?php echo $keywordsHtml; ?>
+                </div>
+                <div class="project-keywords-input">
+                    <input type="hidden" name="keywords" value="<?php echo $keywordsInputIds; ?>" />
+                    <input type="text" class="form-control" id="keywords" placeholder="Search available keywords" />
+                </div>
+            </div>
+            <script>const keywords = [<?php echo $allKeywords; ?>];</script>
+        </div>
+        <div class="form-group row">
             <div class="col-sm-7 offset-sm-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>&nbsp;&nbsp;Save Changes
@@ -247,7 +295,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
     <h3 id="images">Images</h3>
     <p><i class="fas fa-info-circle"></i><i>&nbsp;&nbsp;You can upload images to accompany your project's profile.
-        Images must be no larger than 5MB. Please limit the number of images per project to 10.
+        Images must be no larger than 5MB. Please limit the number of images per project to 10.</i>
     </p>
     <div class="edit-project-images-container">
         <button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 

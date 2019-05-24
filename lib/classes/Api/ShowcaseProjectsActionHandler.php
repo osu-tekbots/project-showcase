@@ -3,6 +3,7 @@ namespace Api;
 
 use Model\ShowcaseProject;
 use Model\CollaborationInvitation;
+use Model\Keyword;
 
 /**
  * Defines the logic for how to handle AJAX requests with JSON bodies made to modify showcase project information.
@@ -15,6 +16,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     /** @var \DataAccess\UsersDao */
     private $usersDao;
 
+    /** @var \DataAccess\KeywordsDao */
+    private $keywordsDao;
+
     /** @var \Email\CollaborationMailer */
     private $mailer;
 
@@ -22,13 +26,16 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
      * Constructs a new instance of the action handler for requests on user resources.
      *
      * @param \DataAccess\ShowcaseProjectsDao $projectsDao the data access object for showcase projects
+     * @param \DataAccess\UsersDao $usersDao the data access object for users
+     * @param \DataAccess\KeywordsDao $keywordsDao the data access object for keywords
      * @param \Email\CollaborationMailer  $mailer the Mailer class providing email functionality for collaboration
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($projectsDao, $usersDao, $mailer, $logger) {
+    public function __construct($projectsDao, $usersDao, $keywordsDao, $mailer, $logger) {
         parent::__construct($logger);
         $this->mailer = $mailer;
         $this->usersDao = $usersDao;
+        $this->keywordsDao = $keywordsDao;
         $this->projectsDao = $projectsDao;
     }
 
@@ -68,6 +75,7 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         $projectId = $this->getFromBody('projectId');
         $title = $this->getFromBody('title');
         $description = $this->getFromBody('description');
+        $keywords = $this->getFromBody('keywords');
 
         $project = $this->projectsDao->getProject($projectId);
         // TODO: handle case when project is not found
@@ -81,6 +89,25 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save changes to project'));
         }
+
+        // Update the keywords. First we remove all of the old keywords.
+        $ok = $this->keywordsDao->removeAllKeywordsForEntity($project->getId());
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save project keyword information'));
+            }
+        if(!empty($keywords)) {
+            // Clean the keyword IDs and split them into an array
+            $keywords = \trim($keywords, ' ,');
+            $keywords = \explode(',', $keywords);
+            foreach ($keywords as $kId) {
+                $k = new Keyword($kId);
+                $ok = $this->keywordsDao->addKeywordInJoinTable($k, $project->getId());
+                if (!$ok) {
+                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save project keyword information'));
+                }
+            }
+        }
+        
 
         $this->respond(new Response(
             Response::OK,
@@ -178,14 +205,14 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
         $projects = $this->projectsDao->getProjectsWithQuery($query);
 
-        if($projects == false) {
+        if ($projects == false) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to fetch projects for query'));
         }
 
         // Map the projects to an array we can represent as JSON
         include_once PUBLIC_FILES . '/modules/project.php';
         $body = array('html' => '');
-        foreach($projects as $p) {
+        foreach ($projects as $p) {
             $body['html'] .= createProfileProjectHtml($p, false);
         }
 
