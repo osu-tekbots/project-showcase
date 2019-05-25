@@ -9,6 +9,7 @@
     border-radius: 3px;
     width: 315px;
     min-width: 315px;
+    background-color: var(--color-white);
 }
 
 .project-title {

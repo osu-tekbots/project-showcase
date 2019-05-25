@@ -1,4 +1,10 @@
 <?php
+use DataAccess\ShowcaseProjectsDao;
+
+$projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
+$recentProjects = $projectsDao->getMostRecentProjects(4);
+
+
 
 $title = 'Browse Showcase Projects';
 $css = array(
@@ -29,12 +35,30 @@ include_once PUBLIC_FILES . '/modules/header.php';
 </div>
 
 <div class="container-fluid">
-    <div class="row projects-row" id="results" style="display: none;">
+    <div id="results" style="display: none;">
+        <div class="row projects-row">
+            <div class="col">
+                <h3>Search Results</h3>
+            </div>
+        </div>
+        <div class="row projects-row" id="resultsContent">
+        </div>
     </div>
 
-    <div class="row projects-row" id="suggestions">
-        <div class="col">
-            <h3>Recently Added</h3>
+    <div id="suggestions">
+        <div class="row projects-row" >
+            <div class="col">
+                <h3>Recently Added</h3>
+            </div>
+        </div>
+        <div class="row projects-row">
+            <div class="col recent-projects">
+                <?php
+                include_once PUBLIC_FILES . '/modules/project.php';
+                foreach ($recentProjects as $p) {
+                    echo createProfileProjectHtml($p, false);
+                } ?>
+            </div>
         </div>
     </div>
 

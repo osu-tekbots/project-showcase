@@ -7,7 +7,7 @@ function onBrowseInputSubmit() {
             hideSuggestions();
             showResults();
             clearResults();
-            $('#results').html(res.content.html);
+            $('#resultsContent').html(res.content.html);
         })
         .catch(err => {
             snackbar(err.message, 'error');
@@ -22,7 +22,7 @@ function hideSuggestions() {
 }
 
 function clearResults() {
-    $('#results').empty();
+    $('#resultsContent').empty();
 }
 
 function showResults() {

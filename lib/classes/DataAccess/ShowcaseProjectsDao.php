@@ -127,6 +127,36 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Fetches the most recently added projects by date.
+     *
+     * @param integer $limit the maximum number of projects to fetch. Defaults to 10.
+     * @return \Model\ShowcaseProject[] an array of projects on success, false otherwise
+     */
+    public function getMostRecentProjects($limit = 10) {
+        try {
+            $sql = "
+            SELECT *
+            FROM showcase_project
+            ORDER BY sp_date_created DESC
+            LIMIT :limit
+            ";
+            $params = array(':limit' => $limit);
+
+            $results = $this->conn->query($sql, $params);
+
+            $projects = array();
+            foreach($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+            return $projects;
+        } catch(\Exception $e) {
+            $this->logger->error("Failed to get the $limit most recent projects: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches a single showcase project with the provided ID.
      * 
      * This will also fetch all the artifacts associated with the project.

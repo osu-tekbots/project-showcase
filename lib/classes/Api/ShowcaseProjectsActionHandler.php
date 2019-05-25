@@ -205,7 +205,7 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
         $projects = $this->projectsDao->getProjectsWithQuery($query);
 
-        if ($projects == false) {
+        if (!$projects && !is_array($projects)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to fetch projects for query'));
         }
 
