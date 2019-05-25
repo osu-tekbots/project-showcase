@@ -1,8 +1,11 @@
 <?php
 use DataAccess\ShowcaseProjectsDao;
+use DataAccess\KeywordsDao;
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $recentProjects = $projectsDao->getMostRecentProjects(4);
+
+$keywordsDao = new KeywordsDao($dbConn, $logger);
 
 
 
@@ -56,6 +59,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <?php
                 include_once PUBLIC_FILES . '/modules/project.php';
                 foreach ($recentProjects as $p) {
+                    $keywords = $keywordsDao->getKeywordsForEntity($p->getId());
+                    $p->setKeywords($keywords);
                     echo createProfileProjectHtml($p, false);
                 } ?>
             </div>
