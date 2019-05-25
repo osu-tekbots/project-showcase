@@ -93,17 +93,24 @@ class ShowcaseProjectsDao {
     public function getProjectsWithQuery($query) {
         try {
             $sql = '
-            SELECT *
-            FROM showcase_project, showcase_worked_on, user
-            WHERE sp_id = swo_sp_id AND u_id = swo_u_id AND (
-                u_fname LIKE :query
-                OR u_lname LIKE :query
-                OR sp_title LIKE :query
-                OR sp_description LIKE :query
-            )
+            SELECT p.*
+            FROM showcase_project p
+            INNER JOIN showcase_worked_on w ON w.swo_sp_id = p.sp_id
+            INNER JOIN user u on u.u_id = w.swo_u_id
+            LEFT OUTER JOIN (
+                SELECT *
+                FROM capstone_keyword_for, capstone_keyword
+                WHERE ckf_ck_id = ck_id
+            ) AS keywords ON ckf_entity_id = sp_id
+            WHERE
+                LOWER (u_fname) LIKE :query
+                OR LOWER(u_lname) LIKE :query
+                OR LOWER(sp_title) LIKE :query
+                OR LOWER(sp_description) LIKE :query
+                OR LOWER(ck_name) LIKE :query
             GROUP BY sp_id
             ';
-            $params = array(':query' => "%$query%");
+            $params = array(':query' => strtolower("%$query%"));
             
             $results = $this->conn->query($sql, $params);
 
