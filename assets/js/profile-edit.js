@@ -293,7 +293,9 @@ function addRowToTableBodyProjects(pid, title, description){
             <td>${title}</td>
             <td>${description}</td>
             <td>
-                <a href="projects/edit?id=${pid}" class="btn btn-primary">Edit</a>
+                <a href="projects/edit?id=${pid}" class="btn btn-sm btn-light">
+                    <i class='fas fa-edit'></i>
+                </a>
             </td>
         </tr>
     `);
