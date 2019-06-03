@@ -29,6 +29,44 @@ class ShowcaseProjectsDao {
     }
 
     /**
+     * Fetches all the projects from the database.
+     *
+     * @param integer $count the number to limit the return array size to
+     * @param integer $offset the offset in the database table to start retrieve projects from
+     * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
+     */
+    public function getAllProjects($count = 0, $offset = 0) {
+        try {
+            $limit = '';
+            if ($offset > 0) {
+                $limit = "LIMIT $offset";
+                if ($count > 0) {
+                    $limit .= ", $count";
+                }
+            } elseif ($count > 0) {
+                $limit = "LIMIT $count";
+            }
+            $sql = "
+            SELECT *
+            FROM showcase_project
+            ORDER BY sp_title ASC
+            $limit
+            ";
+            $results = $this->conn->query($sql);
+
+            $projects = array();
+            foreach ($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+            return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get all projects: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches all showcase projects associated with the user that has the provided ID.
      * 
      * By default, the artifacts accompanying the projects will not be included. This helps us optimize the function
