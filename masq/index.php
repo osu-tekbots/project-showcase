@@ -73,6 +73,7 @@ function stopMasquerade() {
         unset($_SESSION['userID']);
         if (isset($_SESSION['masq']['savedPreviousUser'])) {
             $_SESSION['userID'] = $_SESSION['masq']['userID'];
+            $_SESSION['userType'] = $_SESSION['masq']['userType'];
         }
         unset($_SESSION['masq']);
     }
@@ -89,8 +90,10 @@ function startMasquerade($user) {
     if (isset($_SESSION['userID'])) {
         $_SESSION['masq']['savedPreviousUser'] = true;
         $_SESSION['masq']['userID'] = $_SESSION['userID'];
+        $_SESSION['masq']['userType'] = $_SESSION['userType'];
     }
     $_SESSION['userID'] = $user->getId();
+    $_SESSION['userType'] = $user->getType()->getId();
 }
 ?>
 

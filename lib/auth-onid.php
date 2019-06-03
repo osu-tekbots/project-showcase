@@ -81,5 +81,6 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $onid) {
     // The user and profile existed or were created successfully
     // Set the SESSION and return true
     $_SESSION['userID'] = $user->getId();
+    $_SESSION['userType'] = $user->getType()->getId();
     return true;
 }

@@ -1,6 +1,11 @@
 <?php
 namespace Api;
 
+use Model\User;
+use Model\UserAuthProvider;
+use Model\UserType;
+use Model\ShowcaseProfile;
+
 /**
  * Defines the logic for how to handle AJAX requests made to modify user information.
  */
@@ -86,6 +91,69 @@ class ProfileActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to create a new profile in the showcase for a user
+     *
+     * @return void
+     */
+    public function handleCreateProfile() {
+        $onid = $this->getFromBody('onid');
+        $fname = $this->getFromBody('fname');
+        $lname = $this->getFromBody('lname');
+        $type = $this->getFromBody('type');
+
+        $user = new User();
+        $user->setType(new UserType($type, ''))
+            ->setAuthProvider(new UserAuthProvider(UserAuthProvider::ONID, 'ONID'))
+            ->setOnid($onid)
+            ->setFirstName($fname)
+            ->setLastName($lname);
+
+        $ok = $this->usersDao->addNewUser($user);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create new user profile'));
+        }
+
+        $profile = new ShowcaseProfile($user->getId(), true);
+        $ok = $this->profilesDao->addNewShowcaseProfile($profile);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create user showcase profile'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully create new user'
+        ));
+    }
+
+    /**
+     * Handles a request to update a user's type
+     *
+     * @return void
+     */
+    public function handleUpdateUserType() {
+        $uid = $this->getFromBody('uid');
+        $admin = $this->getFromBody('admin');
+
+        $user = $this->usersDao->getUser($uid);
+
+        if ($admin) {
+            $user->getType()->setId(UserType::ADMIN);
+        } else {
+            $user->getType()->setId(UserType::STUDENT);
+        }
+
+        $ok = $this->usersDao->updateUser($user);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to update user type'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully updated user type'
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -103,6 +171,12 @@ class ProfileActionHandler extends ActionHandler {
 
             case 'saveProfile':
                 $this->saveUserProfile();
+
+            case 'createProfile':
+                $this->handleCreateProfile();
+
+            case 'updateUserType':
+                $this->handleUpdateUserType();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on user resource'));

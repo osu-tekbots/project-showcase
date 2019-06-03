@@ -26,6 +26,45 @@ class ShowcaseProfilesDao {
     }
 
     /**
+     * Fetches all of the showcase profiles for users in the database.
+     *
+     * @param integer $count
+     * @param integer $offset
+     * @return \Model\ShowcaseProfile[] an array of showcase profiles on success, false otherwise
+     */
+    public function getAllProfiles($count = 0, $offset = 0) {
+        try {
+            $limit = '';
+            if ($offset > 0) {
+                $limit = "LIMIT $offset";
+                if ($count > 0) {
+                    $limit .= ", $count";
+                }
+            } elseif ($count > 0) {
+                $limit = "LIMIT $count";
+            }
+            $sql = "
+            SELECT *
+            FROM user, showcase_user_profile
+            WHERE u_id = sup_u_id
+            ORDER BY u_lname ASC
+            $limit
+            ";
+            $results = $this->conn->query($sql);
+
+            $profiles = array();
+            foreach ($results as $row) {
+                $profiles[] = self::ExtractShowcaseProfileFromRow($row);
+            }
+
+            return $profiles;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get all user profiles: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches additional profile information about a user needed for the project showcase site.
      * 
      * The profile will also include a reference to the User object associated with the profile.

@@ -2,17 +2,34 @@
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
+use Model\UserType;
 
 if (!isset($_SESSION)) {
     session_start();
 }
 
+$baseUrl = $configManager->getBaseUrl();
 if (!$isLoggedIn) {
-    echo "<script>window.location.replace('');</script>";
+    echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
-
 $userId = $_SESSION['userID'];
+
+
+
+if (isset($_GET['id']) && $_GET['id'] != $userId) {
+    if ($_SESSION['userType'] == UserType::ADMIN) {
+        $userId = $_GET['id'];
+    } else {
+        $_SESSION['error'] = 'You do not have permission to edit that profile';
+        echo "<script>window.location.replace('$baseUrl/error');</script>";
+        die();
+    }
+}
+
+
+
+
 
 // Get the user profile information
 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);

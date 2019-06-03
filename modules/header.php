@@ -1,4 +1,6 @@
 <?php
+use Model\UserType;
+
 /**
  * This header module should be included in all PHP files that render visible HTML content. It includes all the
  * JavaScript and CSS files and creates the header navigation bar.
@@ -84,10 +86,28 @@ $js = array_merge(
     ), $js
 );
 
-// Setup the navigation links
-$navlinks = array(
-    'BROWSE' => 'browse'
-);
+// Setup the navigation links. If there are links already defined, merge them AFTER the default links
+if (isset($navlinks)) {
+    $navlinks = array_merge(
+        array(
+            'BROWSE' => 'browse'
+        ), 
+        $navlinks
+    );
+} else {
+    $navlinks = array(
+        'BROWSE' => 'browse'
+    );
+}
+
+if($isLoggedIn) {
+    if($_SESSION['userType'] == UserType::ADMIN) {
+        $navlinks['ADMIN'] = 'admin/';
+    }
+    $navlinks['PROFILE'] = 'profile/';
+} else {
+    $navlinks['SIGN IN'] = 'signin';
+}
 
 ?>
 
@@ -139,7 +159,7 @@ $navlinks = array(
         <a class="header-main-link" href="">
             <div class="logo">
                 <img class="logo" src="assets/img/osu-logo-orange.png" />
-                <h1><span id="projectPrefix">Project </span>Showcase</h1>
+                <h1><span id="projectPrefix">Project </span>Showcase </h1>
             </div>
         </a>
         <nav class="navigation">
@@ -149,21 +169,6 @@ $navlinks = array(
                 echo "
                 <a href='$link'>
                     <li>$title</li>
-                </a>
-                ";
-            }
-
-            // The last link is the SIGN IN or the PROFILE link
-            if ($isLoggedIn) {
-                echo "
-                <a href='profile/'>
-                    <li>PROFILE</li>
-                </a>
-                ";
-            } else {
-                echo "
-                <a href='signin'>
-                    <li>SIGN IN</li>
                 </a>
                 ";
             }
