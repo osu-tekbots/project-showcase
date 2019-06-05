@@ -8,14 +8,15 @@ use Util\Security;
  * @param boolean $isOwnProject indicates whether the project is owned by the viewer or not
  * @return string the HTML for rendering a profile project
  */
-function createProfileProjectHtml($project, $isOwnProject) {
+function createProfileProjectHtml($project, $isOwnProject = false) {
 
-    $descriptionCharLimit = 250;
+    $descriptionCharLimit = 230;
+    $titleCharLimit = 28;
 
     $id = $project->getId();
     $title = $project->getTitle();
-    if(strlen($title) > 20) {
-        $descriptionCharLimit = 200;
+    if(strlen($title) > $titleCharLimit) {
+        $title = substr($title, 0, $titleCharLimit) . '...';
     }
     $description = $project->getDescription();
     if (strlen($description) > $descriptionCharLimit) {
@@ -37,18 +38,19 @@ function createProfileProjectHtml($project, $isOwnProject) {
     }
 
     return "
-    <div class='profile-project'>
-        <h3 class='project-title'>$title</h3>
-        <p class='project-description'>$description</p>
-        <div class='project-details'>
-            <div class='project-tile-keywords'>
-                $keywordsHtml
+    <div class='card profile-project-card'>
+        <div class='card-body profile-project-card-body'>
+            <h5 class='project-title'>$title</h5>
+            <p class='project-description'>$description</p>
+            <div class='project-details'>
+                <div class='project-tile-keywords'>
+                    $keywordsHtml
+                </div>
+                <a href='projects/?id=$id' class='btn btn-outline-osu'>
+                    Details
+                </a>
             </div>
-            <a href='projects/?id=$id' class='btn btn-outline-osu'>
-                Details
-            </a>
         </div>
-        
     </div>
     ";
 }

@@ -1,15 +1,14 @@
-.profile-project {
-    padding: 10px;
-    box-shadow: 1px 1px 3px var(--color-grey);
-    height: 300px;
+.profile-project-card {
+    height: 315px;
+    margin: 5px;
+    width: 315px;
+    min-width: 315px;
+}
+
+.profile-project-card-body {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    margin: 5px;
-    border-radius: 3px;
-    width: 315px;
-    min-width: 315px;
-    background-color: var(--color-white);
 }
 
 .project-title {
