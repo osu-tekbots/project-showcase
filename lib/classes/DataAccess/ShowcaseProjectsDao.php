@@ -172,23 +172,23 @@ class ShowcaseProjectsDao {
      */
     public function getMostRecentProjects($limit = 10) {
         try {
-            $sql = "
+            $sql = '
             SELECT *
             FROM showcase_project
             ORDER BY sp_date_created DESC
             LIMIT :limit
-            ";
+            ';
             $params = array(':limit' => $limit);
 
             $results = $this->conn->query($sql, $params);
 
             $projects = array();
-            foreach($results as $row) {
+            foreach ($results as $row) {
                 $projects[] = self::ExtractShowcaseProjectFromRow($row);
             }
 
             return $projects;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->error("Failed to get the $limit most recent projects: " . $e->getMessage());
             return false;
         }
@@ -793,7 +793,54 @@ class ShowcaseProjectsDao {
             $this->logger->error("Failed to remove the invitation with ID $invitationId: " . $e->getMessage());
             return false;
         }
-    } 
+    }
+
+    /**
+     * Fetches various statistics about all showcase projects in the database.
+     * 
+     * Returns an associative array with the following keys:
+     * - `keywords`: associative array of counts of all the keywords used in projects in the showcase
+     * - `totalProjects`: total number of showcase projects
+     * - `usersWithProjects`: total number of users that have at least on project in the showcase
+     *
+     * @return mixed[]|bool an array of statistics with the above keys on success. False on error.
+     */
+    public function getStatsAboutProjects() {
+        try {
+            $stats = array();
+            // All keywords used in projects
+            $sql = '
+            SELECT k.ck_name, COUNT(k.ck_id) AS count
+            FROM capstone_keyword k, capstone_keyword_for kf, showcase_project p
+            WHERE k.ck_id = kf.ckf_ck_id AND kf.ckf_entity_id = p.sp_id
+            GROUP BY k.ck_id
+            ';
+            $stats['keywords'] = array();
+            $results = $this->conn->query($sql);
+            foreach($results as $row) {
+                $stats['keywords'][$row['ck_name']] = $row['count'];
+            }
+
+            // Total number of projects
+            $sql = '
+            SELECT COUNT(*) AS total
+            FROM showcase_project
+            ';
+            $stats['totalProjects'] = $this->conn->query($sql)[0]['total'];
+
+            // Total number of users with at least one project
+            $sql = '
+            SELECT COUNT(DISTINCT swo_u_id) AS total
+            FROM showcase_worked_on
+            ';
+            $stats['usersWithProjects'] = $this->conn->query($sql)[0]['total'];
+
+            return $stats;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get stats for projects: ' . $e->getMessage());
+            return false;
+        }
+    }
 
 
     /**

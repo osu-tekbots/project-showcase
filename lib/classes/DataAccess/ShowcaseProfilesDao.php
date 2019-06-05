@@ -185,6 +185,32 @@ class ShowcaseProfilesDao {
     }
 
     /**
+     * Fetches statistics about user profiles in the showcase.
+     * 
+     * The resulting associative array will have the following keys:
+     * - `totalUsers`: the total number of users of the showcase
+     *
+     * @return mixed[]|bool an array containing the stats fetched from the database on success. False on error.
+     */
+    public function getStatsAboutProfiles() {
+        
+        try {
+            $stats = array();
+            // Total number of users
+            $sql = "
+            SELECT COUNT(sup_u_id) AS total
+            FROM showcase_user_profile
+            ";
+            $stats['totalUsers'] = $this->conn->query($sql)[0]['total'];
+
+            return $stats;
+        } catch(\Exception $e) {
+            $this->logger->error("Failed to get stats for profiles: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Uses information from a row in the database to create a ShowcaseProfile object.
      * 
      * If the `$includeUser` flag is true, then the user reference will also be set in the profile. This
