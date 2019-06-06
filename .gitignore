@@ -2,3 +2,5 @@
 *.ini
 **/.htpasswd
 .htaccess
+.private/
+private/
