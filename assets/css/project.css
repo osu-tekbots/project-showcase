@@ -37,6 +37,7 @@ CSS for the single project tile module displayed on multiple pages in the projec
 
 .project-tile-keywords {
     display: flex;
+    flex-grow: 1;
     align-items: center;
     overflow-x: hidden;
     position: relative;
