@@ -16,11 +16,11 @@ function createProfileProjectHtml($project, $isOwnProject = false) {
     $id = $project->getId();
     $title = $project->getTitle();
     if(strlen($title) > $titleCharLimit) {
-        $title = substr($title, 0, $titleCharLimit) . '...';
+        $title = substr($title, 0, $titleCharLimit - 3) . '...';
     }
     $description = $project->getDescription();
     if (strlen($description) > $descriptionCharLimit) {
-        $description = substr($description, 0, $descriptionCharLimit) . '...';
+        $description = substr($description, 0, $descriptionCharLimit - 3) . '...';
     }
 
     $title = Security::HtmlEntitiesEncode($title);
