@@ -76,7 +76,7 @@ $pResumeHtml = $pHasResume ? "
 
 // Generate the HTML for the projects
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
-$projects = $projectsDao->getUserProjects($userId);
+$projects = $projectsDao->getUserProjects($userId, false, true);
 if (!$projects || count($projects) == 0) {
     $pProjectsMessage = "
         <p>You haven't created any projects yet.</p>
@@ -95,9 +95,13 @@ if (!$projects || count($projects) == 0) {
         }
         $description = Security::HtmlEntitiesEncode($description);
 
+        $hidden = !$p->isPublished() ? "
+            &nbsp;&nbsp;&nbsp;<span class='hidden-alert badge badge-pill badge-danger'><i class='fas fa-eye-slash'></i></span>" 
+        : '';
+
         $pProjectsHtml .= "
             <tr>
-                <td>$title</td>
+                <td class='project-title'>$title $hidden</td>
                 <td>$description</td>
                 <td>
                     <a href='projects/edit?id=$pid' class='btn btn-sm btn-light' data-toggle='tooltip'

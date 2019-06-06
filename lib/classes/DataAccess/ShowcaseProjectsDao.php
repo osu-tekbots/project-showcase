@@ -35,7 +35,7 @@ class ShowcaseProjectsDao {
      * @param integer $offset the offset in the database table to start retrieve projects from
      * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
      */
-    public function getAllProjects($count = 0, $offset = 0) {
+    public function getAllProjects($count = 0, $offset = 0, $includeHidden = false) {
         try {
             $limit = '';
             if ($offset > 0) {
@@ -46,9 +46,11 @@ class ShowcaseProjectsDao {
             } elseif ($count > 0) {
                 $limit = "LIMIT $count";
             }
+            $hiddenCondition = !$includeHidden ? 'WHERE sp_published = 1' : '';
             $sql = "
             SELECT *
             FROM showcase_project
+            $hiddenCondition
             ORDER BY sp_title ASC
             $limit
             ";
@@ -76,14 +78,15 @@ class ShowcaseProjectsDao {
      * @param boolean $includeArtifacts flag to indicate whether to include project artifacts. Defaults to false.
      * @return \Model\ShowcaseProject[]|boolean an array of projects on success, false on error
      */
-    public function getUserProjects($userId, $includeArtifacts = false) {
+    public function getUserProjects($userId, $includeArtifacts = false, $includeHidden = false) {
         try {
             $artifactsTable = $includeArtifacts ? ', showcase_project_artifact ' : '';
             $artifactsPredicate = $includeArtifacts ? 'AND spa_sp_id = sp_id' : '';
+            $hiddenPredicate = !$includeHidden ? 'AND sp_published = 1' : '';
             $sql = "
             SELECT * 
             FROM showcase_project, showcase_worked_on $artifactsTable
-            WHERE swo_u_id = :id AND swo_sp_id = sp_id $artifactsPredicate
+            WHERE swo_u_id = :id AND swo_sp_id = sp_id $artifactsPredicate $hiddenPredicate
             ORDER BY swo_u_id, swo_sp_id
             ";
             $params = array(':id' => $userId);
@@ -141,11 +144,13 @@ class ShowcaseProjectsDao {
                 WHERE ckf_ck_id = ck_id
             ) AS keywords ON ckf_entity_id = sp_id
             WHERE
-                LOWER (u_fname) LIKE :query
-                OR LOWER(u_lname) LIKE :query
-                OR LOWER(sp_title) LIKE :query
-                OR LOWER(sp_description) LIKE :query
-                OR LOWER(ck_name) LIKE :query
+                sp_published = 1 AND (
+                    LOWER (u_fname) LIKE :query
+                    OR LOWER(u_lname) LIKE :query
+                    OR LOWER(sp_title) LIKE :query
+                    OR LOWER(sp_description) LIKE :query
+                    OR LOWER(ck_name) LIKE :query
+                )
             GROUP BY sp_id
             ';
             $params = array(':query' => strtolower("%$query%"));
@@ -175,6 +180,7 @@ class ShowcaseProjectsDao {
             $sql = '
             SELECT *
             FROM showcase_project
+            WHERE sp_published = 1
             ORDER BY sp_date_created DESC
             LIMIT :limit
             ';

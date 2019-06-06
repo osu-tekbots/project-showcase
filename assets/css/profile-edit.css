@@ -69,4 +69,13 @@
     min-width: 200px;
 }
 
+.project-title {
+    position: relative;
+}
+
+.hidden-alert {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
 

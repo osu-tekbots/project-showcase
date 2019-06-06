@@ -11,7 +11,7 @@ use Util\Security;
 function createProfileProjectHtml($project, $isOwnProject = false) {
 
     $descriptionCharLimit = 230;
-    $titleCharLimit = 28;
+    $titleCharLimit = 27;
 
     $id = $project->getId();
     $title = $project->getTitle();
@@ -37,18 +37,32 @@ function createProfileProjectHtml($project, $isOwnProject = false) {
         }
     }
 
+    $actionButton = "
+    <a href='projects/?id=$id' class='btn btn-outline-osu'>
+        Details
+    </a>
+    ";
+    $hiddenAlert = '';
+    if($isOwnProject && !$project->isPublished()) {
+        $actionButton = "
+        <a href='projects/edit?id=$id' class='btn btn-outline-osu'>
+            Edit
+        </a>
+        ";
+        $hiddenAlert = "<span class='hidden-alert badge badge-pill badge-danger'><i class='fas fa-eye-slash'></i></span>";
+    }
+
     return "
     <div class='card profile-project-card'>
         <div class='card-body profile-project-card-body'>
+            $hiddenAlert
             <h5 class='project-title'>$title</h5>
             <p class='project-description'>$description</p>
             <div class='project-details'>
                 <div class='project-tile-keywords'>
                     $keywordsHtml
                 </div>
-                <a href='projects/?id=$id' class='btn btn-outline-osu'>
-                    Details
-                </a>
+                $actionButton
             </div>
         </div>
     </div>

@@ -2,6 +2,7 @@
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
 use DataAccess\KeywordsDao;
+use Model\UserType;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -37,7 +38,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
 // Fetch the showcase project and artifacts
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $project = $projectsDao->getProject($projectId);
-if (!$project) {
+if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType::ADMIN)) {
     // The project was not found, let the user know
     echo "
     
@@ -100,7 +101,7 @@ if (!$project) {
     }
     $pCollaboratorsHtml .= '</h4>';
     
-    $editButtonHtml = $collaboratorIsUser ? "
+    $editButtonHtml = $collaboratorIsUser || $_SESSION['userType'] == UserType::ADMIN ? "
         <a href='projects/edit?id=$projectId' class='btn btn-sm btn-light'>
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
         </a>

@@ -9,6 +9,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    position: relative;
 }
 
 .project-title {
@@ -63,4 +64,12 @@
     padding: 3px 7px;
     margin: 3px;
     white-space: nowrap;
+}
+
+.hidden-alert {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 1.4rem;
+    z-index: 1000;
 }

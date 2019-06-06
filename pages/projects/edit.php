@@ -56,6 +56,21 @@ $project = $projectsDao->getProject($projectId);
 $pTitle = $project->getTitle();
 $pDescription = $project->getDescription();
 
+// Check if the project is published or not. If it is not, display an alert informing the user their project has been
+// flagged by the admins and is not visible
+$pPublishedHtml = $project->isPublished() ? "" : "
+    <div class='row'>
+        <div class='col'>
+            <div class='alert alert-warning'>
+                <p><i class='fas fa-eye-slash'></i>&nbsp;&nbsp;This project has been hidden from public view by the website
+                administrators. For questions regarding questionable or innapropriate content, please contact an OSU Tekbots
+                administrator.</p>
+            </div>
+        </div>
+    </div>
+    
+";
+
 // Get the tags for the project
 $keywordsDao = new KeywordsDao($dbConn, $logger);
 $keywords = $keywordsDao->getKeywordsForEntity($projectId);
@@ -249,6 +264,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
     </a>
     <br/>
     <br/>
+
+    <?php echo $pPublishedHtml; ?>
 
     <form id="formEditProjectGeneral">
         <input type="hidden" name="projectId" id="projectId" value="<?php echo $projectId; ?>" />

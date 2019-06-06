@@ -48,3 +48,32 @@ function onUserTypeClick() {
     });
 }
 $('.btn-user-type').click(onUserTypeClick);
+
+/**
+ * Handles updating a projects visibility from published to hidden and visa-versa.
+ */
+function onProjectPublishedClick() {
+    let published = $(this).data('published');
+    let id = $(this).data('id');
+    body = {
+        action: 'updateVisibility',
+        publish: !published,
+        id
+    };
+    api.post('/showcase-projects.php', body).then(res => {
+        snackbar(res.message, 'success');
+        $(this).data('published', !published);
+        if(published) {
+            $(this).removeClass('btn-success').addClass('btn-danger');
+            $(this).text('Hidden');
+            $(this).tooltip('hide').attr('data-original-title', 'Publish').tooltip('show');
+        } else {
+            $(this).removeClass('btn-danger').addClass('btn-success');
+            $(this).text('Published');
+            $(this).tooltip('hide').attr('data-original-title', 'Hide').tooltip('show');
+        }
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}
+$('.btn-published').click(onProjectPublishedClick);

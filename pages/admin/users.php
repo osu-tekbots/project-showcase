@@ -42,6 +42,7 @@ foreach ($profiles as $p) {
     ";
 }
 
+$title = 'View Users';
 $css = array(
     'assets/css/admin.css',
     'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'

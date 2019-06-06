@@ -92,10 +92,10 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
         // Update the keywords. First we remove all of the old keywords.
         $ok = $this->keywordsDao->removeAllKeywordsForEntity($project->getId());
-            if (!$ok) {
-                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save project keyword information'));
-            }
-        if(!empty($keywords)) {
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save project keyword information'));
+        }
+        if (!empty($keywords)) {
             // Clean the keyword IDs and split them into an array
             $keywords = \trim($keywords, ' ,');
             $keywords = \explode(',', $keywords);
@@ -226,6 +226,30 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to change the visibility of a showcase project
+     *
+     * @return void
+     */
+    public function handleUpdateVisibility() {
+        $id = $this->getFromBody('id');
+        $published = $this->getFromBody('publish');
+        
+        $project = $this->projectsDao->getProject($id);
+
+        $project->setPublished($published);
+
+        $ok = $this->projectsDao->updateProject($project);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to upate visibility of project'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully updated project visibility'
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -258,6 +282,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'browseProjects':
                 $this->handleBrowseProjects();
+
+            case 'updateVisibility':
+                $this->handleUpdateVisibility();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

@@ -134,7 +134,7 @@ if (!$profile) {
 
     // Create the HTML for the 'Projects' section
     $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
-    $projects = $projectsDao->getUserProjects($userId);
+    $projects = $projectsDao->getUserProjects($userId, false, $isOwnProfile);
     if (!$projects) {
         if($isOwnProfile) {
             $projectsHtml = "
