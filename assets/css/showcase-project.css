@@ -24,6 +24,16 @@
     margin-bottom: 10px;
 }
 
+.collaborator-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.collaborator-link:hover {
+    text-decoration: underline;
+    color: inherit;
+}
+
 .collaborators-container {
     display: flex;
     justify-content: center;

@@ -92,12 +92,12 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
                 $pCollaboratorsHtml .= '<span class="small-font">,</span> ';
             }
         }
-        
 
         $c = $pCollaborators[$i];
         $name = Security::HtmlEntitiesEncode($c->getUser()->getFullName());
+        $cId = $c->getUser()->getId();
 
-        $pCollaboratorsHtml .= $name;
+        $pCollaboratorsHtml .= "<a class='collaborator-link' href='profile/?id=$cId'>$name</a>";
     }
     $pCollaboratorsHtml .= '</h4>';
     
