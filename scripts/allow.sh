@@ -2,7 +2,7 @@
 #
 # On the OSU servers the files and directories have to have certain permissions in order to be
 # accessible from a browser. We set the correct permissions here.
-for f in $(find . -not -path "./.git/*"); do
+for f in $(find . -not -path "./.git/*" -not -path "./.private/*" -not -path "./private/*"); do
     if [ "$f" = "." ] || [ "$f" = ".." ]; then
         continue
     fi
