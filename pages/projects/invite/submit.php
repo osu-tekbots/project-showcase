@@ -1,7 +1,14 @@
 <?php
+/**
+ * This page handles a decision from a user on whether or not to accept or decline an invitation to collaborate on a
+ * project from another user. If the user declined the invitation, they will be redirected to the 'declined.php'
+ * page after this script completes. If they accepted the invitation, they will be redirected to the 'accepted.php'
+ * file.
+ */
+
 use DataAccess\ShowcaseProjectsDao;
 
-if(!isset($_SESSION)) {
+if (!isset($_SESSION)) {
     session_start();
 }
 
@@ -12,7 +19,7 @@ $invitationId = isset($_POST['invitationId']) ? $_POST['invitationId'] : false;
 
 $baseUrl = $configManager->getBaseUrl();
 
-switch($decision) {
+switch ($decision) {
 
     case 'accept':
         acceptInvitation($projectId, $userId, $invitationId);
@@ -38,13 +45,13 @@ switch($decision) {
 function acceptInvitation($projectId, $userId, $invitationId) {
     global $dbConn, $logger, $baseUrl;
 
-    if(!$projectId || !$userId || !$invitationId) {
+    if (!$projectId || !$userId || !$invitationId) {
         redirectToError($baseUrl);
     }
 
     $dao = new ShowcaseProjectsDao($dbConn, $logger);
     $ok = $dao->acceptInvitationToCollaborateOnProject($projectId, $userId, $invitationId);
-    if(!$ok) {
+    if (!$ok) {
         redirectToError($baseUrl);
     }
 
@@ -62,13 +69,13 @@ function acceptInvitation($projectId, $userId, $invitationId) {
 function declineInvitation($invitationId) {
     global $dbConn, $logger, $baseUrl;
 
-    if(!$invitationId) {
+    if (!$invitationId) {
         redirectToError($baseUrl);
     }
 
     $dao = new ShowcaseProjectsDao($dbConn, $logger);
     $ok = $dao->removeInvitationToCollaborateOnProject($invitationId);
-    if(!$ok) {
+    if (!$ok) {
         redirectToError($baseUrl);
     }
 
@@ -88,10 +95,7 @@ function redirectToError($baseUrl) {
             We were unable to process the invitation decision. Please try the link again or 
             <a href='$baseUrl'>return to the home page</a>
         ";
-        $redirect = $baseUrl . 'error';
-        echo "<script>window.location.replace('$redirect');</script>";
-        die();
+    $redirect = $baseUrl . 'error';
+    echo "<script>window.location.replace('$redirect');</script>";
+    die();
 }
-
-
-

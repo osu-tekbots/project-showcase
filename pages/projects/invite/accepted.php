@@ -1,7 +1,10 @@
 <?php
+/**
+ * Displays the message after a user has accepted an invitation to collaborate on a project
+ */
 
 $projectId = isset($_GET['pid']) ? $_GET['pid'] : false;
-if(!$projectId) {
+if (!$projectId) {
     $baseUrl = $configManager->getBaseUrl();
     echo "<script>window.location.replace('$baseUrl');</script>";
     die();

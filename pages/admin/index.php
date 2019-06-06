@@ -1,4 +1,8 @@
 <?php
+/**
+ * Main admin dashboard view of statistics about the project showcase website
+ */
+
 use Model\UserType;
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;

@@ -45,7 +45,6 @@ $css = array_merge(
         'assets/shared/css/snackbar.css',
         'assets/css/theme.css',
         'assets/css/global.css',
-        'assets/css/bootstrap-overloads.css',
         'assets/css/layout.css',
         'assets/css/header.css',
         'assets/css/footer.css',

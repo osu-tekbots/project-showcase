@@ -1,4 +1,7 @@
 <?php
+/**
+ * Admin view of all users in the project showcase
+ */
 use Model\UserType;
 use DataAccess\ShowcaseProfilesDao;
 

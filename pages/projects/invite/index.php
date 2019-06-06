@@ -1,4 +1,9 @@
 <?php
+/**
+ * View invitation to collaborate on project page. Users must have a valid invitation URL sent from a current user
+ * of the site to successfully view an invitation on this page.
+ */
+
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 
@@ -19,7 +24,7 @@ $baseUrl = $configManager->getBaseUrl();
 if (!$userId) {
 
     // First we need to save the IDs provided in the URL so that they aren't lost during the authentication process
-    if(!isset($_SESSION['iInvitationId'])) {
+    if (!isset($_SESSION['iInvitationId'])) {
         $_SESSION['iInvitationId'] = $invitationId;
         $_SESSION['iProjectId'] = $projectId;
     }
@@ -27,7 +32,6 @@ if (!$userId) {
     // Authenticate using ONID
     include_once PUBLIC_FILES . '/lib/auth-onid.php';
     authenticate();
-
 }
 
 // If we don't have an invitation ID, they may have been lost during authentication. Attempt to recover them. If they
@@ -36,7 +40,7 @@ if (!$invitationId || !$projectId) {
     $invitationId = isset($_SESSION['iInvitationId']) ? $_SESSION['iInvitationId'] : false;
     $projectId = isset($_SESSION['iProjectId']) ? $_SESSION['iProjectId'] : false;
 
-    if(!$invitationId || !$projectId) {
+    if (!$invitationId || !$projectId) {
         $_SESSION['error'] = '
             This is not a valid invitation.
         ';

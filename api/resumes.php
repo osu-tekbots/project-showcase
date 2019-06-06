@@ -1,6 +1,7 @@
 <?php
 /**
- * This api endpoint uploads new resumes to the server.
+ * This api endpoint uploads new resumes to the server. We cannot use the `ActionHandler` class
+ * because it only handles JSON requests, and the resume requests are URL form encoded since they include a file upload.
  */
 
 use DataAccess\ShowcaseProfilesDao;

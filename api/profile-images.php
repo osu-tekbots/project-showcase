@@ -3,8 +3,6 @@
  * This api endpoint uploads new profile images to the server.
  */
 
- // TODO: restrict access to only the user who is performing actions on their own image or admins
-
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\UsersDao;
 use Model\UserType;

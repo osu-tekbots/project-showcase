@@ -1,4 +1,8 @@
 <?php
+/**
+ * This is the endpoint for API requests on showcase project resources. The requests are handled inside the
+ * `ShowcaseProjectActionHandler`, but the handler, mailer, and required DAOs are initialized in this file.
+ */
 use Api\Response;
 use DataAccess\ShowcaseProjectsDao;
 use Api\ShowcaseProjectsActionHandler;

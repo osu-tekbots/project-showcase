@@ -1,4 +1,8 @@
 <?php
+/**
+ * View showcase profile page
+ */
+
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
@@ -58,7 +62,7 @@ if (!$profile) {
     $major = Security::HtmlEntitiesEncode($profile->getUser()->getMajor());
 
     $contactHtml = '';
-    if($profile->canShowContactInfo()){
+    if ($profile->canShowContactInfo()) {
         $phone = $profile->getUser()->getPhone();
         $email = Security::ValidateEmail($profile->getUser()->getEmail());
         $contactHtml = "
@@ -99,7 +103,7 @@ if (!$profile) {
     ": '';
 
     $contactStyle = '';
-    if(empty($websiteHtml) && empty($githubHtml) && empty($linkedinHtml)) {
+    if (empty($websiteHtml) && empty($githubHtml) && empty($linkedinHtml)) {
         $contactStyle = "style='padding-bottom: 60px; margin-top: -35px;'";
     }
 
@@ -113,8 +117,8 @@ if (!$profile) {
 
     // Create the HTML for the 'About' section
     $about = Security::HtmlEntitiesEncode($profile->getAbout());
-    if(empty($about) || is_null($about)) {
-        if($isOwnProfile) {
+    if (empty($about) || is_null($about)) {
+        if ($isOwnProfile) {
             $aboutHtml = "
             <h2>About</h2>
             <p>Add a brief description about yourself highlighting your skills and experience.</p>
@@ -136,7 +140,7 @@ if (!$profile) {
     $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
     $projects = $projectsDao->getUserProjects($userId, false, $isOwnProfile);
     if (!$projects) {
-        if($isOwnProfile) {
+        if ($isOwnProfile) {
             $projectsHtml = "
                 <p>You don't have any projects on display</p>
                 <a href='profile/edit#projects' class='btn btn-primary'>

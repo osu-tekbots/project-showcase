@@ -1,3 +1,7 @@
+/**
+ * Sends a request for search results of browsable showcse projects based on a user-input search query. On success, it
+ * will render the results on the page.
+ */
 function onBrowseInputSubmit() {
     let data = serializeFormAsJson(this.id);
     data.action = 'browseProjects';

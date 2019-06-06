@@ -1,4 +1,8 @@
 <?php
+/**
+ * Edit showcase profile page
+ */
+
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;

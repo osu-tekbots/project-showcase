@@ -1,4 +1,8 @@
 <?php
+/**
+ * View showcase projects page
+ */
+
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
 use DataAccess\KeywordsDao;

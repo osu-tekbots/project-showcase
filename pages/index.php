@@ -1,4 +1,7 @@
 <?php
+/**
+ * Home page for the project showcase website.
+ */
 
 $heroButtonHtml = $isLoggedIn ? "
     <a href='profile/' class='btn btn-lg btn-primary'>

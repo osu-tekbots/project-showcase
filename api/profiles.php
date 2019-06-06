@@ -1,4 +1,8 @@
 <?php
+/**
+ * This is the endpoint for API requests on showcase profile resources. The requests are handled inside the
+ * `ProfileActionHandler`, but the handler and required DAOs are initialized in this file.
+ */
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\UsersDao;
 use Api\ProfileActionHandler;

@@ -1,4 +1,8 @@
 <?php
+/**
+ * Admin view of all projects in the showcase
+ */
+
 use Model\UserType;
 use DataAccess\ShowcaseProjectsDao;
 
@@ -12,17 +16,17 @@ if (!$isLoggedIn || $_SESSION['userType'] != UserType::ADMIN) {
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $projects = $projectsDao->getAllProjects(0,0,true);
 $projectHtml = '';
-foreach($projects as $p) {
+foreach ($projects as $p) {
     $id = $p->getId();
     $title = $p->getTitle();
     $description = $p->getDescription();
-    if(strlen($description) > 180) {
+    if (strlen($description) > 180) {
         $description = substr($description, 0, 180) . '...';
     }
     $created = $p->getDateCreated()->format('Y-m-d');
 
     $published = $p->isPublished();
-    if($published) {
+    if ($published) {
         $publishedButtonText = 'Published';
         $publishedButtonClass = 'btn-success';
         $publishedButtonTooltip = 'Hide';

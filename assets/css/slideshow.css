@@ -1,3 +1,7 @@
+/*
+CSS for the slideshow elements on the view projects pages of the project showcase website. Adapted from the W3 Schools
+tutorial at https://www.w3schools.com/howto/howto_js_slideshow.asp
+*/
 /* Slideshow container */
 .slideshow-container {
     position: relative;

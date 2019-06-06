@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for project keywords
 - Project browsing functionality for site visiters (no login required)
+- Admin dashboard
+- Support for hiding projects containing questionable or inappropriate content
 
 ### Changed
 - Configuration for site now handled via global `config.ini` in project root

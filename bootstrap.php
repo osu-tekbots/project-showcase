@@ -1,4 +1,8 @@
 <?php
+/**
+ * This page contains bootstraping logic required on all pages in the project showcase. It is automatically included
+ * in the `.htaccess` file at the root of the website using the `php_value auto_prepend_file` setting.
+ */
 
 session_start();
 

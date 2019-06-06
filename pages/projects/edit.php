@@ -1,4 +1,8 @@
 <?php
+/**
+ * Edit showcase projects page
+ */
+
 use DataAccess\ShowcaseProjectsDao;
 use DataAccess\UsersDao;
 use Model\UserType;

@@ -1,3 +1,8 @@
+/**
+ * Javascript for slideshow on view project pages of the OSU project showcase website. Adapted from the W3 schools
+ * tutorial at https://www.w3schools.com/howto/howto_js_slideshow.asp.
+ */
+
 var slideIndex = 1;
 showSlides(slideIndex);
 

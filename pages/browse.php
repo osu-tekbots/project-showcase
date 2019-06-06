@@ -1,4 +1,8 @@
 <?php
+/**
+ * This page houses the frontend code for the browse projects functionality of the showcase website.
+ */
+
 use DataAccess\ShowcaseProjectsDao;
 use DataAccess\KeywordsDao;
 

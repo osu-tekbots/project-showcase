@@ -1,4 +1,9 @@
 <?php
+/**
+ * Error page for the project showcase site. When redirecting to this page, you should set the `$_SESSION['error']`
+ * variable to the message you want to display on this page. This provides one place for all errors to be redirected,
+ * giving the user a better experience with the site when things go wrong.
+ */
 
 if(!isset($_SESSION)) {
     session_start();

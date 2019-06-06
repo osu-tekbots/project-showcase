@@ -1,4 +1,8 @@
 <?php
+/**
+ * This page handles the logout process for a user.
+ */
+
 // Unset the session variable and redirect to the home page
 if(!isset($_SESSION)){
     session_start();
