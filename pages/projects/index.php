@@ -192,7 +192,7 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
                 </a>
             " : "
                 <a href='$link' target='_blank' class='btn btn-sm btn-primary'>
-                    <i class='fas fa-external-link-alt'></i>&nbsp;&nbsp;View
+                    <i class='fas fa-external-link-alt'></i>&nbsp;&nbsp;Link
                 </a>
             ";
 
