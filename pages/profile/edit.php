@@ -129,6 +129,7 @@ $css = array(
     'assets/css/profile-edit.css'
 );
 $js = array(
+    'assets/js/smartcrop.js',
     array(
         'src' => 'assets/js/profile-edit.js',
         'defer' => 'true'
