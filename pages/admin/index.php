@@ -42,6 +42,7 @@ $keywordsJs = "
 }
 ";
 
+$title = 'Admin Dashboard';
 $css = array(
     'assets/css/admin.css'
 );
