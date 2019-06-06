@@ -4,6 +4,7 @@
  * because it only handles JSON requests, and the artifact requests are URL form encoded since they may or
  * may not include a file upload.
  */
+include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
 use DataAccess\ShowcaseProjectsDao;

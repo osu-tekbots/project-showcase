@@ -1,6 +1,4 @@
 <?php
-use DataAccess\ShowcaseProjectsDao;
-
 /**
  * This file handles downloading artifacts for showcase projects. 
  * 
@@ -8,6 +6,10 @@ use DataAccess\ShowcaseProjectsDao;
  * rather than under the web root. It also allows us to fetch everything using the users ID and then rename the
  * file as appropriate.
  */
+
+include_once '../bootstrap.php';
+
+use DataAccess\ShowcaseProjectsDao;
 
 
 // Make sure we have an ID of the image to fetch

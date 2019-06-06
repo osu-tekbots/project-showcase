@@ -2,6 +2,7 @@
 /**
  * Displays the message after a user has accepted an invitation to collaborate on a project
  */
+include_once '../../../bootstrap.php';
 
 $projectId = isset($_GET['pid']) ? $_GET['pid'] : false;
 if (!$projectId) {

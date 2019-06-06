@@ -2,6 +2,7 @@
 /**
  * This page houses the frontend code for the browse projects functionality of the showcase website.
  */
+include_once '../bootstrap.php';
 
 use DataAccess\ShowcaseProjectsDao;
 use DataAccess\KeywordsDao;

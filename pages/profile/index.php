@@ -2,6 +2,7 @@
 /**
  * View showcase profile page
  */
+include_once '../../bootstrap.php';
 
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;

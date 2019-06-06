@@ -2,6 +2,7 @@
 /**
  * Admin view of all projects in the showcase
  */
+include_once '../../bootstrap.php';
 
 use Model\UserType;
 use DataAccess\ShowcaseProjectsDao;

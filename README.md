@@ -11,9 +11,6 @@ The `.htaccess` file should be placed in the root of this repository. It **MUST*
 **Be sure to update this README whenever additional configuration is added.**
 
 ```ini
-# Automatically add the bootstrap file to every request
-php_value auto_prepend_file "<PATH_TO_PUBLIC_HTML_DIRECTORY>/bootstrap.php"
-
 # Deny access to files with specific extensions
 <FilesMatch "\.(ini|sh|sql)$">
 Order allow,deny
@@ -43,8 +40,6 @@ RewriteRule ^(.*)$ pages/$1
 ```
 
 Replace the following placeholders with their appropriate values:
-- `PATH_TO_PUBLIC_HTML_DIRECTORY`: for example, if my public files to be served by the site were located under the
-  directory `/var/www/html/mywebsite`, this is the value I would put in place of the placeholder.
 - `URL_FROM_BASE_TO_SITE_ROOT`: for example, if my server base was at `http://example.com/` and my website lived at
   `http://example.com/foo/bar/baz/mysite/`, I would replace the placeholder with `/foo/bar/baz/mysite/`
 

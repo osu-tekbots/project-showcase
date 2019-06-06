@@ -2,6 +2,8 @@
 /**
  * Admin view of all users in the project showcase
  */
+include_once '../../bootstrap.php';
+
 use Model\UserType;
 use DataAccess\ShowcaseProfilesDao;
 

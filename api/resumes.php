@@ -3,6 +3,7 @@
  * This api endpoint uploads new resumes to the server. We cannot use the `ActionHandler` class
  * because it only handles JSON requests, and the resume requests are URL form encoded since they include a file upload.
  */
+include_once '../bootstrap.php';
 
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\UsersDao;

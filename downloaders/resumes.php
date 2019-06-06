@@ -1,12 +1,12 @@
 <?php
-use DataAccess\ShowcaseProfilesDao;
-
 /**
  * This file handles downloading resumes. It allows for access control on images in a private directory
  * rather than under the web root. It also allows us to fetch everything using the users ID and then rename the
  * file as appropriate.
  */
+include_once '../bootstrap.php';
 
+use DataAccess\ShowcaseProfilesDao;
 
 // Make sure we have an ID of the image to fetch
 $userId = isset($_GET['id']) && !empty($_GET['id']) ? $_GET['id'] : false;

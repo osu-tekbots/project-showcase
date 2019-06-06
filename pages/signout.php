@@ -2,6 +2,7 @@
 /**
  * This page handles the logout process for a user.
  */
+include_once '../bootstrap.php';
 
 // Unset the session variable and redirect to the home page
 if(!isset($_SESSION)){

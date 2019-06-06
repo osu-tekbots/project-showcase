@@ -1,12 +1,12 @@
 <?php
-use DataAccess\ShowcaseProjectsDao;
-
 /**
  * This file handles downloading project images. It allows for access control on images in a private directory
  * rather than under the web root. It also allows us to fetch everything using the users ID and then rename the
  * file as appropriate.
  */
+include_once '../bootstrap.php';
 
+use DataAccess\ShowcaseProjectsDao;
 
 // Make sure we have an ID of the image to fetch
 $imageId = isset($_GET['id']) && !empty($_GET['id']) ? $_GET['id'] : false;

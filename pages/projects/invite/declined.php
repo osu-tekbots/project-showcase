@@ -2,6 +2,7 @@
 /**
  * Displays the message after a user has declined an invitation to collaborate on a project
  */
+include_once '../../../bootstrap.php';
 
 $title = 'Invitation Declined';
 include_once PUBLIC_FILES . '/modules/header.php';

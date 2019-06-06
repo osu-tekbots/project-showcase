@@ -3,6 +3,7 @@
  * View invitation to collaborate on project page. Users must have a valid invitation URL sent from a current user
  * of the site to successfully view an invitation on this page.
  */
+include_once '../../../bootstrap.php';
 
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;

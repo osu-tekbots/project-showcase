@@ -4,6 +4,7 @@
  * is defined inside of a separate PHP file and called from this file. Once authentication is complete, the user
  * will be redirected back to the home page.
  */
+include_once '../bootstrap.php';
 include_once PUBLIC_FILES . '/lib/auth-onid.php';
 
 authenticate();

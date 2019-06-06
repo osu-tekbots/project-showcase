@@ -4,6 +4,7 @@
  * variable to the message you want to display on this page. This provides one place for all errors to be redirected,
  * giving the user a better experience with the site when things go wrong.
  */
+include_once '../bootstrap.php';
 
 if(!isset($_SESSION)) {
     session_start();

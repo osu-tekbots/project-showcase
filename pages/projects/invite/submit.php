@@ -5,6 +5,7 @@
  * page after this script completes. If they accepted the invitation, they will be redirected to the 'accepted.php'
  * file.
  */
+include_once '../../../bootstrap.php';
 
 use DataAccess\ShowcaseProjectsDao;
 

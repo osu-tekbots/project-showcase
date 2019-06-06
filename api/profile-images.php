@@ -2,6 +2,7 @@
 /**
  * This api endpoint uploads new profile images to the server.
  */
+include_once '../bootstrap.php';
 
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\UsersDao;

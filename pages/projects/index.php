@@ -2,6 +2,7 @@
 /**
  * View showcase projects page
  */
+include_once '../../bootstrap.php';
 
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;

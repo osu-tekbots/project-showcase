@@ -2,6 +2,7 @@
 /**
  * Main admin dashboard view of statistics about the project showcase website
  */
+include_once '../../bootstrap.php';
 
 use Model\UserType;
 use DataAccess\ShowcaseProfilesDao;

@@ -2,6 +2,7 @@
 /**
  * Home page for the project showcase website.
  */
+include_once '../bootstrap.php';
 
 $heroButtonHtml = $isLoggedIn ? "
     <a href='profile/' class='btn btn-lg btn-primary'>
