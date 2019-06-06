@@ -86,25 +86,35 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
 
     // Collaborators
     $pCollaborators = $projectsDao->getProjectCollaborators($projectId, true);
-    $pCollaboratorsHtml = '<h4>';
+    $pCollaboratorsHtml = '';
     $collaboratorIsUser = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId);
     $numCollaborators = count($pCollaborators);
-    for ($i = 0; $i < $numCollaborators ; $i++) {
-        if ($numCollaborators > 1) {
-            if ($i == $numCollaborators - 1) {
-                $pCollaboratorsHtml .= ' <span class="small-font">and</span> ';
-            } elseif ($i != 0) {
-                $pCollaboratorsHtml .= '<span class="small-font">,</span> ';
+    if($numCollaborators > 0) {
+        $pCollaboratorsHtml = '<h4>';
+        for ($i = 0; $i < $numCollaborators ; $i++) {
+            if ($numCollaborators > 1) {
+                if ($i == $numCollaborators - 1) {
+                    $pCollaboratorsHtml .= ' <span class="small-font">and</span> ';
+                } elseif ($i != 0) {
+                    $pCollaboratorsHtml .= '<span class="small-font">,</span> ';
+                }
             }
+    
+            $c = $pCollaborators[$i];
+            $name = Security::HtmlEntitiesEncode($c->getUser()->getFullName());
+            $cId = $c->getUser()->getId();
+    
+            $pCollaboratorsHtml .= "<a class='collaborator-link' href='profile/?id=$cId'>$name</a>";
         }
+        $pCollaboratorsHtml .= '</h4>';
 
-        $c = $pCollaborators[$i];
-        $name = Security::HtmlEntitiesEncode($c->getUser()->getFullName());
-        $cId = $c->getUser()->getId();
-
-        $pCollaboratorsHtml .= "<a class='collaborator-link' href='profile/?id=$cId'>$name</a>";
+        $pCollaboratorsHtml = "
+        <h6><i>By</i></h6>
+        <div class='collaborators-container'>
+            $pCollaboratorsHtml
+        </div>
+        ";
     }
-    $pCollaboratorsHtml .= '</h4>';
     
     $editButtonHtml = $collaboratorIsUser || $_SESSION['userType'] == UserType::ADMIN ? "
         <a href='projects/edit?id=$projectId' class='btn btn-sm btn-light'>
@@ -209,10 +219,7 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
             $editButtonHtml
         </div>
         <div class='showcase-project-collaborators'>
-            <h6><i>By</i></h6>
-            <div class='collaborators-container'>
-                $pCollaboratorsHtml
-            </div>
+            $pCollaboratorsHtml
         </div>
         $keywordsHtml
         <div class='showcase-project-description row justify-content-md-center'>
