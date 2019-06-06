@@ -203,6 +203,11 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     public function handleBrowseProjects() {
         $query = $this->getFromBody('query', false);
 
+        // If the query is empty, do nothing. We don't want to return everything
+        if (empty($query)) {
+            $this->respond(new Response(Response::BAD_REQUEST, 'Query cannot be empty'));
+        }
+
         $projects = $this->projectsDao->getProjectsWithQuery($query);
 
         if (!$projects && !is_array($projects)) {
