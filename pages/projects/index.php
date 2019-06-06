@@ -87,7 +87,7 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
     // Collaborators
     $pCollaborators = $projectsDao->getProjectCollaborators($projectId, true);
     $pCollaboratorsHtml = '';
-    $collaboratorIsUser = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId);
+    $collaboratorIsUser = $userId != false ? $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId) : false;
     $numCollaborators = count($pCollaborators);
     if($numCollaborators > 0) {
         $pCollaboratorsHtml = '<h4>';
@@ -116,7 +116,7 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
         ";
     }
     
-    $editButtonHtml = $collaboratorIsUser || $_SESSION['userType'] == UserType::ADMIN ? "
+    $editButtonHtml = $collaboratorIsUser || ($isLoggedIn && $_SESSION['userType'] == UserType::ADMIN) ? "
         <a href='projects/edit?id=$projectId' class='btn btn-sm btn-light'>
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
         </a>
