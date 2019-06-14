@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Failure to upload non-PNG files as profile images
+- Various bug fixes and enhancements
 
 ## 1.1.0 - 2019-06-06
 ### Added
