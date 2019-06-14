@@ -39,6 +39,10 @@ $css = array(
     'assets/css/profile.css',
     'assets/css/project.css'
 );
+$js = array(
+    'assets/js/smartcrop.js',
+    'assets/js/crop.js'
+);
 include_once PUBLIC_FILES . '/modules/header.php';
 
 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
@@ -57,7 +61,14 @@ if (!$profile) {
 
     // Create the HTML for the header content
     $image = $profile->isImageUploaded() 
-        ? "<img class='profile-image' src='downloaders/profile-images?id=$userId' />" 
+        ? "
+            <img class='profile-image pulse' id='profileImage' />
+            <script>
+                crop('downloaders/profile-images?id=$userId', (cropped) => {
+                    $('#profileImage').attr('src', cropped);
+                    $('#profileImage').removeClass('pulse');
+                });
+            </script>" 
         : '';
     $name = Security::HtmlEntitiesEncode($profile->getUser()->getFullName());
     $major = Security::HtmlEntitiesEncode($profile->getUser()->getMajor());

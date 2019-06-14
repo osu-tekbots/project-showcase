@@ -94,3 +94,22 @@ CSS for the view profile page of the project showcase website.
 .profile-contact a {
     color: var(--color-black);
 }
+
+.pulse {
+    background-color: var(--color-black);
+    animation-name: pulse;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      background-color: var(--color-black);
+    }
+    50% {
+      background-color: var(--color-light-grey);
+    }
+    100% {
+      background-color: var(--color-black);
+    }
+  }

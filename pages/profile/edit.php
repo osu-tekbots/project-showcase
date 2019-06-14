@@ -56,15 +56,29 @@ $pContactInfoHtmlDisplay = $pShowContactInfo ? '' : "style='display: none;'";
 $pAbout = $profile->getAbout();
 
 $pHasProfileImage = $profile->isImageUploaded();
-$pProfileImageHtml = $pHasProfileImage ? "
+$pProfileImageText = $pHasProfileImage ? "
     <p id='profileImageText'>Current Profile Image</p>
 " : "
     <p id='profileImageText'>No Image has been uploaded</p>
 ";
-
-$pProfileImageLink = $pHasProfileImage ? "downloaders/profile-images?id=$userId" : '';
-$pProfileImagePreviewStyle = $pHasProfileImage ? '' : "style='display: none;'";
-$pProfileImageDeleteStyle = $pHasProfileImage ? '' : "style='display: none;'";
+$pProfileImagePreviewHtml = $pHasProfileImage ? "
+    <img id='profileImagePreview' style='display: none;' />
+    <script>
+        crop('downloaders/profile-images?id=$userId', (cropped) => {
+            $('#profileImagePreview').attr('src', cropped);
+            $('#profileImagePreview').show();
+            $('#btnProfileImageDelete').show();
+        });
+    </script>
+    <button type='button' class='btn btn-danger' id='btnProfileImageDelete' style='display: none'>
+        <i class='fas fa-trash-alt'></i>
+    </button>
+" : "
+    <img id='profileImagePreview' style='display: none;' />
+    <button type='button' class='btn btn-danger' id='btnProfileImageDelete' style='display: none'>
+        <i class='fas fa-trash-alt'></i>
+    </button>
+";
 
 $pWebsiteLink = $profile->getWebsiteLink();
 $pGitHubLink = $profile->getGithubLink();
@@ -101,8 +115,8 @@ if (!$projects || count($projects) == 0) {
         $description = Security::HtmlEntitiesEncode($description);
 
         $hidden = !$p->isPublished() ? "
-            &nbsp;&nbsp;&nbsp;<span class='hidden-alert badge badge-pill badge-danger'><i class='fas fa-eye-slash'></i></span>" 
-        : '';
+            &nbsp;&nbsp;&nbsp;<span class='hidden-alert badge badge-pill badge-danger'><i class='fas fa-eye-slash'></i></span>"
+            : '';
 
         $pProjectsHtml .= "
             <tr>
@@ -130,6 +144,7 @@ $css = array(
 );
 $js = array(
     'assets/js/smartcrop.js',
+    'assets/js/crop.js',
     array(
         'src' => 'assets/js/profile-edit.js',
         'defer' => 'true'
@@ -145,8 +160,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
     <a href="profile/?id=<?php echo $userId; ?>" class="btn btn-sm btn-light">
         <i class="fas fa-chevron-left"></i>&nbsp;&nbsp;View Profile
     </a>
-    <br/>
-    <br/>
+    <br />
+    <br />
 
     <form id="formEditProfile">
 
@@ -163,34 +178,29 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">First Name</label>
             <div class="col-sm-5">
-                <input required name="firstName" type="text" class="form-control" placeholder="First Name" 
-                    value="<?php echo $pFirstname; ?>" />
-            </div>         
+                <input required name="firstName" type="text" class="form-control" placeholder="First Name" value="<?php echo $pFirstname; ?>" />
+            </div>
         </div>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">Last Name</label>
             <div class="col-sm-5">
-                <input required name="lastName" type="text" class="form-control" placeholder="Last Name" 
-                    value="<?php echo $pLastName; ?>" />
-            </div>         
+                <input required name="lastName" type="text" class="form-control" placeholder="Last Name" value="<?php echo $pLastName; ?>" />
+            </div>
         </div>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">Major</label>
             <div class="col-sm-5">
-                <input name="major" type="text" class="form-control" placeholder="Major" 
-                    value="<?php echo $pMajor; ?>" />
-            </div>         
+                <input name="major" type="text" class="form-control" placeholder="Major" value="<?php echo $pMajor; ?>" />
+            </div>
         </div>
         <div class="form-group row">
             <label class="col-sm-2">Contact Information</label>
             <div class="col-sm-5">
                 <div class="form-check">
-                    <input name="publishContactInfo" id="publishContactInfo" type="checkbox" class="form-check-input" 
-                        value="true" 
-                        <?php 
-                        if ($pShowContactInfo) {
-                            echo 'checked';
-                        } ?> />
+                    <input name="publishContactInfo" id="publishContactInfo" type="checkbox" class="form-check-input" value="true" <?php
+                                                                                                                                    if ($pShowContactInfo) {
+                                                                                                                                        echo 'checked';
+                                                                                                                                    } ?> />
                     <label class="form-check-label" for="publishContactInfo">
                         Allow contact information to be visible on profile
                     </label>
@@ -211,28 +221,22 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 </div>
             </div>
         </div>
-        <br/>
+        <br />
 
         <h3 id="resume">Profile Image</h3>
         <div class="form-group">
-            <?php echo $pProfileImageHtml; ?>
+            <?php echo $pProfileImageText; ?>
             <div class="image-preview">
-                <img id="profileImagePreview" src="<?php echo $pProfileImageLink; ?>" 
-                    <?php echo $pProfileImagePreviewStyle; ?> />
-                <button type="button" class="btn btn-danger" id="btnProfileImageDelete" 
-                    <?php echo $pProfileImageDeleteStyle; ?>>
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <?php echo $pProfileImagePreviewHtml; ?>
             </div>
             <div class="custom-file col-sm-6 profile-image-input-container">
-                <input name="profileImage" type="file" class="custom-file-input" id="profileImage"
-                    accept=".png, .jpeg, image/png, image/jpeg">
+                <input name="profileImage" type="file" class="custom-file-input" id="profileImage" accept=".png, .jpeg, image/png, image/jpeg">
                 <label class="custom-file-label" for="profileImage" id="profileImageLabel">
                     Choose image (PNG or JPEG)
                 </label>
             </div>
         </div>
-        <br/>
+        <br />
 
         <h3 id="about">About</h3>
         <div class="form-group row">
@@ -242,32 +246,29 @@ include_once PUBLIC_FILES . '/modules/header.php';
             <div class="col-sm-5">
                 <textarea name="about" class="form-control" rows="15"><?php echo $pAbout; ?></textarea>
             </div>
-            
+
         </div>
 
         <h3 id="links">Links</h3>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">Personal Website</label>
             <div class="col-sm-5">
-                <input name="websiteLink" type="text" class="form-control" placeholder="Personal Website URL" 
-                    value="<?php echo $pWebsiteLink; ?>" />
-            </div>         
+                <input name="websiteLink" type="text" class="form-control" placeholder="Personal Website URL" value="<?php echo $pWebsiteLink; ?>" />
+            </div>
         </div>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">GitHub</label>
             <div class="col-sm-5">
-                <input name="githubLink" type="text" class="form-control" placeholder="GitHub URL" 
-                    value="<?php echo $pGitHubLink; ?>" />
-            </div>         
+                <input name="githubLink" type="text" class="form-control" placeholder="GitHub URL" value="<?php echo $pGitHubLink; ?>" />
+            </div>
         </div>
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">LinkedIn</label>
             <div class="col-sm-5">
-                <input name="linkedInLink" type="text" class="form-control" placeholder="LinkedIn URL" 
-                    value="<?php echo $pLinkedInLink; ?>" />
-            </div>         
+                <input name="linkedInLink" type="text" class="form-control" placeholder="LinkedIn URL" value="<?php echo $pLinkedInLink; ?>" />
+            </div>
         </div>
-        <br/>
+        <br />
 
         <h3 id="resume">Resume</h3>
         <div class="form-group">
@@ -281,14 +282,13 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 </button>
             </div>
             <div class="custom-file col-sm-6">
-                <input name="profileResume" type="file" class="custom-file-input" id="profileResume"
-                    accept=".pdf, application/pdf">
+                <input name="profileResume" type="file" class="custom-file-input" id="profileResume" accept=".pdf, application/pdf">
                 <label class="custom-file-label" for="profileResume" id="profileResumeLabel">
                     Choose file (PDF)
                 </label>
             </div>
         </div>
-        <br/>
+        <br />
 
         <h3 id="projects">Projects</h3>
         <div class="projects-container col-md-8">
@@ -311,8 +311,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </div>
             <div class="form-group">
                 <label>Description</label>
-                <textarea id="newProjectDescription" class="form-control" rows="3"
-                    placeholder="Enter a description about your project"></textarea>
+                <textarea id="newProjectDescription" class="form-control" rows="3" placeholder="Enter a description about your project"></textarea>
             </div>
             <button type="button" class="btn btn-primary" id="btnAddProject">
                 <i class="fas fa-plus"></i>&nbsp;&nbsp;Add Project
