@@ -291,7 +291,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </div>         
         </div>
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label">Keywords</label>
+            <label class="col-sm-2 col-form-label">Keywords <br/>(<i>only provided keywords are acceptable</i>)</label>
             <div class="col-sm-7 autocomplete">
                 <div class="project-keywords">
                     <i id="noKeywordsText" <?php echo $noKeywordsTextStyle; ?>>
