@@ -391,7 +391,7 @@ function onToggleVisibilitySuccess(isVisible) {
 
 autocomplete('keywords', keywords, item => {
     let $kInput = $('input[name=keywords]');
-    if($kInput.val().includes(item.id)) {
+    if ($kInput.val().includes(item.id)) {
         return false;
     }
     if ($kInput.val() === '') {
@@ -406,7 +406,7 @@ autocomplete('keywords', keywords, item => {
         <i class="fas fa-times-circle" data-id="${item.id}"></i>
     </div>
     `);
-    $keyword.find('i').click(function() {
+    $keyword.find('i').click(function () {
         onDeleteTag($(this).data('id'));
     });
     $('.project-keywords').append($keyword);
@@ -422,11 +422,11 @@ function onDeleteTag(id) {
     let $keywords = $('input[name=keywords]');
     $keywords.val($keywords.val().replace(re, ''));
     $(`#${id}`).remove();
-    if($keywords.val() == '') {
+    if ($keywords.val() == '') {
         $('#noKeywordsText').show();
     }
 }
-$('.keyword i').click(function() {
+$('.keyword i').click(function () {
     onDeleteTag($(this).data('id'));
 });
 
@@ -443,43 +443,13 @@ function autocomplete(inputId, values, onItemSelectCb) {
     let currentFocus = -1;
     let $inp = $(`#${inputId}`);
 
-    $inp.on('input', function() {
-        let $autocompleteItems = $('.autocomplete-items');
-
-        // Empty any currently displayed values
-        if ($autocompleteItems) {
-            $autocompleteItems.remove();
-        }
-
-        if (!this.value) {
-            return false;
-        }
-        currentFocus = -1;
-        $autocompleteItems = $("<div class='autocomplete-items'></div>");
-        $(this.parentNode).append($autocompleteItems);
-
-        // Loop through the possible values and look for a match in names
-        for (let val of values) {
-            if (this.value.toLowerCase() === val.name.toLowerCase().substr(0, this.value.length)) {
-                // Found a substring match, add it as an option
-                let $item = $(`<div id="${val.id}"><strong>${val.name}</strong></div>`);
-                $item.click(() => {
-                    // The item was selected. Invoke the callback with the value. If not callback is defined, set
-                    // the input's value to the name of the object
-                    if (onItemSelectCb) {
-                        onItemSelectCb(val);
-                    } else {
-                        this.value = val.name;
-                    }
-                    // Close the autocomplete list
-                    $autocompleteItems.remove();
-                    this.value = '';
-                });
-                $autocompleteItems.append($item);
-            }
-        }
+    $inp.on('input', displayKeywords);
+    $inp.on('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        displayKeywords.call(this);
     });
-    $inp.keydown(function(event) {
+    $inp.keydown(function (event) {
         let $items = $('.autocomplete-items div');
         switch (event.keyCode) {
             // Down
@@ -503,6 +473,41 @@ function autocomplete(inputId, values, onItemSelectCb) {
                 return false;
         }
     });
+
+    function displayKeywords() {
+        console.log('entering');
+        let $autocompleteItems = $('.autocomplete-items');
+
+        // Empty any currently displayed values
+        if ($autocompleteItems) {
+            $autocompleteItems.remove();
+        }
+
+        currentFocus = -1;
+        $autocompleteItems = $("<div class='autocomplete-items'></div>");
+        $(this.parentNode).append($autocompleteItems);
+
+        // Loop through the possible values and look for a match in names
+        for (let val of values) {
+            if (this.value === '' || this.value.toLowerCase() === val.name.toLowerCase().substr(0, this.value.length)) {
+                // Found a substring match, add it as an option
+                let $item = $(`<div id="${val.id}"><strong>${val.name}</strong></div>`);
+                $item.click(() => {
+                    // The item was selected. Invoke the callback with the value. If not callback is defined, set
+                    // the input's value to the name of the object
+                    if (onItemSelectCb) {
+                        onItemSelectCb(val);
+                    } else {
+                        this.value = val.name;
+                    }
+                    // Close the autocomplete list
+                    $autocompleteItems.remove();
+                    this.value = '';
+                });
+                $autocompleteItems.append($item);
+            }
+        }
+    }
     function setActive($items) {
         $items.removeClass('autocomplete-active');
         $($items[currentFocus]).addClass('autocomplete-active');

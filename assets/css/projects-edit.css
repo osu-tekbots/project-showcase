@@ -90,6 +90,8 @@ CSS for the edit showcase project page of the OSU project showcase website.
     right: 0;
     background-color: var(--color-white);
     font-size: 0.8rem;
+    max-height: 200px;
+    overflow-X: auto;
 }
 
 .autocomplete-items div {

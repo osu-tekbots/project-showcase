@@ -303,7 +303,14 @@ include_once PUBLIC_FILES . '/modules/header.php';
                     <input type="text" class="form-control" id="keywords" placeholder="Search available keywords" />
                 </div>
             </div>
-            <script>const keywords = [<?php echo $allKeywords; ?>];</script>
+            <script>
+                const keywords = [<?php echo $allKeywords; ?>];
+                keywords.sort((a, b) => {
+                    let n1 = a.name.toLowerCase();
+                    let n2 = b.name.toLowerCase();
+                    return n1 < n2 ? -1 : n1 === n2 ? 0 : 1;
+                });
+            </script>
         </div>
         <div class="form-group row">
             <div class="col-sm-7 offset-sm-2">
