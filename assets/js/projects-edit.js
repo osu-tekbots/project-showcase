@@ -391,7 +391,8 @@ function onToggleVisibilitySuccess(isVisible) {
 
 autocomplete('keywords', keywords, item => {
     let $kInput = $('input[name=keywords]');
-    if ($kInput.val().includes(item.id)) {
+    let current = $kInput.val().split(',');
+    if (current.includes(item.id)) {
         return false;
     }
     if ($kInput.val() === '') {
