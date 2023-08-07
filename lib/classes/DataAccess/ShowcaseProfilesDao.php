@@ -92,6 +92,26 @@ class ShowcaseProfilesDao {
         }
     }
 
+    public function getUserIdFromOnid($onid) {
+        try {
+            $sql = '
+            SELECT u_id
+            FROM user
+            WHERE u_onid = :onid
+            ';
+            $params = array(':onid' => $onid);
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
+            }
+
+            return $results[0]['u_id'];
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to get user profile for user with ONID '$onid': " . $e->getMessage());
+            return false;
+        }
+    }
+
     /**
      * Adds new information about the showcase profile for the user in the database.
      *
@@ -210,6 +230,37 @@ class ShowcaseProfilesDao {
         }
     }
 
+	 /**
+     * Fetches statistics about user profiles in the showcase.
+     * 
+     * The resulting associative array will have the following keys:
+     * - `totalUsers`: the total number of users of the showcase
+     *
+     * @return mixed[]|bool an array containing the stats fetched from the database on success. False on error.
+     */
+    public function getTopProfiles() {
+        
+        try {
+            $profileIds = array();
+            // Total number of users
+            $sql = "
+            SELECT swo_u_id AS user_id, COUNT(DISTINCT(swo_sp_id)) AS project_count 
+			FROM showcase_worked_on 
+			GROUP BY swo_u_id 
+			ORDER BY project_count DESC
+            ";
+            
+			$results = $this->conn->query($sql);
+			
+            return $results;
+        } catch(\Exception $e) {
+            $this->logger->error("Failed to get Top profiles: " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+
     /**
      * Uses information from a row in the database to create a ShowcaseProfile object.
      * 
@@ -222,7 +273,8 @@ class ShowcaseProfilesDao {
      */
     public static function ExtractShowcaseProfileFromRow($row, $includeUser = true) {
         $profile = new ShowcaseProfile($row['sup_u_id']);
-        if ($includeUser) {
+//        echo "Grabbing Profile";
+		if ($includeUser) {
             $profile->setUser(UsersDao::ExtractUserFromRow($row));
         }
         $profile
@@ -234,7 +286,7 @@ class ShowcaseProfilesDao {
             ->setLinkedInLink($row['sup_linkedin_link'])
             ->setResumeUploaded($row['sup_resume_uploaded'] ? true : false)
             ->setImageUploaded($row['sup_image_uploaded'] ? true : false)
-            ->setDateUpdated(new \DateTime($row['sup_date_updated']));
+            ->setDateUpdated(new \DateTime(($row['sup_date_updated'] == '' ? "now" : $row['sup_date_updated']))); //Modified 3/31/2023
         
         return $profile;
     }

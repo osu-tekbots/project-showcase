@@ -23,13 +23,19 @@ class ShowcaseProject {
     private $artifacts;
     /** @var ShowcaseProjectImage[] */
     private $images;
+    /** @var Award[] */
+    private $awards;
     /** @var Keyword[] */
     private $keywords;
+	/** @var int */
+    private $category;
+	/** @var int */
+    private $score;
 
     public function __construct($id = null) {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
-            $this->setDateCreated(new \DateTime());
+            $this->setDateCreated(new \DateTime("now"));
             $this->setPublished(true);
         }
         $this->setId($id);
@@ -213,6 +219,39 @@ class ShowcaseProject {
         return $this;
     }
 
+	/**
+     * Get the value of awards
+     */ 
+    public function getAwards() {
+        return $this->awards;
+    }
+
+    /**
+     * Set the value of awards
+     *
+     * @return  self
+     */ 
+    public function setAwards($data) {
+        $this->awards = $data;
+
+        return $this;
+    }
+
+	/**
+     * Adds an image to the project and sets the image's project reference to this project.
+     *
+     * @param Award $award the award to add
+     * @return self
+     */
+    public function addAward($award) {
+        if ($this->awards == null) {
+            $this->awards = array($award);
+        } else {
+            $this->awards[] = $award;
+        }
+        return $this;
+    }
+	
 
     /**
      * Get the value of keywords
@@ -231,4 +270,42 @@ class ShowcaseProject {
 
         return $this;
     }
+	
+	/**
+     * Get the value of category
+     */ 
+    public function getCategory() {
+        return $this->category;
+    }
+
+    /**
+     * Set the value of category
+     *
+     * @return  self
+     */ 
+    public function setCategory($data) {
+        $this->category = $data;
+
+        return $this;
+    }
+	
+	/**
+     * Get the value of score
+     */ 
+    public function getScore() {
+        return $this->score;
+    }
+
+    /**
+     * Set the value of score
+     *
+     * @return  self
+     */ 
+    public function setScore($data) {
+        $this->score = $data;
+
+        return $this;
+    }
+	
+	
 }

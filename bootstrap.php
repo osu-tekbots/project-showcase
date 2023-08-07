@@ -4,6 +4,9 @@
  * in the `.htaccess` file at the root of the website using the `php_value auto_prepend_file` setting.
  */
 
+use DataAccess\UsersDao;
+use Model\User;
+
 session_start();
 
 define('PUBLIC_FILES', __DIR__);
@@ -22,3 +25,22 @@ try {
 }
 
 $isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
+
+/*
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+print_r($_SESSION);
+
+if ($isLoggedIn){ //patch to deal with logging via other tools
+	if (!isset($_SESSION['userType'])){
+		$usersDao = new UsersDao($dbConn, $logger);
+		$user = $usersDao->getUser($_SESSION['userID']);
+		
+		$_SESSION['userType'] = $user->getType();
+	}
+}
+*/
+

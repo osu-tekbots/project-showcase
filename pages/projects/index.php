@@ -5,12 +5,74 @@
 include_once '../../bootstrap.php';
 
 use DataAccess\ShowcaseProjectsDao;
+use DataAccess\VoteDao;
+use DataAccess\ShowcaseProfilesDao;
 use Util\Security;
 use DataAccess\KeywordsDao;
 use Model\UserType;
+use Model\Award;
+
+
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL);
 
 if (!isset($_SESSION)) {
     session_start();
+}
+
+if ($isLoggedIn)
+	if (!isset($_SESSION['userType']))
+		$_SESSION['userType'] = UserType::STUDENT;
+
+
+function renderLiftButton($projectId, $userId, $voteDao){
+	if ($voteDao->checkVote($projectId, $userId) == true){
+		$buttonText = 'Lifted!';
+		$buttonClass = 'btn btn-sm btn-success';
+		$buttonTooltip = 'You lifted this project because you think it is awesome! Click again to remove Lift.';
+	} else {
+		$buttonText = 'Lift?';
+		$buttonClass = 'btn btn-sm';
+		$buttonTooltip = 'You can Lift a project so that others can more easily find this awesome project!';
+	}
+	
+	
+	$script = "<script>
+			function onVote(pid, uid) {
+				if ($('#voteIcon').data('state') == 'Lifted!'){ //Already voted 
+					var action = 'removeVote';
+					$('#voteIcon').data('state', '');
+					$('#voteIcon').attr('class','btn btn-sm');
+					$('#voteIcon').text('Lift?');
+					$('#voteIcon').tooltip('hide').attr('data-original-title', 'You can Lift a project so that others can more easily find this awesome project!').tooltip('show');	
+				} else {
+					var action = 'addVote';
+					$('#voteIcon').data('state', 'Lifted!');
+					$('#voteIcon').attr('class','btn btn-sm btn-success');
+					$('#voteIcon').text('Lifted!');
+					$('#voteIcon').tooltip('hide').attr('data-original-title', 'You lifted this project because you think it is awesome! Click again to remove Lift.').tooltip('show');	
+				}
+				
+				body = {
+					action: action,
+					projectId: pid,
+					userId: uid
+				};
+				api.post('/showcase-votes.php', body).then(res => {
+					snackbar(res.message, 'success');
+					location.reload();
+				}).catch(err => {
+					snackbar(err.message, 'error');
+				});				
+			}
+			</script>";
+	$html = "<button onclick='onVote(\"$projectId\",\"$userId\");' id='voteIcon' style='border:1px solid black;' class='$buttonClass' 
+			data-state='$buttonText' data-toggle='tooltip' data-placement='left' title='$buttonTooltip'>
+				$buttonText
+			</button>";
+	
+	return $script . $html;
 }
 
 // Make sure we have the project ID
@@ -21,7 +83,9 @@ if (!$projectId) {
     die();
 }
 
-$userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
+// $userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+$userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
 
 //
 // Include the header in case we need to render a 'Not Found' message
@@ -42,8 +106,9 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
 // Fetch the showcase project and artifacts
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
+$voteDao = new VoteDao($dbConn, $logger);
 $project = $projectsDao->getProject($projectId);
-if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType::ADMIN)) {
+if (!$project) { //Removed check for (!$project->isPublished() && $_SESSION['userType'] != UserType::ADMIN)
     // The project was not found, let the user know
     echo "
     
@@ -59,7 +124,33 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
 
     ";
 } else {
-    // General information
+	//Update Score
+	//TODO: Need to define a formula that calculates a score based on Lifts but decreases as projects get older
+	$project->setScore(count($voteDao->getAllVotesByProject($projectId)));
+	$projectsDao->updateProject($project);
+	
+    // Awards
+	$pAwardsHtml = '';
+	$awards = $projectsDao->getProjectAwards($projectId);
+	if ($awards != false) {
+		$pAwardsHtml = "
+		<div class='showcase-project-artifacts row justify-content-md-center'>
+            <div class='col-md-8'>
+                <h3>Awards</h3>"; 
+		foreach ($awards as $award){
+			if ($award->getImageNameSquare() != '')
+				$pAwardsHtml .= "<img class='img-responsive col-md-2' src='assets/img/".$award->getImageNameSquare()."' title='".$award->getName()."'>";
+			else
+				$pAwardsHtml .= "<div class='col-md-1'>" . $award->getName() . "<div>";
+			
+		}
+        $pAwardsHtml .= "
+			</div>
+        </div>
+		";
+	}
+	
+	// General information
     $pTitle = Security::HtmlEntitiesEncode($project->getTitle());
     $pDescription = Security::HtmlEntitiesEncode($project->getDescription());
 
@@ -121,6 +212,56 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
         </a>
     " : '';
+	
+	
+	
+	$publishButtonHtml = '';
+	if ($isLoggedIn && $_SESSION['userType'] == UserType::ADMIN){
+		$published = $project->isPublished();
+		if ($published) {
+			$publishedButtonText = 'Published';
+			$publishedButtonClass = 'btn-success';
+			$publishedButtonTooltip = 'Hide';
+		} else {
+			$publishedButtonText = 'Hidden';
+			$publishedButtonClass = 'btn-danger';
+			$publishedButtonTooltip = 'Publish';
+		}
+		$publishButtonHtml = "
+			<script>
+			function onPublish(id) {
+				let published = $('#publishButton').data('published');
+				body = {
+					action: 'updateVisibility',
+					publish: !published,
+					id
+				};
+				api.post('/showcase-projects.php', body).then(res => {
+					snackbar(res.message, 'success');
+					$('#publishButton').data('published', !published);
+					if(published) {
+						$('#publishButton').removeClass('btn-success').addClass('btn-danger');
+						$('#publishButton').text('Hidden');	
+						$('#publishButton').tooltip('hide').attr('data-original-title', 'Publish').tooltip('show');						
+					} else {
+						$('#publishButton').removeClass('btn-danger').addClass('btn-success');
+						$('#publishButton').text('Published');
+						$('#publishButton').tooltip('hide').attr('data-original-title', 'Hide').tooltip('show');
+					}
+				}).catch(err => {
+					snackbar(err.message, 'error');
+				});
+				
+				
+			}
+			</script>
+			
+			<button onclick='onPublish(\"$projectId\");' id='publishButton' class='btn btn-sm $publishedButtonClass btn-published' data-published='$published'
+				data-toggle='tooltip' data-placement='left' title='$publishedButtonTooltip'>
+				$publishedButtonText
+			</button>
+		";		
+	}
 
     // Gather the images and generate the HTML to render them in a slideshow
     $pImagesHtml = '';
@@ -216,7 +357,7 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
     <div class='container showcase-project-container'>
         <div class='showcase-project-header'>
             <h1>$pTitle</h1>
-            $editButtonHtml
+            $editButtonHtml $publishButtonHtml
         </div>
         <div class='showcase-project-collaborators'>
             $pCollaboratorsHtml
@@ -236,6 +377,12 @@ if (!$project || (!$project->isPublished() && $_SESSION['userType'] != UserType:
                 </div>
             </div>
         </div>
+		<div class='row justify-content-md-center'>
+            <div class='col-md-8 text-center'>
+			<span data-toggle='tooltip' data-placement='left' title='Authenticated users can Lift projects to make them more visible to people browsing the showcase site.'>".count($voteDao->getAllVotesByProject($projectId)) ." Lifts</span>&nbsp" . (isset($_SESSION['userID']) ? renderLiftButton($projectId, $userId, $voteDao) : '')."
+			</div>
+		</div>
+		$pAwardsHtml
         <div class='showcase-project-artifacts  row justify-content-md-center'>
             <div class='col-md-8'>
                 <h3>Artifacts</h3>

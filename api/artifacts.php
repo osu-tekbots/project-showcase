@@ -8,8 +8,10 @@ include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
 use DataAccess\ShowcaseProjectsDao;
+use DataAccess\ShowcaseProfilesDao;
 use Api\Response;
 use Model\ShowcaseProjectArtifact;
+use Model\UserType;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -33,15 +35,18 @@ if (is_null($projectId) || empty($projectId)) {
 
 // Make sure the current user has permission to perform this action (i.e. they are either an admin or a
 // collaborator on the project)
-$userId = $_SESSION['userID'];
+// $userId = $_SESSION['userID'];
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+$userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
 $usersDao = new UsersDao($dbConn, $logger);
 $user = $usersDao->getUser($userId);
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $isCollaborator = $projectsDao->verifyUserIsCollaboratorOnProject($projectId, $userId);
-if ($isCollaborator == null) {
+if (($isCollaborator == null) && ($user->getType()->getId() != UserType::ADMIN)) {
     respond(500, 'Failed to verify if user is collaborator on project');
 }
+
 if (!$isCollaborator && $user->getType()->getId() != UserType::ADMIN) {
     respond(401, 'You do not have permission to make this request');
 }
@@ -49,7 +54,6 @@ if (!$isCollaborator && $user->getType()->getId() != UserType::ADMIN) {
 //
 // The client making the request has passed all access checks. We can now handle the request based on the action.
 //
-
 switch ($_POST['action']) {
 
     case 'addArtifact':
@@ -133,10 +137,13 @@ function handleAddNewArtifact($projectId, $projectsDao, $configManager, $logger)
             }
             $fileSize = $_FILES['artifactFile']['size'];
             $fileTmp = $_FILES['artifactFile']['tmp_name'];
+			
+			$filename = $_FILES['artifactFile']['name'];
+			$ext = pathinfo($filename, PATHINFO_EXTENSION);
 
-            $fiveMb = 5242880;
+            $fiveMb = 25242880;
             if ($fileSize > $fiveMb) {
-                respond(400, 'Artifact file must be smaller than 5MB');
+                respond(400, 'Artifact file must be smaller than 25MB');
             }
 
             $filepath = 
@@ -151,6 +158,7 @@ function handleAddNewArtifact($projectId, $projectsDao, $configManager, $logger)
             }
 
             $artifact->setFileUploaded(true);
+			$artifact->setExtension($ext);
 
             break;
     }
@@ -176,7 +184,7 @@ function handleDeleteProjectArtifact($projectsDao, $configManager, $logger) {
 
     $artifact = $projectsDao->getProjectArtifact($artifactId);
     // TODO: handle case when artifact is not found
-
+	
     // Check to see if we need to delete a file
     $removedFile = false;
     if ($artifact->isFileUploaded()) {
@@ -190,7 +198,8 @@ function handleDeleteProjectArtifact($projectsDao, $configManager, $logger) {
         }
         $removedFile = true;
     }
-
+	
+	
     $ok = $projectsDao->deleteProjectArtifact($artifactId);
     if (!$ok) {
         if ($removedFile) {

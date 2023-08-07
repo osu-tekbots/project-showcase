@@ -27,6 +27,8 @@ class ShowcaseProjectArtifact {
     private $dateCreated;
     /** @var \DateTime */
     private $dateUpdated;
+	/** @var string */
+    private $extension;
 
     /**
      * Constructs a new instance of an artifact.
@@ -40,7 +42,7 @@ class ShowcaseProjectArtifact {
             $id = IdGenerator::generateSecureUniqueId();
             $this->setPublished(true);
             $this->setFileUploaded(false);
-            $this->setDateCreated(new \DateTime());
+            $this->setDateCreated(new \DateTime("now"));
         }
         $this->setId($id);
     }
@@ -221,6 +223,24 @@ class ShowcaseProjectArtifact {
      */ 
     public function setDateUpdated($dateUpdated) {
         $this->dateUpdated = $dateUpdated;
+
+        return $this;
+    }
+	
+	/**
+     * Get the value of extension
+     */ 
+    public function getExtension() {
+        return $this->extension;
+    }
+
+    /**
+     * Set the value of extension
+     *
+     * @return  self
+     */ 
+    public function setExtension($data) {
+        $this->extension = $data;
 
         return $this;
     }

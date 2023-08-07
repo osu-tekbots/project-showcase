@@ -100,9 +100,11 @@ if (isset($navlinks)) {
 }
 
 if($isLoggedIn) {
-    if($_SESSION['userType'] == UserType::ADMIN) {
-        $navlinks['ADMIN'] = 'admin/';
-    }
+	if (isset($_SESSION['userType'])){
+		if($_SESSION['userType'] == UserType::ADMIN) {
+			$navlinks['ADMIN'] = 'admin/';
+		}
+	}
     $navlinks['PROFILE'] = 'profile/';
 } else {
     $navlinks['SIGN IN'] = 'signin';
@@ -158,7 +160,8 @@ if($isLoggedIn) {
         <a class="header-main-link" href="">
             <div class="logo">
                 <img class="logo" src="assets/img/osu-logo-orange.png" />
-                <h1><span id="projectPrefix">Project </span>Showcase </h1>
+                <h1 class="d-none d-sm-block"><span id="projectPrefix">Project </span>Showcase </h1>
+				<h5 class="d-sm-none">Project<BR>Showcase</h5>
             </div>
         </a>
         <nav class="navigation">

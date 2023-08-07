@@ -28,7 +28,7 @@ class CollaborationInvitation {
     public function __construct($id = null) {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
-            $this->setDateCreated(new \DateTime());
+            $this->setDateCreated(new \DateTime("now"));
         }
         $this->setId($id);
     }

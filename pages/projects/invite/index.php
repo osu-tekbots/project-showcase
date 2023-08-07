@@ -15,7 +15,9 @@ if (!isset($_SESSION)) {
 // Get what we need from the URL and the SESSION (the user must be logged in to accept invitations)
 $projectId = isset($_GET['pid']) ? $_GET['pid'] : false;
 $invitationId = isset($_GET['iid']) ? $_GET['iid'] : false;
-$userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
+// $userId = isset($_SESSION['userID']) ? $_SESSION['userID'] : false;
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+$userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 
@@ -69,7 +71,6 @@ if (!$project) {
 } 
 
 // Check to make sure the profile exists
-$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
 $profile = $profilesDao->getUserProfileInformation($userId);
 if (!$profile) {
     $_SESSION['error'] = "

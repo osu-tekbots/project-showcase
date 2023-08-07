@@ -4,8 +4,15 @@
  */
 include_once '../../bootstrap.php';
 
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL);
+
 use DataAccess\ShowcaseProjectsDao;
+use DataAccess\AwardDao;
 use DataAccess\UsersDao;
+use DataAccess\CategoryDao;
+use DataAccess\ShowcaseProfilesDao;
 use Model\UserType;
 use Util\Security;
 use DataAccess\KeywordsDao;
@@ -25,11 +32,24 @@ if (!$projectId || !$isLoggedIn) {
     die();
 }
 
-$userId = $_SESSION['userID'];
+// $userId = $_SESSION['userID'];
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+$userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
+if ($userId == null || $userId == ''){
+	//Something is wrong! I'm isLoggedIn but I don't have the correct info.
+	
+}
 
 // Fetch the current user
+$awardsDao = new AwardDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
+$categoryDao = new CategoryDao($dbConn, $logger);
+
 $user = $usersDao->getUser($userId);
+if (!$user) {
+	echo "<script>window.location.replace('$baseUrl');</script>";
+    die();
+}
 
 // Restrict access users who are a part of this project and admins
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
@@ -68,13 +88,28 @@ $pPublishedHtml = $project->isPublished() ? "" : "
         <div class='col'>
             <div class='alert alert-warning'>
                 <p><i class='fas fa-eye-slash'></i>&nbsp;&nbsp;This project has been hidden from public view by the website
-                administrators. For questions regarding questionable or innapropriate content, please contact an OSU Tekbots
+                administrators. For questions regarding questionable, inappropriate, or incomplete content, please contact an OSU TekBots
                 administrator.</p>
             </div>
         </div>
     </div>
     
 ";
+
+//Get current category and make the HTML options to allow student to self select affiliated course
+$categoryOptionsHTML = '';
+$categories = $categoryDao->getAllCategories();
+if ($project->getCategory() == 0 || $project->getCategory() == null) // A match!
+	$categoryOptionsHTML .= '<option value="0" selected>Not Affiliated with a Course</option>';
+else
+	$categoryOptionsHTML .= '<option value="0">Not Affiliated with a Course</option>';
+foreach ($categories AS $c){
+	if ($c->getId() == $project->getCategory()) // A match!
+		$categoryOptionsHTML .= '<option value="'.$c->getId().'" selected>'.$c->getName().'</option>';
+	else
+		$categoryOptionsHTML .= '<option value="'.$c->getId().'">'.$c->getName().'</option>';
+}
+
 
 // Get the tags for the project
 $keywordsDao = new KeywordsDao($dbConn, $logger);
@@ -144,7 +179,7 @@ $pProjectImagesSelectHtml .= '
 ';
 
 // Fetch the artifacts for the project
-$pArtifacts =$project->getArtifacts();
+$pArtifacts = $project->getArtifacts();
 if (count($pArtifacts) == 0) {
     $pArtifactsHtml = '<p id="pNoArtifacts">There are no artifacts associated with this project</p>';
 } else {
@@ -232,19 +267,50 @@ foreach ($collaborators as $c) {
 
     if ($cId != $userId) {
         $collaboratorsRowsHtml .= "
-        <tr>
+        <tr id='collab$cId'>
             <td>$cName</td>
             <td class='publically-visible'></td>
             <td class='actions'>
                 <a href='profile/?id=$cId' class='btn btn-sm btn-light'>
                     View Profile
-                </a>
+                </a>                     
+				<button id='btnRemoveCollab' class='btn btn-md btn-danger' onclick='removeCollaborator(\"$cId\", \"$projectId\");'>
+					<i class='fas fa-trash'></i>&nbsp;&nbsp;Remove
+				</button>
             </td>
         </tr>
         ";
     }
 }
 
+
+
+
+
+$awardsHTML = "";
+if ($user->getType()->getId() == UserType::ADMIN){ //There should be option for giving awards
+	$awardsHTML = "<h3>Awards</h3><div class='edit-artifacts-container'>";
+	$newawardsHTML = '';
+	$awards = $projectsDao->getProjectAwards($projectId);
+	
+	if (is_array($awards)){
+		$awardsHTML .= "<div class='col-md-6'>Current Awards:<BR>";
+		foreach ($awards as $a){
+			$awardsHTML .= $a->getName() . "<button type='button' class='btn btn-sm btn-danger' onclick='removeAward(\"".$a->getId()."\", \"$projectId\");'><i class='fas fa-trash'></i></button><BR>";
+		}
+		$awardsHTML .= "</div>";
+	}
+	$awards = $awardsDao->getAllAwards();	
+	
+	$newawardsHTML .= "Add Award:<BR><select id='newaward'>";
+	foreach ($awards as $a){
+		$newawardsHTML .= "<option value = '" . $a->getId() . "'>" . $a->getName() . "</option>";
+	}
+	$newawardsHTML .= "</select><button type='button' class='btn btn-sm btn-success' onclick='giveAward(\"$projectId\");'><i class='fas fa-check'></i></button>";
+	
+	$awardsHTML .= "<div class='col-md-6'>$newawardsHTML</div></div>";
+
+}
 
 
 $title = 'Edit Project';
@@ -281,6 +347,12 @@ include_once PUBLIC_FILES . '/modules/header.php';
             <div class="col-sm-5">
                 <input required name="title" type="text" class="form-control" placeholder="Enter project title" 
                     value="<?php echo $pTitle; ?>" />
+            </div>
+        </div>
+		<div class="form-group row">
+            <label class="col-sm-2 col-form-label">Affiliated Course:</label>
+            <div class="col-sm-5">
+                <select name="category" class="form-control"><?php echo $categoryOptionsHTML;?></select>
             </div>
         </div>
         <div class="form-group row">
@@ -357,6 +429,8 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <img id="projectImagePreview" src="<?php echo $pImagePreviewSrc; ?>" <?php echo $pButtonImagePreviewStyle; ?>>
     </div>
 
+	<?php echo $awardsHTML;?>
+
     <h3 id="artifacts">Artifacts</h3>
     <p><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>Artifacts represent the concrete results 
         of a project. These results can be documents, links, videos, pictures, or other files associated with the 
@@ -380,14 +454,14 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 </div>
                 <div class="form-group">
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="artifactType" id="artifactType" 
+                        <input class="form-check-input" type="radio" name="artifactType" id="artifactType1" 
                             value="file" checked>
                         <label class="form-check-label" for="artifactType">
                             File
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="artifactType" id="artifactType" 
+                        <input class="form-check-input" type="radio" name="artifactType" id="artifactType2" 
                             value="link">
                         <label class="form-check-label" for="artifactType">
                             Link
@@ -458,7 +532,20 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 </tfoot>
             </table>
         </div>
-    </div> 
+    </div>
+    <br><br> 
+    <h3 id="deleteProject">Delete Project</h3>
+    <p class="col-sm-8"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>This will delete the project entirely (Images, Artifacts, Invites).  If you just need to 
+    hide your project from public view, please contact the <a href="mailto: heer@oregonstate.edu">administrator</a> with the project you would like hidden.
+    Any collaborators on the project are able to delete a project, however, please check in with the other collaborators to make sure that they are okay with the project being deleted.
+    </i></p>
+    <div class="form-group row">
+        <div class="col-md-8">
+        <button id="btnDeleteProject" class="btn btn-md btn-danger">
+            <i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Project
+        </button>
+        </div>
+    </div>
     
 </div>
 

@@ -325,6 +325,98 @@ function onSendInviteFormSubmit() {
 $('#formSendInvite').submit(onSendInviteFormSubmit);
 
 /**
+ * Removes a collaborator from project
+ */
+function removeCollaborator(userid, projectid) {
+    let body = {
+        action: 'removeUser',
+		userId: userid,
+		projectId: projectid
+    };
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+			$('#collab'.userid).hide();
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+    return false;
+}
+
+/**
+ * Give an award to a project
+*/ 
+function giveAward(projectid) {
+    awardid = $('#newaward').val();
+	
+	let body = {
+        action: 'giveAward',
+		awardId: awardid,
+		projectId: projectid
+    };
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+    return false;
+}
+
+/**
+ * Give an award to a project
+*/
+function removeAward(awardid, projectid) {
+    let body = {
+        action: 'removeAward',
+		awardId: awardid,
+		projectId: projectid
+    };
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+    return false;
+}
+
+/**
+ * Deletes the project entirely
+ */
+function onDeleteProjectClick() {
+    let res = confirm('You are about to delete a project completely. This action cannot be undone.  Please confirm with your project collaborators that this is something you should do.');
+    if(!res) return false;
+
+    let projectId = $('#projectId').val();
+    let body = {
+        action: 'deleteProject',
+        id: projectId
+    };
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+            setTimeout(function () { location.reload(true); }, 1000);
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+    return false;
+}
+$('#btnDeleteProject').click(onDeleteProjectClick);
+
+/**
  * Sends a request to the server to update the visibility of the user on the project
  */
 function onToggleVisibility() {

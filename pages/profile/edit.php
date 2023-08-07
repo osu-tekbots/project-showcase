@@ -2,6 +2,11 @@
 /**
  * Edit showcase profile page
  */
+ 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+ 
 include_once '../../bootstrap.php';
 
 use DataAccess\ShowcaseProfilesDao;
@@ -13,12 +18,15 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+
 $baseUrl = $configManager->getBaseUrl();
 if (!$isLoggedIn) {
     echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
-$userId = $_SESSION['userID'];
+// $userId = $_SESSION['userID'];
+$userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
 
 
 
@@ -37,13 +45,14 @@ if (isset($_GET['id']) && $_GET['id'] != $userId) {
 
 
 // Get the user profile information
-$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
 $profile = $profilesDao->getUserProfileInformation($userId);
+// TODO: Improper error handling for validating the user profile
 if (!$profile) {
-    echo "<script>window.location.replace('');</script>";
+    echo "<script>window.location.replace('$baseUrl');</script>";
     die();
 }
 
+$pEmail = $profile->getUser()->getEmail();
 $pFirstname = $profile->getUser()->getFirstName();
 $pLastName = $profile->getUser()->getLastName();
 $pMajor = $profile->getUser()->getMajor();
@@ -155,6 +164,26 @@ include_once PUBLIC_FILES . '/modules/header.php';
 ?>
 
 
+<div class="modal fade" id="communityStandards" tabindex="-1" role="dialog" aria-labelledby="communityStandardsLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="communityStandardsLabel">Project Showcase Community Standards</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <p>The EECS project Showcase is a platform for students to exclusively show off their projects and create portfolio examples for their later use.</p><ul><li>Projects are expected to be fully presented to allow viewers to experience the quality of each student's work as well as appreciate the overall quality of all EECS students.</li><li>Any project that is identified as unprofessional, incomplete, or insensative in tone or content is not to be included on the Project Showcase.</li><li>Any project that does not live up to these quality standards will be hidden from public view or deleted based on the decisions of the platform moderators.</li></ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="container">
     <h1>Edit Profile</h1>
     <a href="profile/?id=<?php echo $userId; ?>" class="btn btn-sm btn-light">
@@ -176,11 +205,18 @@ include_once PUBLIC_FILES . '/modules/header.php';
 
         <h3 id="general">General</h3>
         <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-5">
+                <input disabled name="onid" type="text" class="form-control" value="<?php echo $pEmail; ?>" />
+            </div>
+        </div>
+		<div class="form-group row">
             <label class="col-sm-2 col-form-label">First Name</label>
             <div class="col-sm-5">
                 <input required name="firstName" type="text" class="form-control" placeholder="First Name" value="<?php echo $pFirstname; ?>" />
             </div>
         </div>
+		
         <div class="form-group row">
             <label class="col-sm-2 col-form-label">Last Name</label>
             <div class="col-sm-5">
@@ -313,9 +349,12 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 <label>Description</label>
                 <textarea id="newProjectDescription" class="form-control" rows="3" placeholder="Enter a description about your project"></textarea>
             </div>
-            <button type="button" class="btn btn-primary" id="btnAddProject">
+            <div class="row"><div class="col-md-1"></div>
+			<button type="button" class="btn btn-primary" id="btnAddProject">
                 <i class="fas fa-plus"></i>&nbsp;&nbsp;Add Project
             </button>
+			<div class="col-md-8">By adding this project, you are agreeing to our <span data-toggle="modal" data-target="#communityStandards" style="color:blue;text-decoration: underline;">Community Standards</span>.</div>
+			</div>
         </div>
 
     </form>

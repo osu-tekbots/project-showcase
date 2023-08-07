@@ -5,13 +5,16 @@
 include_once '../bootstrap.php';
 
 use DataAccess\ShowcaseProjectsDao;
+use DataAccess\CategoryDao;
 use DataAccess\KeywordsDao;
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
-$recentProjects = $projectsDao->getMostRecentProjects(4);
+$categoryDao = new CategoryDao($dbConn, $logger);
+$recentProjects = $projectsDao->getMostRecentProjects(20);
+$allProjects = $projectsDao->getAllProjects();
+$liftedProjects = $projectsDao->getAllProjectsSortByScore(10);
 
 $keywordsDao = new KeywordsDao($dbConn, $logger);
-
 
 
 $title = 'Browse Showcase Projects';
@@ -26,6 +29,14 @@ $js = array(
     )
 );
 include_once PUBLIC_FILES . '/modules/header.php';
+
+if (isset($_REQUEST['category'])){
+//	echo "<h4>Category Found: ".$_REQUEST['category']."</h4>";
+	if ($_REQUEST['category'] != ''){
+		$categoryProjects = $projectsDao->getProjectsByCategory($_REQUEST['category']);
+		$category = $categoryDao->getCategoryByShortName($_REQUEST['category']);
+	}
+}
 
 ?>
 
@@ -52,25 +63,85 @@ include_once PUBLIC_FILES . '/modules/header.php';
         <div class="row projects-row" id="resultsContent">
         </div>
     </div>
-
-    <div id="suggestions">
+	<div id="suggestions">
         <div class="row projects-row" >
             <div class="col">
-                <h3>Recently Added</h3>
+                <?php echo (isset($categoryProjects) ? '<h3>'.$category->getName().' Projects</h3>' : '<h3>Recently Added</h3>')?>
             </div>
         </div>
         <div class="row projects-row">
             <div class="col recent-projects">
                 <?php
                 include_once PUBLIC_FILES . '/modules/project.php';
-                foreach ($recentProjects as $p) {
-                    $keywords = $keywordsDao->getKeywordsForEntity($p->getId());
-                    $p->setKeywords($keywords);
-                    echo createProfileProjectHtml($p, false);
-                } ?>
+                if (isset($categoryProjects)){
+					foreach ($categoryProjects as $p) {
+						$keywords = $keywordsDao->getKeywordsForEntity($p->getId());
+						$awards = $projectsDao->getProjectAwards($p->getId());
+						$p->setKeywords($keywords);
+						$p->setAwards($awards);
+						echo createProfileProjectHtml($p, false);
+					} 
+				} else {
+					foreach ($recentProjects as $p) {
+						$keywords = $keywordsDao->getKeywordsForEntity($p->getId());
+						$awards = $projectsDao->getProjectAwards($p->getId());
+						$p->setKeywords($keywords);
+						$p->setAwards($awards);
+						echo createProfileProjectHtml($p, false);
+					} 
+				}
+					?>
             </div>
         </div>
+		
+		<div class="row projects-row" >
+            <div class="col">
+                <h3>Lifted Projects</h3>
+            </div>
+        </div>
+        <div class="row projects-row">
+            <div class="col recent-projects">
+                <?php
+                include_once PUBLIC_FILES . '/modules/project.php';
+                
+					foreach ($liftedProjects as $p) {
+						$keywords = $keywordsDao->getKeywordsForEntity($p->getId());
+						$awards = $projectsDao->getProjectAwards($p->getId());
+						$p->setKeywords($keywords);
+						$p->setAwards($awards);
+						echo createProfileProjectHtml($p, false);
+					} 
+				
+					?>
+            </div>
+        </div>
+        
+<?php		
+		if (!(isset($categoryProjects))){
+			echo '<div class="row projects-row" >
+				<div class="col">
+					<h3>All Projects</h3>
+				</div>
+			</div>
+			<div class="row projects-row" >
+				<div class="col recent-projects">';
+					
+					foreach ($allProjects as $p) {
+						$keywords = $keywordsDao->getKeywordsForEntity($p->getId());
+						$awards = $projectsDao->getProjectAwards($p->getId());
+						$p->setKeywords($keywords);
+						$p->setAwards($awards);
+						echo createProfileProjectHtml($p, false);
+					} 
+				   
+			echo '    </div>
+			</div>';
+		}
+?>
+		
+		
     </div>
+    
 
 </div>
 

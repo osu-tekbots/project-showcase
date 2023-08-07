@@ -5,6 +5,7 @@ use Model\ShowcaseProject;
 use Model\ShowcaseProjectArtifact;
 use Model\CollaborationInvitation;
 use Model\ShowcaseProjectImage;
+use Model\Award;
 
 /**
  * Handles database interactions for showcase project and artifact data.
@@ -67,6 +68,92 @@ class ShowcaseProjectsDao {
             return false;
         }
     }
+	
+	/**
+     * Fetches all the projects from the database.
+     *
+     * @param integer $count the number to limit the return array size to
+     * @param integer $offset the offset in the database table to start retrieve projects from
+     * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
+     */
+    public function getAllProjectsSortByScore($count = 0, $offset = 0, $includeHidden = false) {
+        try {
+            $limit = '';
+            if ($offset > 0) {
+                $limit = "LIMIT $offset";
+                if ($count > 0) {
+                    $limit .= ", $count";
+                }
+            } elseif ($count > 0) {
+                $limit = "LIMIT $count";
+            }
+            $hiddenCondition = !$includeHidden ? 'WHERE sp_published = 1' : '';
+            $sql = "
+            SELECT *
+            FROM showcase_project
+            $hiddenCondition
+            ORDER BY sp_score DESC, sp_title ASC
+            $limit
+            ";
+            $results = $this->conn->query($sql);
+
+            $projects = array();
+            foreach ($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+            return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get all projects: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	
+	/**
+     * Fetches all the projects from the database by type.
+     *
+     * @param string $category the short name of the category
+     * @param integer $count the number to limit the return array size to
+     * @param integer $offset the offset in the database table to start retrieve projects from
+     * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
+     */
+    public function getProjectsByCategory($category, $count = 0, $offset = 0, $includeHidden = false) {
+        try {
+            $limit = '';
+            if ($offset > 0) {
+                $limit = "LIMIT $offset";
+                if ($count > 0) {
+                    $limit .= ", $count";
+                }
+            } elseif ($count > 0) {
+                $limit = "LIMIT $count";
+            }
+            $hiddenCondition = !$includeHidden ? ' AND sp_published = 1 ' : '';
+            $sql = "
+            SELECT showcase_project.* 
+            FROM showcase_project 
+            INNER JOIN showcase_category ON showcase_category.id = showcase_project.sp_category 
+			WHERE showcase_category.shortname = '$category' 
+			$hiddenCondition 
+			ORDER BY sp_title ASC 
+            $limit
+            ";
+
+            $results = $this->conn->query($sql);
+
+            $projects = array();
+            foreach ($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+			
+            return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get all projects: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * Fetches all showcase projects associated with the user that has the provided ID.
@@ -78,7 +165,7 @@ class ShowcaseProjectsDao {
      * @param boolean $includeArtifacts flag to indicate whether to include project artifacts. Defaults to false.
      * @return \Model\ShowcaseProject[]|boolean an array of projects on success, false on error
      */
-    public function getUserProjects($userId, $includeArtifacts = false, $includeHidden = false) {
+    public function getUserProjects($userId, $includeArtifacts = false, $includeHidden = false, $sort = 'title') {
         try {
             $artifactsTable = $includeArtifacts ? ', showcase_project_artifact ' : '';
             $artifactsPredicate = $includeArtifacts ? 'AND spa_sp_id = sp_id' : '';
@@ -110,10 +197,17 @@ class ShowcaseProjectsDao {
                 }
             }
 
-            // Finally sort the projects by their create date
-            \usort($projects, function($p1, $p2) {
-                return $p1->getDateCreated() > $p2->getDateCreated();
-            });
+            
+			// Finally sort the projects by their create date
+			// TODO: This needs to be imporved for readability and function
+            if ($sort == 'title')
+				\usort($projects, function($p1, $p2) {		
+						return ($p1->getTitle() > $p2->getTitle() ? 1 : 0);
+				});
+			else
+				\usort($projects, function($p1, $p2) {		
+						return ($p1->getDateCreated() > $p2->getDateCreated() ? 1 : 0);
+				});
 
             return $projects;
         } catch (\Exception $e) {
@@ -200,6 +294,7 @@ class ShowcaseProjectsDao {
         }
     }
 
+
     /**
      * Fetches a single showcase project with the provided ID.
      * 
@@ -259,7 +354,7 @@ class ShowcaseProjectsDao {
                 $images[] = $image;
             }
             \usort($images, function($i1, $i2) {
-                return $i1->getDateCreated() > $i2->getDateCreated();
+                return ($i1->getDateCreated() > $i2->getDateCreated() ? 0 : 1);
             });
             $project->setImages($images);
 
@@ -269,6 +364,69 @@ class ShowcaseProjectsDao {
             return false;
         }
     }
+
+	/**
+     * Fetches a awards (if any) for a showcase project with the provided ID.
+     * 
+     *
+     * @param string $projectId the ID of the awards to retrieve
+     * @return \Model\ShowcaseProject|boolean the project on success, false if not found or an error occurred
+     */
+    public function getProjectAwards($projectId) {
+        try {
+            $sql = '
+            SELECT showcase_awards.* 
+			FROM `showcase_awards` 
+			WHERE id IN (SELECT award_id FROM showcase_project_awards WHERE showcase_project_awards.sp_id = :id) 
+			ORDER BY showcase_awards.name ASC
+            ';
+            $params = array(':id' => $projectId);
+
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
+            }
+
+			$awards = array();
+            foreach ($results as $row) {
+                $awards[] = self::ExtractAwardFromRow($row);
+            }
+
+            return $awards;
+            
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch awards for project with ID '$projectId': " . $e->getMessage());
+            return false;
+        }
+    }
+
+	/**
+     * Fetches a project award with the provided ID.
+     *
+     * @param string $artifactId the string ID of the artifact
+     * @return \Model\ShowcaseProjectArtifact the artifact on success, false if not found or an error occurs
+     */
+    public function getProjectAward($awardId) {
+        try {
+            $sql = '
+            SELECT showcase_awards.*
+            FROM showcase_awards
+            WHERE id = :id
+            ';  
+            $params = array(':id' => $awardId);
+
+            $results = $this->conn->query($sql, $params);
+            if (\count($results) == 0) {
+                return false;
+            }
+
+            return self::ExtractShowcaseAwardFromRow($results[0]);
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch project award with ID '$awardId': " . $e->getMessage());
+            return false;
+        }
+    }
+
 
     /**
      * Fetches a project artifact with the provided ID.
@@ -381,9 +539,9 @@ class ShowcaseProjectsDao {
             $sql = '
             INSERT INTO showcase_project_artifact (
                 spa_id, spa_sp_id, spa_name, spa_description, spa_file_uploaded, spa_link, spa_published,
-                spa_date_created, spa_date_updated
+                spa_date_created, spa_date_updated, spa_extension 
             ) VALUES (
-                :id, :pid, :name, :description, :file, :link, :published, :created, :updated
+                :id, :pid, :name, :description, :file, :link, :published, :created, :updated, :extension
             )
             ';
             $params = array(
@@ -395,7 +553,9 @@ class ShowcaseProjectsDao {
                 ':link' => $artifacts->getLink(),
                 ':published' => $artifacts->isPublished(),
                 ':created' => QueryUtils::FormatDate($artifacts->getDateCreated()),
-                ':updated' => QueryUtils::FormatDate($artifacts->getDateUpdated())
+                ':updated' => QueryUtils::FormatDate($artifacts->getDateUpdated()),
+				':extension' => $artifacts->getExtension()
+                
             );
             $this->conn->execute($sql, $params);
 
@@ -528,7 +688,7 @@ class ShowcaseProjectsDao {
             return true;
         } catch (\Exception $e) {
             $this->conn->rollback();
-            $this->logger->error("Failed to accept collaboration invitates for user $userId with project $projectId: " 
+            $this->logger->error("Failed to accept collaboration invitation for user $userId with project $projectId: " 
             . $e->getMessage());
             return false;
         }
@@ -543,11 +703,13 @@ class ShowcaseProjectsDao {
     public function updateProject($project) {
         try {
             $sql = '
-            UPDATE showcase_project SET
-                sp_title = :title,
-                sp_description = :description,
-                sp_published = :published,
-                sp_date_updated = :updated
+            UPDATE showcase_project SET 
+                sp_title = :title, 
+                sp_description = :description, 
+                sp_published = :published, 
+                sp_category = :mycategory, 
+				sp_score = :score, 
+                sp_date_updated = :updated 
             WHERE sp_id = :id
             ';
             $params = array(
@@ -555,6 +717,8 @@ class ShowcaseProjectsDao {
                 ':title' => $project->getTitle(),
                 ':description' => $project->getDescription(),
                 ':published' => $project->isPublished(),
+                ':mycategory' => $project->getCategory(),
+                ':score' => $project->getScore(),
                 ':updated' => QueryUtils::FormatDate($project->getDateUpdated())
             );
             $this->conn->execute($sql, $params);
@@ -610,6 +774,8 @@ class ShowcaseProjectsDao {
      */
     public function deleteProjectArtifact($artifactId) {
         try {
+            unlink(PUBLIC_FILES . '/.private/artfacts' . "/$artifactId");
+
             $sql = '
             DELETE FROM showcase_project_artifact
             WHERE spa_id = :id
@@ -626,13 +792,84 @@ class ShowcaseProjectsDao {
     }
 
     /**
-     * Deletes project image metadata from the database.
+     * Deletes project invites from the database
+     *
+     * @param string $projectId the ID of the project invites to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteProjectInvites($projectId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_collaboration_invite
+            WHERE sci_sp_id = :id
+            ';
+            $params = array(':id' => $projectId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project invites: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Deletes project collaborators from the database
+     *
+     * @param string $projectId the ID of the project collaborators to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteProjectCollaborators($projectId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_worked_on
+            WHERE swo_sp_id = :id
+            ';
+            $params = array(':id' => $projectId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project invites: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * Deletes a single project collaborator from the database based on project and user id
+     *
+     * @param string $projectId the ID of the project collaborators to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteProjectCollaborator($projectId, $userId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_worked_on
+            WHERE swo_sp_id = :id AND swo_u_id = :uid
+            ';
+            $params = array(':id' => $projectId, ':uid' => $userId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project user: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Deletes project image metadata from the database as well as the image stored
      *
      * @param string $imageId the ID of the image to delete
      * @return boolean true on success, false otherwise
      */
     public function deleteProjectImage($imageId) {
         try {
+            unlink(PUBLIC_FILES . '/.private/images/projects' . "/$imageId");
+
             $sql = '
             DELETE FROM showcase_project_image
             WHERE spi_id = :id
@@ -644,6 +881,29 @@ class ShowcaseProjectsDao {
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to delete showcase project image: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Deletes project information from the database
+     *
+     * @param string $projectId the ID of the project to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteShowcaseProject($projectId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_project
+            WHERE sp_id = :id
+            ';
+            $params = array(':id' => $projectId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project: ' . $e->getMessage());
             return false;
         }
     }
@@ -861,8 +1121,10 @@ class ShowcaseProjectsDao {
             ->setTitle($row['sp_title'])
             ->setDescription($row['sp_description'])
             ->setPublished($row['sp_published'] ? true : false)
-            ->setDateCreated(new \DateTime($row['sp_date_created']))
-            ->setDateUpdated($row['sp_date_updated'] ? new \DateTime($row['sp_date_updated']) : null);
+            ->setDateCreated(new \DateTime(($row['sp_date_created'] == '' ? "now" : $row['sp_date_created']))) //Modified 3/31/2023
+            ->setDateUpdated($row['sp_date_updated'] ? new \DateTime($row['sp_date_updated']) : null)
+			->setCategory($row['sp_category'])
+			->setScore($row['sp_score']);
 
         return $project;
     }
@@ -892,8 +1154,9 @@ class ShowcaseProjectsDao {
             ->setDescription($row['spa_description'])
             ->setFileUploaded($row['spa_file_uploaded'] ? true : false)
             ->setLink($row['spa_link'])
+            ->setExtension($row['spa_extension'])
             ->setPublished($row['spa_published'] ? true : false)
-            ->setDateCreated(new \DateTime($row['spa_date_created']))
+            ->setDateCreated(new \DateTime(($row['spa_date_created'] == '' ? "now" : $row['spa_date_created']))) //Modified 3/31/2023
             ->setDateUpdated($row['spa_date_updated'] ? new \DateTime($row['spa_date_updated']) : null);
 
         if ($projectInRow) {
@@ -919,7 +1182,7 @@ class ShowcaseProjectsDao {
         $image
             ->setProjectId($row['spi_sp_id'])
             ->setFileName($row['spi_file_name'])
-            ->setDateCreated(new \DateTime($row['spi_date_created']));
+            ->setDateCreated(new \DateTime(($row['spi_date_created'] == '' ? "now" : $row['spi_date_created']))); //Modified 3/31/2023
         return $image;
     }
 
@@ -936,10 +1199,28 @@ class ShowcaseProjectsDao {
         $invitation
             ->setProjectId($row['sci_sp_id'])
             ->setEmail($row['sci_email'])
-            ->setDateCreated(new \DateTime($row['sci_date_created']));
+            ->setDateCreated(new \DateTime(($row['sci_date_created'] == '' ? "now" : $row['sci_date_created']))); //Modified 3/31/2023
         if ($projectInRow) {
             $invitation->setProject(self::ExtractShowcaseProjectFromRow($row));
         }
         return $invitation;
+    }
+	
+	/**
+     * Users information from a row in the database to create an Award object.
+     *
+     * @param mixed[] $row the row from the database
+     * 
+     * @return \Model\Award the award
+     */
+    public static function ExtractAwardFromRow($row) {
+        $award = new Award($row['id']);
+        $award
+            ->setName($row['name'])
+            ->setDescription($row['description'])
+			->setImageNameSquare($row['image_name_square'])
+			->setImageNameRectangle($row['image_name_rectangle']);
+
+        return $award;
     }
 }

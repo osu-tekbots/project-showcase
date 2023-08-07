@@ -45,7 +45,7 @@ class ShowcaseProfile {
             $this->setAcceptingInvites(true);
             $this->setImageUploaded(false);
             $this->setResumeUploaded(false);
-            $this->setDateCreated(new \DateTime());
+            $this->setDateCreated(new \DateTime("now"));
         }
     }
 

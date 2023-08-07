@@ -36,6 +36,19 @@ function createProfileProjectHtml($project, $isOwnProject = false) {
             ";
         }
     }
+	
+	// Awards
+	$pAwardsHtml = '';
+	$awards = $project->getAwards();
+	if ($awards != null){
+		if(count($awards) > 0) {
+			foreach ($awards as $award){
+				if ($award->getImageNameSquare() != '')
+					$pAwardsHtml .= "<div class='award_overlay'><img class='' style='width:3em;' src='assets/img/".$award->getImageNameSquare()."' title='".$award->getName()."'></div>";
+			}
+		}
+}	
+	
 
     $actionButton = "
     <a href='projects/?id=$id' class='btn btn-outline-osu'>
@@ -49,7 +62,7 @@ function createProfileProjectHtml($project, $isOwnProject = false) {
             Edit
         </a>
         ";
-        $hiddenAlert = "<span class='hidden-alert badge badge-pill badge-danger'><i class='fas fa-eye-slash'></i></span>";
+        $hiddenAlert = "<span class='hidden-alert badge badge-pill badge-danger'><i class='fas fa-eye-slash' data-toggle='tooltip' data-placement='top' title='This project is hidden from search. Either you requested this or it does not meet the community standards for the showcase. Add more content if you want it searchable.'></i></span>";
     }
 
     return "
@@ -60,7 +73,7 @@ function createProfileProjectHtml($project, $isOwnProject = false) {
             <p class='project-description'>$description</p>
             <div class='project-details'>
                 <div class='project-tile-keywords'>
-                    $keywordsHtml
+                    $pAwardsHtml $keywordsHtml
                 </div>
                 $actionButton
             </div>

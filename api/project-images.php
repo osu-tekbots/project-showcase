@@ -8,8 +8,36 @@ include_once '../bootstrap.php';
 
 use DataAccess\UsersDao;
 use DataAccess\ShowcaseProjectsDao;
+use DataAccess\ShowcaseProfilesDao;
 use Api\Response;
 use Model\ShowcaseProjectImage;
+
+function correctImageOrientation($filename) {
+  if (function_exists('exif_read_data')) {
+    $exif = exif_read_data($filename);
+    if($exif && isset($exif['Orientation'])) {
+      $orientation = $exif['Orientation'];
+      if($orientation != 1){
+        $img = imagecreatefromjpeg($filename);
+        $deg = 0;
+        switch ($orientation) {
+          case 3:
+            $deg = 180;
+            break;
+          case 6:
+            $deg = 270;
+            break;
+          case 8:
+            $deg = 90;
+            break;
+        }
+        return $deg;
+      } // if there is some rotation necessary
+    } // if have the exif orientation info
+  } // if function exists   
+  return 0;  
+}
+
 
 if (!isset($_SESSION)) {
     session_start();
@@ -33,7 +61,9 @@ if (is_null($projectId) || empty($projectId)) {
 
 // Make sure the current user has permission to perform this action (i.e. they are either an admin or a
 // collaborator on the project)
-$userId = $_SESSION['userID'];
+// $userId = $_SESSION['userID'];
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+$userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
 $usersDao = new UsersDao($dbConn, $logger);
 $user = $usersDao->getUser($userId);
 

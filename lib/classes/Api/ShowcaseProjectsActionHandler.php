@@ -13,8 +13,14 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     /** @var \DataAccess\ShowcaseProjectsDao */
     private $projectsDao;
 
+	/** @var \DataAccess\AwardDao */
+    private $awardDao;
+
     /** @var \DataAccess\UsersDao */
     private $usersDao;
+
+	/** @var \DataAccess\CategoryDao */
+    private $categoryDao;
 
     /** @var \DataAccess\KeywordsDao */
     private $keywordsDao;
@@ -31,9 +37,11 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
      * @param \Email\CollaborationMailer  $mailer the Mailer class providing email functionality for collaboration
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($projectsDao, $usersDao, $keywordsDao, $mailer, $logger) {
+    public function __construct($projectsDao, $usersDao, $keywordsDao, $awardDao, $categoryDao, $mailer, $logger) {
         parent::__construct($logger);
         $this->mailer = $mailer;
+        $this->awardDao = $awardDao;
+        $this->categoryDao = $categoryDao;
         $this->usersDao = $usersDao;
         $this->keywordsDao = $keywordsDao;
         $this->projectsDao = $projectsDao;
@@ -48,6 +56,13 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         $userId = $this->getFromBody('userId');
         $title = $this->getFromBody('title');
         $description = $this->getFromBody('description');
+
+        if (empty(trim($title))){
+            $this->respond(new Response(Response::BAD_REQUEST, 'Title cannot be empty'));
+        }
+        if (empty(trim($description))){
+            $this->respond(new Response(Response::BAD_REQUEST, 'Description cannot be empty'));
+        }
 
         $project = new ShowcaseProject();
         $project
@@ -75,7 +90,15 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         $projectId = $this->getFromBody('projectId');
         $title = $this->getFromBody('title');
         $description = $this->getFromBody('description');
+        $category = $this->getFromBody('category');
         $keywords = $this->getFromBody('keywords');
+
+        if (empty(trim($title))){
+            $this->respond(new Response(Response::BAD_REQUEST, 'Title cannot be empty'));
+        }
+        if (empty(trim($description))){
+            $this->respond(new Response(Response::BAD_REQUEST, 'Description cannot be empty'));
+        }
 
         $project = $this->projectsDao->getProject($projectId);
         // TODO: handle case when project is not found
@@ -83,7 +106,8 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         $project
             ->setTitle($title)
             ->setDescription($description)
-            ->setDateUpdated(new \DateTime());
+            ->setCategory($category)
+            ->setDateUpdated(new \DateTime("now")); //Modified 3/31/2023
         
         $ok = $this->projectsDao->updateProject($project);
         if (!$ok) {
@@ -114,6 +138,90 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             'Successfully saved changes to project'
         ));
     }
+	
+	
+	/**
+     * Handles a request to update category in the database for a project.
+     *
+     * @return void
+     */
+    public function handleUpdateCategory() {
+        $projectId = $this->getFromBody('projectId');
+        $category = $this->getFromBody('category');
+        
+        $project = $this->projectsDao->getProject($projectId);
+        // TODO: handle case when project is not found
+
+        $project->setCategory($category);
+        
+        $ok = $this->projectsDao->updateProject($project);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to save changes to project'));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully updated category to '.$category.' for ' . $projectId
+        ));
+    }
+	
+	/**
+     * Handles a request to create a category in the database.
+     *
+     * @return void
+     */
+    public function handleCreateCategory() {
+        $name = $this->getFromBody('name');
+        $shrtname = $this->getFromBody('shrtname');
+        
+		$ok = $this->categoryDao->createCategory($name, $shrtname);
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create category'));
+        }
+		
+		$this->respond(new Response(
+            Response::OK,
+            'Successfully added category, '.$name));
+    }
+	
+	/**
+     * Handles a request to give an award to a project.
+     *
+     * @return void
+     */
+    public function handleGiveAward() {
+        $projectId = $this->getFromBody('projectId');
+        $awardId = $this->getFromBody('awardId');
+        
+        $ok = $this->awardDao->giveAward($awardId, $projectId);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to give award.'));
+        }
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully added award'
+        ));
+    }
+	
+	/**
+     * Handles a request to remove an award from a project.
+     *
+     * @return void
+     */
+    public function handleRemoveAward() {
+        $projectId = $this->getFromBody('projectId');
+        $awardId = $this->getFromBody('awardId');
+        
+        $ok = $this->awardDao->removeAward($awardId, $projectId);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to remove award.'));
+        }
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully removed award'
+        ));
+    }
+	
 
     /**
      * Handles inviting a user to collaborate on a project.
@@ -125,9 +233,16 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         $userId = $this->getFromBody('userId');
         $email = $this->getFromBody('email');
 
-        $user = $this->usersDao->getUser($userId);
-        // TODO: handle case when user is not found
+		if (substr($email,-16,16) != '@oregonstate.edu') //Can not be added to project
+			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Collaborators must have '@oregonstate.edu' email addresses."));
 
+        $user = $this->usersDao->getUser($userId);
+//    	if (!($user)) // User search returned false
+//			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "User not found in user table. They need to login to this site once before you can add them."));
+		
+//		if ($user->getOnid() == '') //Can not be added to project
+//			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Collaborators must have '@oregonstate.edu' email addresses."));
+			
         $project = $this->projectsDao->getProject($projectId);
         // TODO: handle case when showcase project is not found
 
@@ -154,9 +269,41 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             "Successfully sent invitation to $email"
         ));
     }
+	
+	/**
+     * Handles removing a user from a project.
+     *
+     * @return void
+     */
+    public function handleRemoveUserFromProject() {
+        $projectId = $this->getFromBody('projectId');
+        $userId = $this->getFromBody('userId');
+/*        
+        $user = $this->usersDao->getUser($userId);			
+        $project = $this->projectsDao->getProject($projectId);
+
+
+        $sent = $this->mailer->sendInvite($user, $email, $project, $invitation->getId());
+        if (!$sent) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
+        }
+*/
+        $ok = $this->projectsDao->deleteProjectCollaborator($projectId, $userId);
+        if (!$ok) {
+            $this->response(new Response(
+                Response::INTERNAL_SERVER_ERROR, 
+                'Failed to remove user. You need to contact support.'
+            ));
+        }
+
+        $this->respond(new Response(
+            Response::OK,
+            "Successfully removed user."
+        ));
+    }
 
     /**
-     * Handles a request to not show a user as a project associate publically.
+     * Handles a request to not show a user as a project associate publicly.
      *
      * @return void
      */
@@ -195,6 +342,11 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         ));
     }
 
+	
+	public function getAction() {
+        return $this->getFromBody('action');
+	}
+	
     /**
      * Handles a request for showcase projects that match the query in the body
      *
@@ -218,11 +370,12 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         include_once PUBLIC_FILES . '/modules/project.php';
         $body = array('html' => '');
         foreach ($projects as $p) {
-            $keywords = $this->keywordsDao->getKeywordsForEntity($p->getId());
-            $p->setKeywords($keywords);
+			$keywords = $this->keywordsDao->getKeywordsForEntity($p->getId());
+			$awards = $this->projectsDao->getProjectAwards($p->getId());
+			$p->setKeywords($keywords);
+			$p->setAwards($awards);
             $body['html'] .= createProfileProjectHtml($p, false);
         }
-
         $this->respond(new Response(
             Response::OK,
             'Successfully fetched projects with query',
@@ -255,6 +408,56 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to delete a showcase project entirely
+     *
+     * @return void
+     */
+    public function handleDeleteProject() {
+        $sid = $this->getFromBody('id');
+        
+        $project = $this->projectsDao->getProject($sid);
+    
+        $pImages = $project->getImages();
+        foreach ($pImages as $i) {
+            $id = $i->getId();
+            $ok = $this->projectsDao->deleteProjectImage($id);
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to upate delete project image'));
+            }
+        }
+
+        $pArtifacts = $project->getArtifacts();
+        foreach ($pArtifacts as $artifact) {
+            $aId = $artifact->getId();
+            $ok = $this->projectsDao->deleteProjectArtifact($aId);
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete project artifacts'));
+            }
+        }
+
+        $ok = $this->projectsDao->deleteProjectInvites($sid);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete project invites'));
+        }
+
+        $ok = $this->projectsDao->deleteProjectCollaborators($sid);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete collaborators'));
+        }
+
+        $ok = $this->projectsDao->deleteShowcaseProject($sid);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete project'));
+        }
+
+    
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully deleted the project'
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -279,6 +482,15 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             case 'inviteUser':
                 $this->handleInviteUserToProject();
 
+			case 'removeUser':
+                $this->handleRemoveUserFromProject();
+
+			case 'giveAward':
+                $this->handleGiveAward();
+			
+			case 'removeAward':
+                $this->handleRemoveAward();
+
             case 'hideUserFromProject':
                 $this->handleHideUserFromProject();
 
@@ -290,6 +502,15 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'updateVisibility':
                 $this->handleUpdateVisibility();
+
+			case 'updateCategory':
+                $this->handleUpdateCategory();
+
+			case 'createCategory':
+                $this->handleCreateCategory();
+
+            case 'deleteProject':
+                $this->handleDeleteProject();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

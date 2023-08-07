@@ -47,7 +47,7 @@ function onUserTypeClick() {
         snackbar(err.message, 'error');
     });
 }
-$('.btn-user-type').click(onUserTypeClick);
+$('#currentUsers').on('click', '.btn-user-type', onUserTypeClick);
 
 /**
  * Handles updating a projects visibility from published to hidden and visa-versa.
@@ -76,4 +76,4 @@ function onProjectPublishedClick() {
         snackbar(err.message, 'error');
     });
 }
-$('.btn-published').click(onProjectPublishedClick);
+$('#currentProjects').on('click', '.btn-published', onProjectPublishedClick);

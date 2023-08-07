@@ -5,14 +5,17 @@
  */
 include_once '../bootstrap.php';
 
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
+//error_reporting(E_ALL);
+
 use Api\Response;
 use DataAccess\ShowcaseProjectsDao;
-use Api\ShowcaseProjectsActionHandler;
+use Api\VoteActionHandler;
 use DataAccess\UsersDao;
 use Email\CollaborationMailer;
-use DataAccess\KeywordsDao;
+use DataAccess\VoteDao;
 use DataAccess\AwardDao;
-use DataAccess\CategoryDao;
 
 if (!isset($_SESSION)) {
     session_start();
@@ -20,20 +23,13 @@ if (!isset($_SESSION)) {
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
-$keywordsDao = new KeywordsDao($dbConn, $logger);
+$voteDao = new VoteDao($dbConn, $logger);
 $awardDao = new AwardDao($dbConn, $logger);
-$categoryDao = new CategoryDao($dbConn, $logger);
-$mailer = new CollaborationMailer(
-    $configManager->get('email.subject_tag'), 
-    $configManager->get('email.from_address'), 
-    $logger, 
-    $configManager
-);
-$handler = new ShowcaseProjectsActionHandler($projectsDao, $usersDao, $keywordsDao, $awardDao, $categoryDao, $mailer, $logger);
 
-if ($handler->getAction() == 'browseProjects') {
-	$handler->handleRequest();
-} else if ($isLoggedIn) {
+
+$handler = new VoteActionHandler($projectsDao, $usersDao, $voteDao, $awardDao, $logger);
+
+if ($isLoggedIn) {
     $handler->handleRequest();
 } else {
     $handler->respond(new Response(Response::UNAUTHORIZED, 'You do not have permission to access this resource'));

@@ -20,6 +20,16 @@ function renderAdminMenu($active = 'dashboard') {
             'icon' => 'fas fa-project-diagram',
             'link' => 'admin/projects',
             'title' => 'Projects'
+        ),
+        'awards' => array(
+            'icon' => 'fas fa-project-diagram',
+            'link' => 'admin/awards',
+            'title' => 'Edit Awards'
+        ),
+		'categories' => array(
+            'icon' => 'fas fa-project-diagram',
+            'link' => 'admin/categories',
+            'title' => 'Edit Categories'
         )
     );
     

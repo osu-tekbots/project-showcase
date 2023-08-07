@@ -275,7 +275,8 @@ class UsersDao {
      * @return \Model\User
      */
     public static function ExtractUserFromRow($row) {
-        $user = new User($row['u_id']);
+ //       echo "Grabbing User";
+		$user = new User($row['u_id']);
         $user->setType(self::ExtractUserTypeFromRow($row, true))
             ->setFirstName($row['u_fname'])
             ->setLastName($row['u_lname'])
@@ -287,9 +288,9 @@ class UsersDao {
             ->setOnid($row['u_onid'])
             ->setAuthProvider(self::ExtractUserAuthProviderFromRow($row, true))
             ->setAuthProviderId($row['u_uap_provided_id'])
-            ->setDateCreated(new \DateTime($row['u_date_created']))
-            ->setDateUpdated(new \DateTime($row['u_date_updated']))
-            ->setDateLastLogin(new \DateTime($row['u_date_last_login']));
+            ->setDateCreated(new \DateTime(($row['u_date_created'] == '' ? "now" : $row['u_date_created']))) //Modified 3/31/2023
+            ->setDateUpdated(new \DateTime(($row['u_date_updated'] == '' ? "now" : $row['u_date_updated']))) //Modified 3/31/2023
+            ->setDateLastLogin(new \DateTime(($row['u_date_last_login'] == '' ? "now" : $row['u_date_last_login']))); //Modified 3/31/2023
         
         return $user;
     }

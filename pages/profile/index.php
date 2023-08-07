@@ -4,6 +4,10 @@
  */
 include_once '../../bootstrap.php';
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 use DataAccess\ShowcaseProfilesDao;
 use DataAccess\ShowcaseProjectsDao;
 use Util\Security;
@@ -13,6 +17,8 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
+$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+
 // If an ID is provided, display the profile for that user.
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $userId = $_GET['id'];
@@ -20,7 +26,8 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 } 
 // If no ID is provided and the user is logged in, then we will show their profile
 elseif ($isLoggedIn) {
-    $userId = $_SESSION['userID'];
+    // $userId = $_SESSION['userID'];
+    $userId = $profilesDao->getUserIdFromOnid($_SESSION['auth']['id']); // TEMPORARY FIX for login issues across eecs sites
     $isOwnProfile = true;
 }
 // The user is not logged in and no ID is provided, so redirect to the home page 
@@ -45,14 +52,13 @@ $js = array(
 );
 include_once PUBLIC_FILES . '/modules/header.php';
 
-$profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
 $profile = $profilesDao->getUserProfileInformation($userId);
 
 if (!$profile) {
     echo "
     <div class='container'>
         <h1>Whoops!</h1>
-        <p>Looks like we couldn't find the profile you were looking for. Try returning to <a href=''>the home page</a>.
+        <p>Looks like we couldn't find the profile you were looking for. Try returning to <a href=''>the home page</a>. You may need to logout and back in.
         </p>
     </div>
     ";
@@ -77,9 +83,22 @@ if (!$profile) {
     if ($profile->canShowContactInfo()) {
         $phone = $profile->getUser()->getPhone();
         $email = Security::ValidateEmail($profile->getUser()->getEmail());
-        $contactHtml = "
-            <i><a href='mailto:$email'>$email</a></i>&nbsp;&nbsp;|&nbsp;&nbsp;<i>$phone</i>
+        if (empty($phone) && empty($email)){
+            $contactHtml = "";
+        }
+        else if (empty($phone)){
+            $contactHtml = "
+            <i><a href='mailto:$email'>$email</a></i>
         ";
+        } else if (empty($email)) {
+        $contactHtml = "
+           <i>$phone</i>
+        ";
+        } else {
+            $contactHtml = "
+            <i><a href='mailto:$email'>$email</a></i>&nbsp;|&nbsp;<i>$phone</i>
+        ";
+        }
     }
 
     $editButton = !$isOwnProfile ? '' : "
@@ -138,8 +157,10 @@ if (!$profile) {
                 <i class='fas fa-handshake'></i>&nbsp;&nbsp;Introduce Yourself
             </a>
             ";
+            
         } else {
             $aboutHtml = '';
+            $profileLink = "";
         }
     } else {
         $aboutHtml = "
@@ -148,9 +169,19 @@ if (!$profile) {
         ";
     }
 
+    if ($isOwnProfile) {
+        $link = $baseUrl . "profile/?id=$userId";
+        $profileLink = "
+        <p>Sharable Profile Link: <a href='$link'>$link</a></p>
+    ";
+    } else {
+        $profileLink = "";
+    }
+
     // Create the HTML for the 'Projects' section
     $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
-    $projects = $projectsDao->getUserProjects($userId, false, $isOwnProfile);
+    $projects = $projectsDao->getUserProjects($userId, false, true);
+//    Edited line above to show hidden project also when going to personal profile. $projects = $projectsDao->getUserProjects($userId, false, $isOwnProfile);
     if (!$projects) {
         if ($isOwnProfile) {
             $projectsHtml = "
@@ -159,6 +190,7 @@ if (!$profile) {
                     <i class='fas fa-plus'></i>&nbsp;&nbsp;Add a Project
                 </a>
             ";
+            
         } else {
             $projectsHtml = "<p>The student doesn't have any projects on display</p>";
         }
@@ -175,7 +207,11 @@ if (!$profile) {
             $projectsHtml .= createProfileProjectHtml($p, $isOwnProfile);
         }
 
-        $projectsHtml .= '</div>';
+        
+		$projectsHtml .= "<a href='profile/edit#projects' class='btn btn-primary'>
+                    <i class='fas fa-plus'></i>&nbsp;&nbsp;Add a Project
+                </a>";
+		$projectsHtml .= '</div>';
     }
 
     // Render all of the HTML
@@ -197,6 +233,7 @@ if (!$profile) {
                         </div>
                         <div class='profile-contact' $contactStyle>
                             $contactHtml
+                            $profileLink
                         </div>
                     </div>
                     $resumeHtml

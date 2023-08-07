@@ -72,7 +72,8 @@ class Mailer {
             $to = \implode(',', $to);
         }
 
-        $accepted = \mail($to, $subject, $message, $headersStr);
+		$additional = "-fheer@oregonstate.edu"; // Added 4/26/2022 to redirect bounces.
+        $accepted = \mail($to, $subject, $message, $headersStr, $additional);
         if (!$accepted) {
             $lastError = error_get_last();
             if ($this->logger != null) {
