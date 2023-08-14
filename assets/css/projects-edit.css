@@ -49,7 +49,7 @@ CSS for the edit showcase project page of the OSU project showcase website.
     align-self: center;
 }
 
-#btnDeleteSelectedImage {
+#btnDeleteSelectedImage, #btnUpSelectedImage, #btnDownSelectedImage {
     align-self: flex-start;
     margin-bottom: 10px;
 }

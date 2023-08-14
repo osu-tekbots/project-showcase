@@ -87,6 +87,8 @@ switch ($_POST['action']) {
 
     case 'deleteProjectImage':
         handleDeleteProjectImage($projectsDao, $configManager, $logger);
+    case 'moveProjectImage':
+        handleMoveProjectImage($projectsDao, $configManager, $logger);
 
     default: 
         respond(400, 'Invalid action on project image resource');
@@ -159,6 +161,16 @@ function handleAddNewProjectImage($projectId, $projectsDao, $configManager, $log
         ->setFileName($fileName)
         ->setProjectId($projectId);
 
+    // Set the new image as the last in order
+    $project = $projectsDao->getProject($projectId);
+    $projectImgs = $project->getImages();
+    if(count($projectImgs)) {
+        $nextOrderIndex = $projectImgs[count($projectImgs) - 1]->getOrder() + 1;
+        $image->setOrder($nextOrderIndex);
+    } else {
+        $image->setOrder(1);
+    }
+
     $imageId = $image->getId();
 
     $filepath = 
@@ -201,10 +213,47 @@ function handleDeleteProjectImage($projectsDao, $configManager, $logger) {
         respond(500, 'Failed to delete image');
     }
 
+    // Move reference to the end for keeping order numbering sequential
+    $image = $projectsDao->getProjectImage($imageId);
+    $projectId = $image->getProjectId();
+    $oldIndex = $image->getOrder();
+    $newIndex = count($projectsDao->getProject($projectId)->getImages());
+    $ok = $projectsDao->moveProjectImage($projectId, $imageId, $oldIndex, $newIndex);
+    if (!$ok) {
+        respond(500, 'Failed to move image reference for deletion');
+    }
+
+    // Delete reference from database
     $ok = $projectsDao->deleteProjectImage($imageId);
     if (!$ok) {
-        respond(500, 'Failed to delete image');
+        respond(500, 'Failed to delete image reference from database');
     }
 
     respond(200, 'Successfully deleted image');
+}
+
+
+/**
+ * Handles a request to move an image in a project.
+ *
+ * @param \DataAccess\ShowcaseProjectsDao $projectsDao data access object for projects
+ * @param \Util\ConfigManager $configManager configuration manager to getting file location information
+ * @param \Util\Logger $logger logger for capturing information
+ * @return void
+ */
+function handleMoveProjectImage($projectsDao, $configManager, $logger) {
+    $projectId = getFromBody('projectId');
+    $imageId = getFromBody('imageId');
+    $direction = getFromBody('direction');
+
+    $image = $projectsDao->getProjectImage($imageId);
+    $oldIndex = $image->getOrder();
+    $newIndex = $direction == 'up' ? $oldIndex-1 : $oldIndex+1;
+
+    $ok = $projectsDao->moveProjectImage($projectId, $imageId, $oldIndex, $newIndex);
+    if (!$ok) {
+        respond(500, 'Failed to move image');
+    }
+
+    respond(200, 'Successfully moved image '.$direction);
 }

@@ -83,13 +83,15 @@ $pDescription = $project->getDescription();
 
 // Check if the project is published or not. If it is not, display an alert informing the user their project has been
 // flagged by the admins and is not visible
-$pPublishedHtml = $project->isPublished() ? "" : "
-    <div class='row'>
+$pPublishedHtml = "
+    <div id='hiddenAlert' ".($project->isPublished() ? "style='display: none'" : "")." class='row'>
         <div class='col'>
             <div class='alert alert-warning'>
-                <p><i class='fas fa-eye-slash'></i>&nbsp;&nbsp;This project has been hidden from public view by the website
-                administrators. For questions regarding questionable, inappropriate, or incomplete content, please contact an OSU TekBots
-                administrator.</p>
+                <p><i class='fas fa-eye-slash'></i>&nbsp;&nbsp;This project has been hidden from public view and will 
+                no longer appear on the project browsing page. However, it is still visibile on your profile page and
+                can be accessed via a direct link. <BR>
+                For questions regarding questionable, inappropriate, or incomplete content, or to have this project
+                republished, please contact an OSU TekBots <a href='mailto: heer@oregonstate.edu'>administrator</a>.</p>
             </div>
         </div>
     </div>
@@ -148,9 +150,10 @@ $pImagePreviewSrc = '';
 $pButtonImageDeleteStyle = 'style="display: none;"';
 $pButtonImagePreviewStyle = $pButtonImageDeleteStyle;
 $pProjectImagesSelectHtml = "
-    <select class='image-picker' id='selectProjectImages'>
+<select class='image-picker' id='selectProjectImages'>
 ";
 $pImages = $project->getImages();
+$pButtonAllowMoveDown = (count($pImages) > 1) ? '' : 'disabled';
 $first = true;
 foreach ($pImages as $i) {
     $id = $i->getId();
@@ -399,10 +402,21 @@ include_once PUBLIC_FILES . '/modules/header.php';
         Images must be no larger than 5MB. Please limit the number of images per project to 10.</i>
     </p>
     <div class="edit-project-images-container">
-        <button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 
-            <?php echo $pButtonImageDeleteStyle; ?>>
-            <i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
-        </button>
+        <div id="imageButtons">
+            <button type="button" class="btn btn-sm btn-danger" id="btnDeleteSelectedImage" 
+                <?php echo $pButtonImageDeleteStyle; ?>>
+                <i class="fas fa-trash"></i>&nbsp;&nbsp;Delete Selected Image
+            </button>
+            <button type="button" class="btn btn-sm btn-info" id="btnUpSelectedImage" disabled
+                <?php echo $pButtonImageDeleteStyle; ?>>
+                <i class="fas fa-chevron-left"></i>&nbsp;&nbsp;Move Selected Image Forward
+            </button>
+            <button type="button" class="btn btn-sm btn-info" id="btnDownSelectedImage" 
+                <?php echo $pButtonAllowMoveDown ?>
+                <?php echo $pButtonImageDeleteStyle; ?>>
+                <i class="fas fa-chevron-right"></i>&nbsp;&nbsp;Move Selected Image Back
+            </button>
+        </div>
         <div class="project-images-select-container">
             <?php echo $pProjectImagesSelectHtml; ?>
         </div>
@@ -534,9 +548,25 @@ include_once PUBLIC_FILES . '/modules/header.php';
         </div>
     </div>
     <br><br> 
+    <h3 id="hideProject">Hide Project</h3>
+    <p class="col-sm-8"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>This will hide the project from search on the 
+        project browsing page. However, it will not affect visibility on your profile page and will still be accessible 
+        via a direct link. If you want to republish this project to the project browsing page in the future, you will 
+        need to contact the <a href="mailto: heer@oregonstate.edu">administrator</a> with the project you would like 
+        unhidden. Any collaborators on the project are able to hide a project, however, please check in with the other 
+        collaborators to make sure that they are okay with the project being hidden.
+    </i></p>
+    <div class="form-group row">
+        <div class="col-md-8">
+        <button id="btnHideProject" class="btn btn-md btn-warning">
+            <i class="fas fa-eye-slash"></i>&nbsp;&nbsp;Hide Project
+        </button>
+        </div>
+    </div>
+    <BR>
     <h3 id="deleteProject">Delete Project</h3>
-    <p class="col-sm-8"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>This will delete the project entirely (Images, Artifacts, Invites).  If you just need to 
-    hide your project from public view, please contact the <a href="mailto: heer@oregonstate.edu">administrator</a> with the project you would like hidden.
+    <p class="col-sm-8"><i class="fas fa-info-circle"></i>&nbsp;&nbsp;<i>This will delete the project entirely (Images, Artifacts, Invites).  
+    <!-- If you just need to hide your project from public view, please contact the <a href="mailto: heer@oregonstate.edu">administrator</a> with the project you would like hidden. -->
     Any collaborators on the project are able to delete a project, however, please check in with the other collaborators to make sure that they are okay with the project being deleted.
     </i></p>
     <div class="form-group row">

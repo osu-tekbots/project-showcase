@@ -23,6 +23,9 @@ class ShowcaseProjectImage {
     /** @var \DateTime() */
     private $dateCreated;
 
+    /** @var int */
+    private $order;
+
     public function __construct($id = null) {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
@@ -121,4 +124,24 @@ class ShowcaseProjectImage {
 
         return $this;
     }
+
+    /**
+     * Get the order of the image in the project
+     */ 
+    public function getOrder() {
+        return $this->order;
+    }
+
+    /**
+     * Set the order of the image in the project
+     *
+     * @return  self
+     */ 
+    public function setOrder($order) {
+        $this->order = $order;
+
+        return $this;
+    }
+
+    
 }

@@ -58,11 +58,15 @@ $('#imageFile').change(onImageFileChange);
  */
 function initializeImagePicker() {
     $('#selectProjectImages').imagepicker({
-        selected: onImagePickerOptionChange
+        selected: onImagePickerOptionChange,
     });
     $('#selectProjectImages')
         .data('picker')
         .sync_picker_with_select();
+    
+    let select = document.querySelector('#selectProjectImages');
+    let selectedImage = select.options[select.selectedIndex];
+    onUpdateImageButtons(selectedImage);
 }
 initializeImagePicker();
 
@@ -71,7 +75,25 @@ initializeImagePicker();
  */
 function onImagePickerOptionChange(pickerOption) {
     $('#projectImagePreview').attr('src', $(pickerOption.option[0]).data('img-src'));
+
+    // Update movement buttons based on which is selected
+    let imageId = pickerOption.option.attr('id');
+    let image = document.getElementById(imageId);
+    onUpdateImageButtons(image);
 }
+
+function onUpdateImageButtons(selectedImage) {
+    if(!selectedImage) return;
+    if(selectedImage == selectedImage.parentElement.firstElementChild) 
+        document.getElementById('btnUpSelectedImage').disabled = true;
+    else
+        document.getElementById('btnUpSelectedImage').disabled = false;
+    if(selectedImage == selectedImage.parentElement.lastElementChild) 
+        document.getElementById('btnDownSelectedImage').disabled = true;
+    else
+        document.getElementById('btnDownSelectedImage').disabled = false;
+}
+
 
 /**
  * Handles a form submission for uploading a new image to associate with the project.
@@ -106,6 +128,8 @@ function onUploadImageSuccess(id) {
     $('#btnUploadImage').attr('disabled', false);
     $('#formAddNewImageLoader').hide();
     $('#btnDeleteSelectedImage').show();
+    $('#btnUpSelectedImage').show();
+    $('#btnDownSelectedImage').show();
     let name = $('#labelImageFile').text();
     $('#selectProjectImages').append(
         $(`
@@ -145,6 +169,8 @@ function onDeleteSelectedImageButtonClick() {
             $('#projectImagePreview').attr('src', '');
             if ($('#selectProjectImages option').length == 0) {
                 $('#btnDeleteSelectedImage').hide();
+                $('#btnUpSelectedImage').hide();
+                $('#btnDownSelectedImage').hide();
             }
         })
         .catch(err => {
@@ -152,6 +178,66 @@ function onDeleteSelectedImageButtonClick() {
         });
 }
 $('#btnDeleteSelectedImage').click(onDeleteSelectedImageButtonClick);
+
+/**
+ * Handles moving an image forward in the project by sending a request to the server for the project image to be moved.
+ */
+function onMoveSelectedImageUpButtonClick() {
+    $('#btnUpSelectedImage').prop('disabled', true);
+    $('#btnDownSelectedImage').prop('disabled', true);
+    
+    let form = new FormData();
+    let id = $('#selectProjectImages').val();
+    form.append('action', 'moveProjectImage');
+    form.append('projectId', $('#projectId').val());
+    form.append('imageId', id);
+    form.append('direction', 'up')
+
+    api.post('/project-images.php', form, true)
+        .then(() => {
+            $(`option[id=${id}]`).insertBefore($(`option[id=${id}]`).prev());
+            initializeImagePicker();
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        })
+        .finally(() => {
+            let select = document.querySelector('#selectProjectImages');
+            let selectedImage = select.options[select.selectedIndex];
+            onUpdateImageButtons(selectedImage);
+        });
+}
+$('#btnUpSelectedImage').click(onMoveSelectedImageUpButtonClick);
+
+/**
+ * Handles moving an image back in the project by sending a request to the server for the project image to be moved.
+ */
+function onMoveSelectedImageDownButtonClick() {
+    $('#btnUpSelectedImage').prop('disabled', true);
+    $('#btnDownSelectedImage').prop('disabled', true);
+
+    let form = new FormData();
+    let id = $('#selectProjectImages').val();
+    form.append('action', 'moveProjectImage');
+    form.append('projectId', $('#projectId').val());
+    form.append('imageId', id);
+    form.append('direction', 'down')
+
+    api.post('/project-images.php', form, true)
+        .then(() => {
+            $(`option[id=${id}]`).insertAfter($(`option[id=${id}]`).next());
+            initializeImagePicker();
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        })
+        .finally(() => {
+            let select = document.querySelector('#selectProjectImages');
+            let selectedImage = select.options[select.selectedIndex];
+            onUpdateImageButtons(selectedImage);
+        });
+}
+$('#btnDownSelectedImage').click(onMoveSelectedImageDownButtonClick);
 
 /**
  * Detects a change in the radio button select for artifact types and hides/shows the appropriate input
@@ -415,6 +501,24 @@ function onDeleteProjectClick() {
     return false;
 }
 $('#btnDeleteProject').click(onDeleteProjectClick);
+
+function onHideProjectClick(id) {
+    let projectId = $('#projectId').val();
+    body = {
+        action: 'updateVisibility',
+        publish: false,
+        id: projectId
+    };
+    api.post('/showcase-projects.php', body).then(res => {
+        snackbar(res.message, 'success');
+        document.getElementById('hiddenAlert').style.display = '';
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+
+
+}
+$('#btnHideProject').click(onHideProjectClick);
 
 /**
  * Sends a request to the server to update the visibility of the user on the project

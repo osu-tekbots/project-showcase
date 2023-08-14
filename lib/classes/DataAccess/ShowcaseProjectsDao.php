@@ -343,7 +343,7 @@ class ShowcaseProjectsDao {
             SELECT *
             FROM showcase_project_image
             WHERE spi_sp_id = :id
-            ORDER BY spi_date_created
+            ORDER BY spi_order ASC
             ';
             $results = $this->conn->query($sql, $params);
 
@@ -353,9 +353,6 @@ class ShowcaseProjectsDao {
                 $image->setProject($project);
                 $images[] = $image;
             }
-            \usort($images, function($i1, $i2) {
-                return ($i1->getDateCreated() > $i2->getDateCreated() ? 0 : 1);
-            });
             $project->setImages($images);
 
             return $project;
@@ -576,16 +573,17 @@ class ShowcaseProjectsDao {
         try {
             $sql = '
             INSERT INTO showcase_project_image (
-                spi_id, spi_sp_id, spi_file_name, spi_date_created
+                spi_id, spi_sp_id, spi_file_name, spi_date_created, spi_order
             ) VALUES (
-                :id, :pid, :name, :created
+                :id, :pid, :name, :created, :order
             )
             ';
             $params = array(
                 ':id' => $image->getId(),
                 ':pid' => $image->getProjectId(),
                 ':name' => $image->getFileName(),
-                ':created' => QueryUtils::FormatDate($image->getDateCreated())
+                ':created' => QueryUtils::FormatDate($image->getDateCreated()),
+                ':order' => $image->getOrder()
             );
             $this->conn->execute($sql, $params);
 
@@ -762,6 +760,87 @@ class ShowcaseProjectsDao {
             return true;
         } catch (\Exception $e) {
             $this->logger->error('Failed to update showcase project artifact: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Sets the order for a project's images in the database based on the date they were added
+     * This function is used for projects created before the order information was added
+     *
+     * @param string $imageId  the image to set the order of
+     * @param int    $index    the order to assign the image
+     * 
+     * @return boolean true on success, false otherwise
+     */
+
+    public function setProjectImageOrder($imageId, $index) {
+        try {
+            // Update the order of the desired image
+            $sql = '
+            UPDATE showcase_project_image
+            SET spi_order = :index
+            WHERE spi_id = :id
+            ';
+            $params = array(
+                ':index' => $index,
+                ':id' => $imageId
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to move showcase project image: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Changes the order for a project image in the database
+     *
+     * @param string $projectId  the ID of the project to move the image in
+     * @param string $imageId    the ID of the image to move
+     * @param integer $oldIndex  the old index of the image
+     * @param integer $newIndex  the new index of the image
+     * 
+     * @return boolean true on success, false otherwise
+     */
+    public function moveProjectImage($projectId, $imageId, $oldIndex, $newIndex) {
+        try {
+            // For compatability (ish!) with older projects
+            if(is_null($oldIndex) || is_null($newIndex)) {
+                $oldIndex = 1;
+                $newIndex = 1;
+            }
+
+            // Change the order of other necessary images
+            $sql = '
+            UPDATE showcase_project_image
+            SET spi_order = spi_order '.($oldIndex > $newIndex? '+ 1' : '- 1').'
+            WHERE spi_sp_id = :pid
+            AND spi_order >= :ione
+            AND spi_order <= :itwo
+            ';
+            $params = array(
+                ':pid' => $projectId,
+                ':ione' => min($oldIndex, $newIndex),
+                ':itwo' => max($oldIndex, $newIndex)
+            );
+            $this->conn->execute($sql, $params);
+
+            // Update the order of the desired image
+            $sql = '
+            UPDATE showcase_project_image
+            SET spi_order = :index
+            WHERE spi_id = :id
+            ';
+            $params = array(
+                ':index' => $newIndex,
+                ':id' => $imageId
+            );
+            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to move showcase project image: ' . $e->getMessage());
             return false;
         }
     }
@@ -1182,7 +1261,8 @@ class ShowcaseProjectsDao {
         $image
             ->setProjectId($row['spi_sp_id'])
             ->setFileName($row['spi_file_name'])
-            ->setDateCreated(new \DateTime(($row['spi_date_created'] == '' ? "now" : $row['spi_date_created']))); //Modified 3/31/2023
+            ->setDateCreated(new \DateTime(($row['spi_date_created'] == '' ? "now" : $row['spi_date_created']))) //Modified 3/31/2023
+            ->setOrder($row['spi_order']);
         return $image;
     }
 
