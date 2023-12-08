@@ -8,6 +8,7 @@ include_once '../bootstrap.php';
 if(!isset($_SESSION)){
     session_start();
 }
+unset($_SESSION['site']);
 unset($_SESSION['userID']);
 unset($_SESSION['userType']);
 unset($_SESSION['auth']);

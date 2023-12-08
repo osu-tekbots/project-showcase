@@ -24,23 +24,7 @@ try {
     $logger = null;
 }
 
+// Set $_SESSION variables to be for this site
+include PUBLIC_FILES . '/lib/authenticate.php';
+
 $isLoggedIn = isset($_SESSION['userID']) && !empty($_SESSION['userID']);
-
-/*
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-print_r($_SESSION);
-
-if ($isLoggedIn){ //patch to deal with logging via other tools
-	if (!isset($_SESSION['userType'])){
-		$usersDao = new UsersDao($dbConn, $logger);
-		$user = $usersDao->getUser($_SESSION['userID']);
-		
-		$_SESSION['userType'] = $user->getType();
-	}
-}
-*/
-
