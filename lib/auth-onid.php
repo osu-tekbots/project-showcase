@@ -1,8 +1,9 @@
 <?php
 use DataAccess\UsersDao;
-use Model\User;
 use DataAccess\ShowcaseProfilesDao;
+use Model\User;
 use Model\ShowcaseProfile;
+use Model\UserAuthProvider;
 
 $baseUrl = $configManager->getBaseUrl();
 
@@ -58,7 +59,8 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $onid) {
             ->setOnid($onid)
             ->setFirstName($_SESSION['auth']['firstName'])
             ->setLastName($_SESSION['auth']['lastName'])
-            ->setEmail($_SESSION['auth']['email']);
+            ->setEmail($_SESSION['auth']['email'])
+            ->setAuthProvider(new UserAuthProvider(UserAuthProvider::ONID, 'ONID'));
 
         $ok = $usersDao->addNewUser($user);
         if (!$ok) {
