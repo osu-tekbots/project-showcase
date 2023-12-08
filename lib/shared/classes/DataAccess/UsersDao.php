@@ -121,6 +121,11 @@ class UsersDao {
      */
     public function getUserByOnid($onid) {
         try {
+            if($onid == '' || $onid == NULL) {
+                $this->logger->warn("Called getUserByOnid() with blank or null ONID");
+                return false;
+            }
+
             $sql = 'SELECT * FROM user, user_type, user_salutation, user_auth_provider ';
             $sql .= 'WHERE u_onid = :id AND u_ut_id = ut_id AND u_us_id = us_id AND u_uap_id = uap_id';
             $params = array(':id' => $onid);
@@ -145,6 +150,8 @@ class UsersDao {
      */
     public function addNewUser($user) {
         try {
+            $this->logger->info("Adding new user");
+
             $sql = 'INSERT INTO user ';
             $sql .= '(u_id, u_ut_id, u_fname, u_lname, u_us_id, u_email, u_phone, u_major, u_affiliation, u_onid, ';
             $sql .= 'u_uap_id, u_uap_provided_id, u_date_created) ';

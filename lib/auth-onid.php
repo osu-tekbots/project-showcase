@@ -17,12 +17,19 @@ $baseUrl = $configManager->getBaseUrl();
  */
 function authenticate() {
     global $isLoggedIn, $baseUrl, $dbConn, $logger;
-
+    $logger->info("Login status: ".($isLoggedIn?'true':'false')."; userID: ".(isset($_SESSION['userID']) ? $_SESSION['userID'] : "N/A"));
     if (!$isLoggedIn) {
+        $logger->info('Logging in...');
         include_once PUBLIC_FILES . '/lib/shared/auth/onid.php';
         $onid = authenticateWithONID();
     
-        $ok = createUserAndProfileIfNeeded($dbConn, $logger, $onid);
+        try {
+            $ok = createUserAndProfileIfNeeded($dbConn, $logger, $onid);
+        } catch(\Exception $e) {
+            $logger->error("createUserAndProfileIfNeeded() failed for ONID ".$onid.". Exception: ".$e);
+            $ok = false;
+        }
+
         if (!$ok) {
             $_SESSION['error'] = '
                 We were unable to authenticate your sign-in request successfully. Please try again later or contact
@@ -49,12 +56,12 @@ function authenticate() {
  * @return bool true if an entry was created or one exists, false otherwise
  */
 function createUserAndProfileIfNeeded($dbConn, $logger, $onid) {
-
     // First check if the user was created
     $usersDao = new UsersDao($dbConn, $logger);
     $user = $usersDao->getUserByOnid($onid);
     if (!$user) {
         $user = new User();
+        $logger->info('Creating new user '.$user->getID());
         $user
             ->setOnid($onid)
             ->setFirstName($_SESSION['auth']['firstName'])
@@ -64,6 +71,7 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $onid) {
 
         $ok = $usersDao->addNewUser($user);
         if (!$ok) {
+            $logger->error('Could not create new user');
             return false;
         }
     }
