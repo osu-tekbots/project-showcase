@@ -19,7 +19,8 @@ $configManager = new Util\ConfigManager(__DIR__);
 $dbConn = DataAccess\DatabaseConnection::FromConfig($configManager->getDatabaseConfig());
 
 try {
-    $logger = new Util\Logger($configManager->getLogFilePath(), $configManager->getLogLevel());
+    $logFileName = $configManager->getLogFilePath() . date('MY') . ".log";
+    $logger = new Util\Logger($logFileName, $configManager->getLogLevel());
 } catch (\Exception $e) {
     $logger = null;
 }
