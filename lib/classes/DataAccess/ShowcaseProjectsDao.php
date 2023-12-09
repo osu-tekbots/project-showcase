@@ -1158,7 +1158,8 @@ class ShowcaseProjectsDao {
             SELECT k.ck_name, COUNT(k.ck_id) AS count
             FROM capstone_keyword k, capstone_keyword_for kf, showcase_project p
             WHERE k.ck_id = kf.ckf_ck_id AND kf.ckf_entity_id = p.sp_id
-            GROUP BY k.ck_id
+            GROUP BY k.ck_name
+            ORDER BY `count` DESC;
             ';
             $stats['keywords'] = array();
             $results = $this->conn->query($sql);
