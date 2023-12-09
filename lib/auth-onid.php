@@ -77,20 +77,24 @@ function createUserAndProfileIfNeeded($dbConn, $logger, $onid) {
     }
 
     // The user exists or was created successfully. Check the profile.
-    $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
-    $profile = $profilesDao->getUserProfileInformation($user->getId());
-    if (!$profile) {
-        // The profile does not exist. Create one.
-        $profile = new ShowcaseProfile($user->getId(), true);
-        $ok = $profilesDao->addNewShowcaseProfile($profile);
-        if (!$ok) {
-            return false;
-        }
-    }
+    createProfileIfNeeded($dbConn, $logger, $user->getId());
 
     // The user and profile existed or were created successfully
     // Set the SESSION and return true
     $_SESSION['userID'] = $user->getId();
     $_SESSION['userType'] = $user->getType()->getId();
     return true;
+}
+
+function createProfileIfNeeded($dbConn, $logger, $userID) {
+    $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+    $profile = $profilesDao->getUserProfileInformation($userID);
+    if (!$profile) {
+        // The profile does not exist. Create one.
+        $profile = new ShowcaseProfile($userID, true);
+        $ok = $profilesDao->addNewShowcaseProfile($profile);
+        if (!$ok) {
+            return false;
+        }
+    }
 }
