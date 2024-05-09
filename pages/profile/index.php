@@ -130,19 +130,19 @@ $signoutButton = !$isOwnProfile ? '' : "
 // Create HTML for external links if the user has any
 $websiteLink = Security::ValidateUrl($profile->getWebsiteLink());
 $websiteHtml = !is_null($websiteLink) && !empty($websiteLink) ? "
-    <a href='$websiteLink' target='_blank'>
+    <a href='https://$websiteLink' target='_blank'>
         <i class='fas fa-globe fa-2x'></i>
     </a>
 " : '';
 $githubLink = Security::ValidateUrl($profile->getGithubLink());
 $githubHtml = !empty($githubLink) && !is_null($githubLink) ? "
-    <a href='$githubLink' target='_blank'>
+    <a href='https://$githubLink' target='_blank'>
         <i class='fab fa-github fa-2x'></i>
     </a>
 " : '';
 $linkedinLink = Security::ValidateUrl($profile->getLinkedInLink());
 $linkedinHtml = !is_null($linkedinLink) && !empty($linkedinLink) ? "
-    <a href='$linkedinLink' target='_blank'>
+    <a href='https://$linkedinLink' target='_blank'>
         <i class='fab fa-linkedin fa-2x'></i>
     </a>
 ": '';
