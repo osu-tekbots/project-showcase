@@ -69,6 +69,24 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
     <?php renderAdminMenu('awards'); ?>
     <div class="admin-content">
         <div class="admin-paper">
+            <form id="formNewAward">
+                <input type="hidden" name="action" value="createAward" />
+                <div class="form-row user-form">
+                    <div class="col-2">
+                        <input required type="text" class="form-control" max="" name="name" placeholder="Name"/>
+                    </div>
+                    <div class="col-8">
+                        <input required type="text" class="form-control" max="" name="description" placeholder="Description"/>
+                    </div>
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i>&nbsp;&nbsp;New Award
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="admin-paper">
             <table class="table" id="currentAwards">
                 <thead>
                     <tr>

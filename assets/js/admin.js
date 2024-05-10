@@ -50,6 +50,29 @@ function onUserTypeClick() {
 $('#currentUsers').on('click', '.btn-user-type', onUserTypeClick);
 
 /**
+ * Handles the form submission for creating a new user by making a request to the API server to create a new profile.
+ */
+function onNewAwardFormSubmit(event) {
+    event.preventDefault();
+
+    let formId = 'formNewAward';
+    let body = serializeFormAsJson(formId);
+
+    api.post('/showcase-projects.php', body)
+        .then(res => {
+            snackbar(res.message, 'success');
+            document.getElementById(formId).reset();
+            setTimeout(() => window.location.reload(), 1000);
+        })
+        .catch(err => {
+            snackbar(err.message, 'error');
+        });
+
+    return false;
+}
+$('#formNewAward').submit(onNewAwardFormSubmit);
+
+/**
  * Handles updating a projects visibility from published to hidden and visa-versa.
  */
 function onProjectPublishedClick() {

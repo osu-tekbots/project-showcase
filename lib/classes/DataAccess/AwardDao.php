@@ -92,6 +92,44 @@ class AwardDao {
      * @param sting $id the award id string
      * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
      */
+    public function createAward($award) {
+        try {
+            $sql = "INSERT INTO showcase_awards 
+                (
+                    name,
+                    description,
+                    image_name_square,
+                    image_name_rectangle
+                )
+                VALUES (
+                    :name, 
+                    :description, 
+                    :image_name_square,
+                    :image_name_rectangle
+                )
+            ";
+            $params = array(
+                ':name' => $award->getName(),
+                ':description' => $award->getDescription(),
+                ':image_name_square' => $award->getImageNameSquare(),
+                ':image_name_rectangle' => $award->getImageNameRectangle()
+            );
+							
+			$this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to create award: ' . $e->getMessage());
+            return false;
+        }
+    }
+	
+	/**
+     * Attaches an award to a project.
+     *
+     * @param sting $id the award id string
+     * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
+     */
     public function giveAward($awardId, $projectId) {
         try {
             $sql = "

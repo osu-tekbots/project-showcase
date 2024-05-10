@@ -4,6 +4,7 @@ namespace Api;
 use Model\ShowcaseProject;
 use Model\CollaborationInvitation;
 use Model\Keyword;
+use Model\Award;
 
 /**
  * Defines the logic for how to handle AJAX requests with JSON bodies made to modify showcase project information.
@@ -183,6 +184,24 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             Response::OK,
             'Successfully added category, '.$name));
     }
+
+    
+    public function handleCreateAward() {
+        $award = new Award();
+        $award->setName($this->getFromBody('name'));
+        $award->setDescription($this->getFromBody('description'));
+        $award->setImageNameSquare('gold_square.png');
+        $award->setImageNameRectangle('');
+
+        $ok = $this->awardDao->createAward($award);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create award.'));
+        }
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully created award'
+        ));
+    }
 	
 	/**
      * Handles a request to give an award to a project.
@@ -237,11 +256,11 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Collaborators must have '@oregonstate.edu' email addresses."));
 
         $user = $this->usersDao->getUser($userId);
-//    	if (!($user)) // User search returned false
-//			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "User not found in user table. They need to login to this site once before you can add them."));
-		
-//		if ($user->getOnid() == '') //Can not be added to project
-//			$this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Collaborators must have '@oregonstate.edu' email addresses."));
+        // if (!($user)) // User search returned false
+        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "User not found in user table. They need to login to this site once before you can add them."));
+        
+        // if ($user->getOnid() == '') //Can not be added to project
+        //     $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Collaborators must have '@oregonstate.edu' email addresses."));
 			
         $project = $this->projectsDao->getProject($projectId);
         // TODO: handle case when showcase project is not found
@@ -278,7 +297,7 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     public function handleRemoveUserFromProject() {
         $projectId = $this->getFromBody('projectId');
         $userId = $this->getFromBody('userId');
-/*        
+        /*        
         $user = $this->usersDao->getUser($userId);			
         $project = $this->projectsDao->getProject($projectId);
 
@@ -287,7 +306,7 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
         if (!$sent) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, "Failed to send invitation to $email"));
         }
-*/
+        */
         $ok = $this->projectsDao->deleteProjectCollaborator($projectId, $userId);
         if (!$ok) {
             $this->response(new Response(
@@ -511,6 +530,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'deleteProject':
                 $this->handleDeleteProject();
+
+            case 'createAward':
+                $this->handleCreateAward();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

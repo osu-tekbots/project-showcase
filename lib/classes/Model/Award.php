@@ -22,8 +22,6 @@ class Award {
     public function __construct($id = null) {
         if ($id == null) {
             $id = IdGenerator::generateSecureUniqueId();
-            $this->setDateCreated(new \DateTime("now"));
-            $this->setPublished(true);
         }
         $this->setId($id);
 
