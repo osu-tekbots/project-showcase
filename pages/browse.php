@@ -146,6 +146,6 @@ if (isset($_REQUEST['category'])){
 </div>
 
 
-<?
+<?php
 include_once PUBLIC_FILES . '/modules/footer.php';
 ?>
