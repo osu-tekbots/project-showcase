@@ -106,6 +106,7 @@ if($isLoggedIn) {
 		}
 	}
     $navlinks['PROFILE'] = 'profile/';
+    $navlinks['SIGN OUT'] = 'signout';
 } else {
     $navlinks['SIGN IN'] = 'signin';
 }
