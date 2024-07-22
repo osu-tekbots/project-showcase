@@ -47,6 +47,10 @@ else {
 	$filename = $artifact->getName() . '.' . $mimeParts[1];
 	header("Content-Type: $mime");
 }
+// Using original file name if exists (stored in link column of data table)
+if ($artifact->getLink()){
+    $filename = $artifact->getLink();
+}
 header("Content-Disposition: attachment; filename=$filename");
 $bytes = readfile($filepath);
 if (!$bytes) {

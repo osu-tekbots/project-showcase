@@ -132,6 +132,55 @@ function handleAddNewArtifact($projectId, $projectsDao, $configManager, $logger)
             break;
 
         case 'file':
+		
+			$white_list = array(
+                // text
+                'txt' => 'text/plain',
+                'htm' => 'text/html',
+                'html' => 'text/html',
+                'php' => 'text/html',
+
+                // images
+                'png' => 'image/png',
+                'jpe' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'jpg' => 'image/jpeg',
+                'gif' => 'image/gif',
+                'bmp' => 'image/bmp',
+                'ico' => 'image/vnd.microsoft.icon',
+                'tiff' => 'image/tiff',
+                'tif' => 'image/tiff',
+                'svg' => 'image/svg+xml',
+                'svgz' => 'image/svg+xml',
+
+                // archives
+                'zip' => 'application/zip',
+                'rar' => 'application/x-rar-compressed',
+                'cab' => 'application/vnd.ms-cab-compressed',
+
+                // audio/video
+                'mp3' => 'audio/mpeg',
+                'qt' => 'video/quicktime',
+                'mov' => 'video/quicktime',
+
+                // adobe
+                'pdf' => 'application/pdf',
+                'psd' => 'image/vnd.adobe.photoshop',
+
+                // ms office
+                'doc' => 'application/msword',
+                'rtf' => 'application/rtf',
+                'xls' => 'application/vnd.ms-excel',
+                'ppt' => 'application/vnd.ms-powerpoint',
+                'docx' => 'application/msword',
+                'xlsx' => 'application/vnd.ms-excel',
+                'pptx' => 'application/vnd.ms-powerpoint',
+
+                // open office
+                'odt' => 'application/vnd.oasis.opendocument.text',
+                'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+            );
+		
             if (!isset($_FILES['artifactFile'])) {
                 respond(400, 'Must include file in request to create artifact with file attachment');
             }
@@ -145,6 +194,10 @@ function handleAddNewArtifact($projectId, $projectsDao, $configManager, $logger)
             if ($fileSize > $fiveMb) {
                 respond(400, 'Artifact file must be smaller than 25MB');
             }
+			
+			if (!array_key_exists($ext, $white_list)) {
+				respond(400, 'File type not allowed.');
+			}
 
             $filepath = 
                 $configManager->getPrivateFilesDirectory() . '/' .
@@ -158,6 +211,10 @@ function handleAddNewArtifact($projectId, $projectsDao, $configManager, $logger)
             }
 
             $artifact->setFileUploaded(true);
+
+            // Using the link column to store the original file name
+			$artifact->setLink($filename);
+
 			$artifact->setExtension($ext);
 
             break;
