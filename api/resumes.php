@@ -41,8 +41,10 @@ if (empty($userId)) {
 // Make sure the current user has permission to perform this action
 $usersDao = new UsersDao($dbConn, $logger);
 $user = $usersDao->getUser($userId);
-if (!$isLoggedIn || ($userId != $_SESSION['userID'] && $user->getType()->getId() != UserType::ADMIN) ) {
-    respond(401, 'You do not have permission to make this request');
+//Revised this line to check admin levle via the Session variable. $_SESSION['userType']
+//if (!$isLoggedIn || ($userId != $_SESSION['userID'] && $user->getType()->getId() != UserType::ADMIN) ) {
+if (!$isLoggedIn || ($userId != $_SESSION['userID'] && $_SESSION['userType'] != UserType::ADMIN) ) {
+    respond(401, 'You do not have permission to make this request. Login status: ' . $isLoggedIn . ' UL: ' . $user->getType()->getId() );
 }
 
 // Construct the path

@@ -163,7 +163,7 @@ foreach ($pImages as $i) {
         <option 
             $selected
             id='$id'
-            data-img-src='downloaders/project-images?id=$id'
+            data-img-src='downloaders/project-images.php?id=$id'
             data-img-class='project-image-thumbnail'
             data-img-alt='$name'
             value='$id'>
@@ -173,7 +173,7 @@ foreach ($pImages as $i) {
     if ($first) {
         $pButtonImageDeleteStyle = '';
         $pButtonImagePreviewStyle = '';
-        $pImagePreviewSrc = "downloaders/project-images?id=$id";
+        $pImagePreviewSrc = "downloaders/project-images.php?id=$id";
         $first = false;
     }
 }
@@ -203,7 +203,7 @@ if (count($pArtifacts) == 0) {
         $aDescription = $artifact->getDescription();
         if ($artifact->isFileUploaded()) {
             $aContentHtml = "
-                <a href='downloaders/artifacts?id=$aId'>Download Artifact File</a>
+                <a href='downloaders/artifacts.php?id=$aId'>Download Artifact File</a>
              ";
         } else {
             $aLink = Security::ValidateUrl($artifact->getLink());

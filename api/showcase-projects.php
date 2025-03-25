@@ -29,7 +29,7 @@ $mailer = new CollaborationMailer(
     $logger, 
     $configManager
 );
-$handler = new ShowcaseProjectsActionHandler($projectsDao, $usersDao, $keywordsDao, $awardDao, $categoryDao, $mailer, $logger);
+$handler = new ShowcaseProjectsActionHandler($dbConn, $projectsDao, $usersDao, $keywordsDao, $awardDao, $categoryDao, $mailer, $logger);
 
 if ($handler->getAction() == 'browseProjects') {
 	$handler->handleRequest();

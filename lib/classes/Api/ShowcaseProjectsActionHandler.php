@@ -1,10 +1,12 @@
 <?php
 namespace Api;
 
+use DataAccess\FlagDao;
 use Model\ShowcaseProject;
 use Model\CollaborationInvitation;
 use Model\Keyword;
 use Model\Award;
+use Model\Flag;
 
 /**
  * Defines the logic for how to handle AJAX requests with JSON bodies made to modify showcase project information.
@@ -16,6 +18,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
 	/** @var \DataAccess\AwardDao */
     private $awardDao;
+
+	/** @var DatabaseConnection */
+    private $conn;
 
     /** @var \DataAccess\UsersDao */
     private $usersDao;
@@ -38,9 +43,11 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
      * @param \Email\CollaborationMailer  $mailer the Mailer class providing email functionality for collaboration
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($projectsDao, $usersDao, $keywordsDao, $awardDao, $categoryDao, $mailer, $logger) {
+    public function __construct($conn, $projectsDao, $usersDao, $keywordsDao, $awardDao, $categoryDao, $mailer, $logger) {
         parent::__construct($logger);
         $this->mailer = $mailer;
+        $this->conn = $conn;
+        $this->flagDao = $flagDao;
         $this->awardDao = $awardDao;
         $this->categoryDao = $categoryDao;
         $this->usersDao = $usersDao;
@@ -202,6 +209,25 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             'Successfully created award'
         ));
     }
+	
+	public function handleCreateFlag() {
+        $flag = new Flag();
+        $flag->setDescription($this->getFromBody('name'));
+        $flag->setActive(1);
+			
+		$flagDao = new FlagDao($this->conn, $this->logger);
+
+        $ok = $flagDao->createFlag($flag);
+        
+		if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create flag.'));
+        }
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully created flag'
+        ));
+    }
+	
 	
 	/**
      * Handles a request to give an award to a project.
@@ -379,7 +405,11 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
             $this->respond(new Response(Response::BAD_REQUEST, 'Query cannot be empty'));
         }
 
-        $projects = $this->projectsDao->getProjectsWithQuery($query);
+        if (isset($_REQUEST['all'])){
+            $projects = $this->projectsDao->getProjectsWithQuery($query);
+        } else{
+            $projects = $this->projectsDao->getRecentlyCreatedProjectsWithQuery($query);
+        }
 
         if (!$projects && !is_array($projects)) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to fetch projects for query'));
@@ -505,7 +535,7 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
                 $this->handleRemoveUserFromProject();
 
 			case 'giveAward':
-                $this->handleGiveAward();
+               $this->handleGiveAward();
 			
 			case 'removeAward':
                 $this->handleRemoveAward();
@@ -533,6 +563,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'createAward':
                 $this->handleCreateAward();
+
+			case 'createFlag':
+                $this->handleCreateFlag();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));

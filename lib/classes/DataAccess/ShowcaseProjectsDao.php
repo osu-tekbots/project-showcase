@@ -68,6 +68,48 @@ class ShowcaseProjectsDao {
             return false;
         }
     }
+
+    /**
+     * Fetches all the projects from the database within the last two years.
+     *
+     * @param integer $count the number to limit the return array size to
+     * @param integer $offset the offset in the database table to start retrieve projects from
+     * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
+     */
+    public function getAllRecentlyCreatedProjects($count = 0, $offset = 0, $includeHidden = false) {
+        try {
+            $limit = '';
+            if ($offset > 0) {
+                $limit = "LIMIT $offset";
+                if ($count > 0) {
+                    $limit .= ", $count";
+                }
+            } elseif ($count > 0) {
+                $limit = "LIMIT $count";
+            }
+            $hiddenCondition = !$includeHidden ? 'WHERE sp_published = 1' : '';
+            $date = date('Y-m-d', strtotime(date("Y-m-d") . ' -2 years'));
+            $sql = "
+            SELECT *
+            FROM showcase_project
+            $hiddenCondition
+            AND sp_date_created >= '$date'
+            ORDER BY sp_title ASC
+            $limit
+            ";
+            $results = $this->conn->query($sql);
+
+            $projects = array();
+            foreach ($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+            return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get all projects: ' . $e->getMessage());
+            return false;
+        }
+    }
 	
 	/**
      * Fetches all the projects from the database.
@@ -230,8 +272,6 @@ class ShowcaseProjectsDao {
             $sql = '
             SELECT p.*
             FROM showcase_project p
-            INNER JOIN showcase_worked_on w ON w.swo_sp_id = p.sp_id
-            INNER JOIN user u on u.u_id = w.swo_u_id
             LEFT OUTER JOIN (
                 SELECT *
                 FROM capstone_keyword_for, capstone_keyword
@@ -239,14 +279,57 @@ class ShowcaseProjectsDao {
             ) AS keywords ON ckf_entity_id = sp_id
             WHERE
                 sp_published = 1 AND (
-                    LOWER (u_fname) LIKE :query
-                    OR LOWER(u_lname) LIKE :query
-                    OR LOWER(sp_title) LIKE :query
+                    LOWER(sp_title) LIKE :query
                     OR LOWER(sp_description) LIKE :query
                     OR LOWER(ck_name) LIKE :query
                 )
             GROUP BY sp_id
             ';
+            $params = array(':query' => strtolower("%$query%"));
+            
+            $results = $this->conn->query($sql, $params);
+
+            $projects = array();
+            foreach ($results as $row) {
+                $projects[] = self::ExtractShowcaseProjectFromRow($row);
+            }
+
+            return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch projects with query '$query': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches projects that match the constraints specified in the query that were created in the last 2 years.
+     * 
+     * The `$query` parameter should be a string or an associative array with the following keys:
+     * - `query`: the string query used to search project titles, description, and collaborator names
+     *
+     * @param string|mixed[] $query the string or associative array specifying the query/parameters
+     * @return \Model\ShowcaseProject[]|boolean an array of projects on success, false otherwise
+     */
+    public function getRecentlyCreatedProjectsWithQuery($query) {
+        try {
+            $date = date('Y-m-d', strtotime(date("Y-m-d") . ' -2 years'));
+            $sql = "
+            SELECT p.*
+            FROM showcase_project p
+            LEFT OUTER JOIN (
+                SELECT *
+                FROM capstone_keyword_for, capstone_keyword
+                WHERE ckf_ck_id = ck_id
+            ) AS keywords ON ckf_entity_id = sp_id
+            WHERE
+                sp_published = 1 AND (
+                    LOWER(sp_title) LIKE :query
+                    OR LOWER(sp_description) LIKE :query
+                    OR LOWER(ck_name) LIKE :query
+                )
+            AND sp_date_created >= '$date'
+            GROUP BY sp_id
+            ";
             $params = array(':query' => strtolower("%$query%"));
             
             $results = $this->conn->query($sql, $params);

@@ -13,22 +13,22 @@ function renderAdminMenu($active = 'dashboard') {
         ),
         'users' => array(
             'icon' => 'fas fa-user',
-            'link' => 'admin/users',
+            'link' => 'admin/users.php',
             'title' => 'Users'
         ),
         'projects' => array(
             'icon' => 'fas fa-project-diagram',
-            'link' => 'admin/projects',
+            'link' => 'admin/projects.php',
             'title' => 'Projects'
         ),
         'awards' => array(
             'icon' => 'fas fa-project-diagram',
-            'link' => 'admin/awards',
+            'link' => 'admin/awards.php',
             'title' => 'Edit Awards'
         ),
 		'categories' => array(
             'icon' => 'fas fa-project-diagram',
-            'link' => 'admin/categories',
+            'link' => 'admin/categories.php',
             'title' => 'Edit Categories'
         )
     );

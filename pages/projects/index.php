@@ -208,7 +208,7 @@ if (!$project) { //Removed check for (!$project->isPublished() && $_SESSION['use
     }
     
     $editButtonHtml = $collaboratorIsUser || ($isLoggedIn && $_SESSION['userType'] == UserType::ADMIN) ? "
-        <a href='projects/edit?id=$projectId' class='btn btn-sm btn-light'>
+        <a href='projects/edit.php?id=$projectId' class='btn btn-sm btn-light'>
             <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
         </a>
     " : '';
@@ -275,7 +275,7 @@ if (!$project) { //Removed check for (!$project->isPublished() && $_SESSION['use
 
         $pImagesHtml .= "
             <div class='slide fade'>
-                <img src='downloaders/project-images?id=$imageId' />
+                <img src='downloaders/project-images.php?id=$imageId' />
             </div>
         ";
 
@@ -328,7 +328,7 @@ if (!$project) { //Removed check for (!$project->isPublished() && $_SESSION['use
             $description = Security::HtmlEntitiesEncode($a->getDescription());
             $link = Security::ValidateUrl($a->getLink());
             $linkHtml = $a->isFileUploaded() ? "
-                <a href='downloaders/artifacts?id=$id' class='btn btn-sm btn-primary'>
+                <a href='downloaders/artifacts.php?id=$id' class='btn btn-sm btn-primary'>
                     <i class='fas fa-download'></i>&nbsp;&nbsp;Download
                 </a>
             " : "

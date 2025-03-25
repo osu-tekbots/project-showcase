@@ -160,12 +160,12 @@ if($isLoggedIn) {
     <header id="header" class="dark">
         <a class="header-main-link" href="">
             <div class="logo">
-                <img class="logo" src="assets/img/osu-logo-orange.png" />
-                <h1 class="d-none d-sm-block"><span id="projectPrefix">Project </span>Showcase </h1>
-				<h5 class="d-sm-none">Project<BR>Showcase</h5>
+                <!--img class="logo" src="assets/img/osu-logo-orange.png" /-->
+                <h1 class="d-none d-lg-block" style="font-size: 36px; margin-bottom: 5px"><span id="projectPrefix">Engineering Project </span>Showcase </h1>
+				<h5 class="d-lg-none">Engineering Project<BR>Showcase</h5>
             </div>
         </a>
-        <nav class="navigation">
+        <nav class="navigation d-none d-sm-block">
             <ul>
             <?php 
             foreach ($navlinks as $title => $link) {
@@ -178,6 +178,25 @@ if($isLoggedIn) {
             ?>
 
             </ul>
+        </nav>
+        <nav class="navigation navbar-dark d-sm-none" id=navbarSmall>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navSmall" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse" id="navSmall" style="margin-top: 10px">
+            <?php 
+            foreach ($navlinks as $title => $link) {
+                echo "
+                <a href='$link'>
+                    <h5>
+                    $title
+                    </h5>
+                </a>
+                <br>
+                ";
+            }
+            ?>
+            <div>
         </nav>
     </header>
 

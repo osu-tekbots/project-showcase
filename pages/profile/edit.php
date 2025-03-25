@@ -73,7 +73,7 @@ $pProfileImageText = $pHasProfileImage ? "
 $pProfileImagePreviewHtml = $pHasProfileImage ? "
     <img id='profileImagePreview' style='display: none;' />
     <script>
-        crop('downloaders/profile-images?id=$userId', (cropped) => {
+        crop('downloaders/profile-images.php?id=$userId', (cropped) => {
             $('#profileImagePreview').attr('src', cropped);
             $('#profileImagePreview').show();
             $('#btnProfileImageDelete').show();
@@ -94,7 +94,7 @@ $pGitHubLink = $profile->getGithubLink();
 $pLinkedInLink = $profile->getLinkedInLink();
 
 $pHasResume = $profile->isResumeUploaded();
-$pResumeLink = $pHasResume ? "downloaders/resumes?id=$userId" : '';
+$pResumeLink = $pHasResume ? "downloaders/resumes.php?id=$userId" : '';
 $pResumeButtonsStyle = $pHasResume ? '' : "style='display: none;'";
 $pResumeHtml = $pHasResume ? "
     <p id='resumeText'>You have uploaded a resume.</p>
@@ -132,7 +132,7 @@ if (!$projects || count($projects) == 0) {
                 <td class='project-title'>$title $hidden</td>
                 <td>$description</td>
                 <td>
-                    <a href='projects/edit?id=$pid' class='btn btn-sm btn-light' data-toggle='tooltip'
+                    <a href='projects/edit.php?id=$pid' class='btn btn-sm btn-light' data-toggle='tooltip'
                         data-placement='right' title='Edit'>
                         <i class='fas fa-edit'></i>
                     </a>
@@ -174,7 +174,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
         </button>
       </div>
       <div class="modal-body">
-      <p>The EECS project Showcase is a platform for students to exclusively show off their projects and create portfolio examples for their later use.</p><ul><li>Projects are expected to be fully presented to allow viewers to experience the quality of each student's work as well as appreciate the overall quality of all EECS students.</li><li>Any project that is identified as unprofessional, incomplete, or insensative in tone or content is not to be included on the Project Showcase.</li><li>Any project that does not live up to these quality standards will be hidden from public view or deleted based on the decisions of the platform moderators.</li></ul>
+      <p>The Engineering Project Showcase is a platform exclusively for students to show off their projects and create portfolio examples for their later use.</p><ul><li>Projects are expected to be fully presented to allow viewers to experience the quality of each student's work as well as appreciate the overall quality of all OSU students.</li><li>Any project that is identified as unprofessional, incomplete, or insensitive in tone or content is not to be included on the Project Showcase.</li><li>Any project that does not live up to these quality standards will be hidden from public view or deleted based on the decisions of the platform moderators.</li></ul>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -342,7 +342,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
         </div>
         <div class="form-group form-group-project col-md-6">
             <div class="form-group">
-                <label>Title</label>
+                <h2>Add Project</h2><label>Title</label>
                 <input type="text" class="form-control" id="newProjectTitle" placeholder="Enter project title" />
             </div>
             <div class="form-group">

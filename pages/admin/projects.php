@@ -68,7 +68,7 @@ foreach ($projects as $p) {
         <td style='max-width: 400px'>$description</td>
         <td>$created</td>
         <td>$publishedButton
-            <a href='projects/edit?id=$id' class='btn btn-sm btn-light'><i class='fas fa-edit'></i>&nbsp;&nbsp;Edit</a>
+            <a href='projects/edit.php?id=$id' class='btn btn-sm btn-light'><i class='fas fa-edit'></i>&nbsp;&nbsp;Edit</a>
             <a href='projects/?id=$id' class='btn btn-sm btn-light'>View</a>
 			<BR><select onchange='updateCategory(\"$id\");' class='form-control' id='category$id'>$options</select>
         </td>

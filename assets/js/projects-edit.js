@@ -135,7 +135,7 @@ function onUploadImageSuccess(id) {
         $(`
         <option
             id='${id}'
-            data-img-src='downloaders/project-images?id=${id}'
+            data-img-src='downloaders/project-images.php?id=${id}'
             data-img-class='project-image-thumbnail'
             data-img-alt='${name}'
             value='${id}'>
@@ -333,7 +333,7 @@ function onAddArtifactSuccess(id, name, description, type, link) {
     switch (type) {
         case 'file':
             contentHtml = `
-                <a href="downloaders/artifacts?id=${id}">Download Artifact File</a>
+                <a href="downloaders/artifacts.php?id=${id}">Download Artifact File</a>
             `;
             break;
 
@@ -492,7 +492,7 @@ function onDeleteProjectClick() {
     api.post('/showcase-projects.php', body)
         .then(res => {
             snackbar(res.message, 'success');
-            setTimeout(function () { location.reload(true); }, 1000);
+            setTimeout(function () {window.location.href = "https://projects.engineering.oregonstate.edu/profile/"; }, 1000);
         })
         .catch(err => {
             snackbar(err.message, 'error');

@@ -134,7 +134,7 @@ echo "
     <div class='row justify-content-md-center'>
         <div class='col-md-7 invitation-container'>
             <div class='invitation-actions'>
-                <form method='POST' action='projects/invite/submit'>
+                <form method='POST' action='projects/invite/submit.php'>
                     <input type='hidden' name='projectId' value='$projectId' />
                     <input type='hidden' name='userId' value='$userId' />
                     <input type='hidden' name='invitationId' value='$invitationId' />

@@ -9,7 +9,7 @@ if(!isset($contentOnly) || !$contentOnly):
     Feedback
 </a>
 <footer>
-    &copy;&nbsp;<?php echo date('Y'); ?> Oregon State University
+    &copy;&nbsp;<?php echo date('Y'); ?> Oregon State University - For questions about the College of Engineering Expo event: <a href='mailto:engineering.events@oregonstate.edu' style='color:white;'>engineering.events@oregonstate.edu</a>&nbsp;&nbsp;&nbsp;
     <a class="disclaimer" href="https://oregonstate.edu/official-web-disclaimer" target="_blank">Disclaimer</a>
 </footer>
 <?php

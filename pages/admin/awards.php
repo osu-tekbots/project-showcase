@@ -39,8 +39,6 @@ foreach ($awards as $a) {
     <tr>
         <td><strong>$name</strong></td>
         <td style='max-width:400px;'>$description</td>
-        <td><img class='img-fluid' style='height:4em;' src='assets/img/$imageNameSquare'></td>
-        <td>". ($imageNameRectangle != '' ? "<img class='img-fluid' style='height:4em;' src='assets/img/$imageNameRectangle'>" : "") . "</td>
         <td>$recipientHTML</td>
 		<td></td>
     </tr>
@@ -92,8 +90,6 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
                     <tr>
                         <th>Name</th>
                         <th>Description</th>
-                        <th>Square Image</th>
-                        <th>Rectangular Image</th>
                         <th>Recipients</th>
                         <th></th>
                     </tr>

@@ -40,7 +40,7 @@ foreach ($profiles as $p) {
         <td>$pLastName</td>
         <td>$pIsAdmin</td>
         <td>
-            <a href='profile/edit?id=$uId' class='btn btn-sm btn-light'><i class='fas fa-edit'></i>&nbsp;&nbsp;Edit</a>
+            <a href='profile/edit.php?id=$uId' class='btn btn-sm btn-light'><i class='fas fa-edit'></i>&nbsp;&nbsp;Edit</a>
             <a href='profile/?id=$uId' class='btn btn-sm btn-light'>View</a>
         </td>
     </tr>

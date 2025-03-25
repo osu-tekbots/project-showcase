@@ -64,7 +64,7 @@ class KeywordsDao{
            
             return $keywords;
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get keyowrds for object " . $e->getMessage());
+            $this->logger->error("Failed to get keywords for object " . $e->getMessage());
             return false;
         }
     }

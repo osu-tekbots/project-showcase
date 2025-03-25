@@ -84,7 +84,7 @@ $image = $profile->isImageUploaded()
     ? "
         <img class='profile-image pulse' id='profileImage' />
         <script>
-            crop('downloaders/profile-images?id=$userId', (cropped) => {
+            crop('downloaders/profile-images.php?id=$userId', (cropped) => {
                 $('#profileImage').attr('src', cropped);
                 $('#profileImage').removeClass('pulse');
             });
@@ -116,7 +116,7 @@ if ($profile->canShowContactInfo()) {
 }
 
 $editButton = !$isOwnProfile ? '' : "
-    <a href='profile/edit' id='btnEditProfile' class='btn btn-primary'>
+    <a href='profile/edit.php' id='btnEditProfile' class='btn btn-primary'>
         <i class='fas fa-edit'></i>&nbsp;&nbsp;Edit
     </a>
 ";
@@ -130,19 +130,19 @@ $signoutButton = !$isOwnProfile ? '' : "
 // Create HTML for external links if the user has any
 $websiteLink = Security::ValidateUrl($profile->getWebsiteLink());
 $websiteHtml = !is_null($websiteLink) && !empty($websiteLink) ? "
-    <a href='https://$websiteLink' target='_blank'>
+    <a href='$websiteLink' target='_blank'>
         <i class='fas fa-globe fa-2x'></i>
     </a>
 " : '';
 $githubLink = Security::ValidateUrl($profile->getGithubLink());
 $githubHtml = !empty($githubLink) && !is_null($githubLink) ? "
-    <a href='https://$githubLink' target='_blank'>
+    <a href='$githubLink' target='_blank'>
         <i class='fab fa-github fa-2x'></i>
     </a>
 " : '';
 $linkedinLink = Security::ValidateUrl($profile->getLinkedInLink());
 $linkedinHtml = !is_null($linkedinLink) && !empty($linkedinLink) ? "
-    <a href='https://$linkedinLink' target='_blank'>
+    <a href='$linkedinLink' target='_blank'>
         <i class='fab fa-linkedin fa-2x'></i>
     </a>
 ": '';
@@ -155,7 +155,7 @@ if (empty($websiteHtml) && empty($githubHtml) && empty($linkedinHtml)) {
 // Create the HTML to render a resume download link if the user has a resume uploaded
 $resumeUploaded = $profile->isResumeUploaded();
 $resumeHtml = $resumeUploaded ? "
-    <a href='downloaders/resumes?id=$userId' class='btn btn-primary'>
+    <a href='downloaders/resumes.php?id=$userId' class='btn btn-primary'>
         <i class='fas fa-download'></i>&nbsp;&nbsp;Resume
     </a>
 " : '';
@@ -167,7 +167,7 @@ if (empty($about) || is_null($about)) {
         $aboutHtml = "
         <h2>About</h2>
         <p>Add a brief description about yourself highlighting your skills and experience.</p>
-        <a href='profile/edit' class='btn btn-primary'>
+        <a href='profile/edit.php' class='btn btn-primary'>
             <i class='fas fa-handshake'></i>&nbsp;&nbsp;Introduce Yourself
         </a>
         ";
@@ -200,7 +200,7 @@ if (!$projects) {
     if ($isOwnProfile) {
         $projectsHtml = "
             <p>You don't have any projects on display</p>
-            <a href='profile/edit#projects' class='btn btn-primary'>
+            <a href='profile/edit.php#projects' class='btn btn-primary'>
                 <i class='fas fa-plus'></i>&nbsp;&nbsp;Add a Project
             </a>
         ";
@@ -222,7 +222,7 @@ if (!$projects) {
     }
 
     
-    $projectsHtml .= "<a href='profile/edit#projects' class='btn btn-primary'>
+    $projectsHtml .= "<a href='profile/edit.php#projects' class='btn btn-primary'>
                 <i class='fas fa-plus'></i>&nbsp;&nbsp;Add a Project
             </a>";
     $projectsHtml .= '</div>';

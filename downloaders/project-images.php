@@ -22,7 +22,7 @@ $filepath =
     $configManager->get('server.upload_project_image_file_path') .
     "/$imageId";
 if(!file_exists($filepath)) {
-    $logger->warn('Error fetching file for profile image: does not exist: ' . $filepath);
+    $logger->warn('Error fetching file for project image: does not exist: ' . $filepath);
     header("X-PHP-Response-Code: 404", true, 404);
     die();
 }

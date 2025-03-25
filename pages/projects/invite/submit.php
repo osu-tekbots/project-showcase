@@ -56,7 +56,7 @@ function acceptInvitation($projectId, $userId, $invitationId) {
         redirectToError($baseUrl);
     }
 
-    $redirect = $baseUrl . "projects/invite/accepted?pid=$projectId";
+    $redirect = $baseUrl . "projects/invite/accepted.php?pid=$projectId";
     echo "<script>window.location.replace('$redirect');</script>";
     die();
 }
@@ -80,7 +80,7 @@ function declineInvitation($invitationId) {
         redirectToError($baseUrl);
     }
 
-    $redirect = $baseUrl . 'projects/invite/declined';
+    $redirect = $baseUrl . 'projects/invite/declined.php';
     echo "<script>window.location.replace('$redirect');</script>";
     die();
 }

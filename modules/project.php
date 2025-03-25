@@ -58,7 +58,7 @@ function createProfileProjectHtml($project, $isOwnProject = false) {
     $hiddenAlert = '';
     if($isOwnProject && !$project->isPublished()) {
         $actionButton = "
-        <a href='projects/edit?id=$id' class='btn btn-outline-osu'>
+        <a href='projects/edit.php?id=$id' class='btn btn-outline-osu'>
             Edit
         </a>
         ";

@@ -4,12 +4,12 @@
  */
 include_once '../../bootstrap.php';
 
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 use Model\UserType;
-use DataAccess\CategoryDao;
+use DataAccess\FlagDao;
 use DataAccess\ShowcaseProjectsDao;
 
 $baseUrl = $configManager->getBaseUrl();
@@ -21,28 +21,30 @@ if (!$isLoggedIn || $_SESSION['userType'] != UserType::ADMIN) {
 }
 
 $projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
-$categoryDao = new CategoryDao($dbConn, $logger);
-$categories = $categoryDao->getAllCategories();
-$categoriesHTML = '';
+$flagDao = new FlagDao($dbConn, $logger);
+$flags = $flagDao->getAllFlags();
+$outputHTML = '';
 
-foreach ($categories as $c) {	
+foreach ($flags as $c) {	
     $id = $c->getId();
-    $name = $c->getName();
-    $shortname = $c->getShortName();
-	$projectCount = count($projectsDao->getProjectsByCategory($shortname));
-    
+    $description = $c->getDescription();
+    $active = $c->getActive();
+	$dateCreated = $c->getDateCreated();
 	
-	$categoriesHTML .= "
+	
+	$outputHTML .= "
     <tr>
-        <td><strong>$name</strong></td>
-        <td><a href='$baseUrl/browse.php?category=$shortname'>$shortname</a></td>
-        <td>$projectCount</td>
+        <td><strong>$description</strong></td>
+        <td>$dateCreated</td>
+        <td>$active</td>
+		<td></td>
+		<td></td>
     </tr>
     ";
 	
 }
 
-$title = 'Edit Categories';
+$title = 'Edit Flags';
 $css = array(
     'assets/css/admin.css',
     'https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css'
@@ -63,20 +65,18 @@ function testing(){
 	alert('Caught Submit');
 }
 
-function addCategory(e){
+function addFlag(e){
 	//here I want to prevent default
     e = e || window.event;
     e.preventDefault();
 	
 	let name = $('#name').val().trim();
-	let shrtname =  $('#shrtname').val().trim();
 	let data = {
 		name: name,
-		shrtname: shrtname,
-		action: 'createCategory'
+		action: 'createFlag'
 	};
 
-	if (name !='' && shrtname != ''){
+	if (name !=''){
 		api.post('/showcase-projects.php', data).then(res => {
 			snackbar(res.message, 'info');
 			location.reload();
@@ -90,32 +90,29 @@ function addCategory(e){
 </script>
 
 <div class="admin-view">
-    <?php renderAdminMenu('categories'); ?>
+    <?php renderAdminMenu('flags'); ?>
     <div class="admin-content">
-
-<!-- 3-17-25: Temporarily disabling adding categories
         <div class="admin-paper">
 			<div class="form-row">
 				<form class="form-inline" id="newCategory">
-				<div class="col"><input type="text" id="name" class="form-control" placeholder="Display Name"></div>
-				<div class="col"><input type="text" pattern="[A-Za-z0-9]{4,10}" id="shrtname" class="form-control" placeholder="Short Name" title="4-10 characters, no symbols, no spaces."></div>
-				<button onclick="addCategory(event)" id="addCategoryID" class="btn btn-primary">Add Category</button>
+				<div class="col"><input type="text" id="name" class="form-control" placeholder="Flag Name"></div>
+				<button onclick="addFlag(event)" id="addFlagID" class="btn btn-primary">Add Flag</button>
 				</form>
 			</div>
 		</div>
--->
-
 		<div class="admin-paper">		
             <table class="table" id="currentCategories">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Short Name</th>
-                        <th>Projects in<BR>this Category</th>
+                        <th>Date</th>
+                        <th>Active</th>
+						<th>Projects</th>
+						<th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php echo $categoriesHTML; ?>
+                    <?php echo $outputHTML; ?>
                 </tbody>
             </table>
             <script>
