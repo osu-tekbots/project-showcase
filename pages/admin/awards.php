@@ -28,6 +28,7 @@ foreach ($awards as $a) {
     $description = $a->getDescription();
 	$imageNameSquare = $a->getImageNameSquare();
     $imageNameRectangle = $a->getImageNameRectangle();
+    $award_active = $a->getAwardActive();
     
 	$recipientHTML = '';
 	$recipients = $awardsDao->getAwardRecipients($id);
@@ -40,10 +41,20 @@ foreach ($awards as $a) {
         <td><strong>$name</strong></td>
         <td style='max-width:400px;'>$description</td>
         <td>$recipientHTML</td>
+        <td>";
+
+    
+
+    if ($award_active == 1) {
+        $awardsHtml .= "<button type='button' class='btn btn-primary' onClick='onAwardActiveToggle(".$id.", ".$award_active.")'>Active</button>";
+    } else {
+        $awardsHtml .= "<button type='button' class='btn btn-outline-primary' onClick='onAwardActiveToggle(".$id.", ".$award_active.")'>Inactive</button>";
+    }
+	
+    $awardsHtml .= "</td>
 		<td></td>
     </tr>
     ";
-	
 }
 
 $title = 'Edit Awards';
@@ -91,6 +102,7 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
                         <th>Name</th>
                         <th>Description</th>
                         <th>Recipients</th>
+                        <th>Is Active</th>
                         <th></th>
                     </tr>
                 </thead>

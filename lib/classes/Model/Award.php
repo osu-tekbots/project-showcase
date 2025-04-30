@@ -17,6 +17,8 @@ class Award {
     private $imageNameSquare;
      /** @var string */
     private $imageNameRectangle;
+     /** @var int */
+    private $award_active;
     
 
     public function __construct($id = null) {
@@ -114,6 +116,23 @@ class Award {
     public function setImageNameRectangle($data) {
         $this->imageNameRectangle = $data;
 
+        return $this;
+    }
+
+    /**
+     * Get the value of award_active
+     */ 
+    public function getAwardActive() {
+        return $this->award_active;
+    }
+
+    /**
+     * Set the value of award_active
+     *
+     * @return  self
+     */ 
+    public function setAwardActive($data) {
+        $this->award_active = $data;
         return $this;
     }
 

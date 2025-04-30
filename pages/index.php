@@ -22,9 +22,11 @@ $css = array(
 include_once PUBLIC_FILES . '/modules/header.php';
 ?>
 
-<div class="hero-home">
-    <h1 class="hero-title">Showcase Your Engineering Project</h1>
-    <p class="hero-subtitle">Show employers you have what it takes</p>
+<div class="hero-home" style="text-align: center;">
+    <h1 class="hero-title d-none d-lg-block">Showcase Your Engineering Project</h1>
+    <h2 class="d-lg-none">Showcase Your Engineering Project</h2>
+    <p class="hero-subtitle d-none d-lg-block">Show employers you have what it takes</p>
+    <p class="d-lg-none">Show employers you have what it takes</p>
     <p><?php echo $heroButtonHtml; ?></p>
 </div>
 

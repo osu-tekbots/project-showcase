@@ -303,7 +303,7 @@ if ($user->getType()->getId() == UserType::ADMIN){ //There should be option for 
 		}
 		$awardsHTML .= "</div>";
 	}
-	$awards = $awardsDao->getAllAwards();	
+	$awards = $awardsDao->getActiveAwards();	
 	
 	$newawardsHTML .= "Add Award:<BR><select id='newaward'>";
 	foreach ($awards as $a){

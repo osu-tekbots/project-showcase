@@ -100,3 +100,17 @@ function onProjectPublishedClick() {
     });
 }
 $('#currentProjects').on('click', '.btn-published', onProjectPublishedClick);
+
+function onAwardActiveToggle(awardId, isActive) {
+    let body = new FormData();
+    body.append('action', 'awardActiveToggle');
+    body.append('isActive', isActive);
+    body.append('awardId', awardId);
+
+    api.post('/awards.php', body, true).then(res => {
+        snackbar(res.message, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}

@@ -55,6 +55,35 @@ class AwardDao {
             return false;
         }
     }
+
+    /**
+     * Fetches active awards from the database.
+     *
+     * @param integer $count the number to limit the return array size to
+     * @param integer $offset the offset in the database table to start retrieve projects from
+     * @return \Model\ShowcaseProject[] an array of showcase projects on success, false otherwise
+     */
+    public function getActiveAwards() {
+        try {
+            $sql = "
+            SELECT *
+            FROM showcase_awards
+            WHERE award_active = 1
+            ORDER BY name ASC
+            ";
+            $results = $this->conn->query($sql);
+
+            $awards = array();
+            foreach ($results as $row) {
+                $awards[] = self::ExtractAwardFromRow($row);
+            }
+
+            return $awards;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to get all awards: ' . $e->getMessage());
+            return false;
+        }
+    }
 	
 	
 	/**
@@ -186,7 +215,8 @@ class AwardDao {
                 name = :name, 
                 description = :description, 
                 image_name_square = :image_name_square,
-                image_name_rectangle = :image_name_rectangle 
+                image_name_rectangle = :image_name_rectangle,
+                award_active = :award_active
             WHERE id = :id
             ';
             $params = array(
@@ -194,7 +224,60 @@ class AwardDao {
                 ':name' => $award->getName(),
                 ':description' => $award->getDescription(),
                 ':image_name_square' => $award->getImageNameSquare(),
-                ':image_name_rectangle' => $award->getImageNameRectangle()
+                ':image_name_rectangle' => $award->getImageNameRectangle(),
+                ':award_active' => $award->getAwardActive()
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update showcase award: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Sets an award to be inactive
+     *
+     * @param int $awardId
+     * @return bool true if successful, false otherwise
+     */
+    public function updateAwardInactive($awardId) {
+        try {
+            $sql = '
+            UPDATE showcase_awards SET
+                award_active = :award_active
+            WHERE id = :id
+            ';
+            $params = array(
+                ':id' => $awardId,
+                ':award_active' => 0
+            );
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to update showcase award: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Sets an award to be active
+     *
+     * @param int $awardId
+     * @return bool true if successful, false otherwise
+     */
+    public function updateAwardActive($awardId) {
+        try {
+            $sql = '
+            UPDATE showcase_awards SET
+                award_active = :award_active
+            WHERE id = :id
+            ';
+            $params = array(
+                ':id' => $awardId,
+                ':award_active' => 1
             );
             $this->conn->execute($sql, $params);
 
@@ -218,7 +301,8 @@ class AwardDao {
             ->setName($row['name'])
             ->setDescription($row['description'])
 			->setImageNameSquare($row['image_name_square'])
-			->setImageNameRectangle($row['image_name_rectangle']);
+			->setImageNameRectangle($row['image_name_rectangle'])
+            ->setAwardActive($row['award_active']);
 
         return $award;
     }

@@ -161,7 +161,7 @@ if (isset($_REQUEST['category'])){
             </div>
         </div>
 		
-		<div class="row projects-row" >
+		<div class="row projects-row" <?php if($liftedProjects == false) {echo "hidden";} else{echo "";} ?>>
             <div class="col">
                 <h3>Lifted Projects</h3>
             </div>
