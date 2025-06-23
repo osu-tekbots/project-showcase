@@ -203,45 +203,62 @@ class ShowcaseProfilesDao {
             return false;
         }
     }
-	
-	/**
-     * Deletes a showcase profile for the user in the database.
+
+    /**
+     * Deletes a showcase profile picture for the user in the database.
      *
      * @param \Model\ShowcaseProfile $profile the profile to be deleted
      * @return boolean true on success, false otherwise
      */
-    public function deleteShowcaseProfile($profile) {
-        //Look for and delete resume and image files
-		//Delete entry from showcase_user_profile table
-		
+    public function deleteShowcaseProfilePicture($configManager, $profile) {
 		try {
-            $sql = '
-            UPDATE showcase_user_profile SET
-                sup_about = :about,
-                sup_show_contact_info = :contact,
-                sup_accepting_invites = :invites,
-                sup_website_link = :website,
-                sup_github_link = :github,
-                sup_linkedin_link = :linkedin,
-                sup_resume_uploaded = :resume,
-                sup_image_uploaded = :image,
-                sup_date_updated = :dupdated
-            WHERE sup_u_id = :id
-            ';
-            $params = array(
-                ':about' => $profile->getAbout(),
-                ':contact' => $profile->canShowContactInfo(),
-                ':invites' => $profile->isAcceptingInvites(),
-                ':website' => $profile->getWebsiteLink(),
-                ':github' => $profile->getGithubLink(),
-                ':linkedin' => $profile->getLinkedInLink(),
-                ':resume' => $profile->isResumeUploaded(),
-                ':image' => $profile->isImageUploaded(),
-                ':dupdated' => QueryUtils::FormatDate($profile->getDateUpdated()),
-                ':id' => $profile->getUserId()
-            );
+            $id = $profile->getUserId();
+            $filepath = 
+                $configManager->getPrivateFilesDirectory() . '/' .
+                $configManager->get('server.upload_profile_image_file_path') .
+                "/$id";
+            if(file_exists($filepath)) {
+                $ok = unlink($filepath);
+                if (!$ok) {
+                    $this->logger->error('Failed to delete profile picture');
+                }
+                $profile->setImageUploaded(false);
+                $ok = $this->updateShowcaseProfile($profile);
+                if (!$ok) {
+                    $logger->warning('Profile image was deleted, but inserting metadata into the database failed: user ' . $id);
+                }
+            }
 
-            $this->conn->execute($sql, $params);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete profile: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Deletes a showcase profile resume for the user in the database.
+     *
+     * @param \Model\ShowcaseProfile $profile the profile to be deleted
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteShowcaseProfileResume($configManager, $profile) {
+		try {
+            $filepath = 
+                $configManager->getPrivateFilesDirectory() . '/' .
+                $configManager->get('server.upload_resume_file_path') .
+                "/$id";
+            if(file_exists($filepath)) {
+                $ok = unlink($filepath);
+                if (!$ok) {
+                    $this->logger->error('Failed to delete resume');
+                }
+                $profile->setResumeUploaded(false);
+                $ok = $this->updateShowcaseProfile($profile);
+                if (!$ok) {
+                    $logger->warning('Resume was deleted, but inserting metadata into the database failed: user ' . $id);
+                }
+            }
 
             return true;
         } catch (\Exception $e) {

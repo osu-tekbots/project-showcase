@@ -129,6 +129,14 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
     </div>
 </div>
 
+<div>
+    <div class="col-2">
+        <button class="btn btn-primary btn-sm" onclick='deleteProfileAssets("<?php echo $_SESSION["userID"]; ?>")'>
+            <i class="fas fa-plus"></i>&nbsp;&nbsp;Test Delete User Assets
+        </button>
+    </div>
+</div
+
 <?php
 include_once PUBLIC_FILES . '/modules/footer.php';
 ?>

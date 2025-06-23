@@ -16,16 +16,19 @@ class ProfileActionHandler extends ActionHandler {
     /** @var \DataAccess\UsersDao */
     private $usersDao;
 
+    private $configManager;
+
     /**
      * Constructs a new instance of the action handler for requests on user resources.
      *
      * @param \DataAccess\UsersDao $dao the data access object for users
      * @param \Util\Logger $logger the logger to use for logging information about actions
      */
-    public function __construct($profilesDao, $usersDao, $logger) {
+    public function __construct($profilesDao, $usersDao, $configManager, $logger) {
         parent::__construct($logger);
         $this->profilesDao = $profilesDao;
         $this->usersDao = $usersDao;
+        $this->configManager = $configManager;
     }
 
     /**
@@ -154,6 +157,34 @@ class ProfileActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to delete a user profile
+     * 
+     * @return void
+     */
+    public function handleDeleteProfileAssets() {
+        $userId = $this->getFromBody('userId');
+
+        $user = $this->usersDao->getUser($userId);
+        $profile = $this->profilesDao->getUserProfileInformation($userId);
+        $configManager = $this->configManager;
+
+        $ok = $this->profilesDao->deleteShowcaseProfilePicture($configManager, $profile);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete showcase profile picture'));
+        }
+
+        $ok = $this->profilesDao->deleteShowcaseProfileResume($configManager, $profile);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete showcase profile resume'));
+        }
+        
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully updated user type'
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -177,6 +208,9 @@ class ProfileActionHandler extends ActionHandler {
 
             case 'updateUserType':
                 $this->handleUpdateUserType();
+            
+            case 'deleteProfileAssets':
+                $this->handleDeleteProfileAssets();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on user resource'));

@@ -114,3 +114,17 @@ function onAwardActiveToggle(awardId, isActive) {
         snackbar(err.message, 'error');
     });
 }
+
+function deleteProfileAssets(userId) {
+    let body = {
+        action: 'deleteProfileAssets',
+        userId: userId
+    };
+
+    api.post('/profiles.php', body).then(res => {
+        snackbar(res.message, 'success');
+        setTimeout(() => window.location.reload(), 1000);
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}

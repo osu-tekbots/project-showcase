@@ -16,7 +16,7 @@ if (!isset($_SESSION)) {
 
 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
 $usersDao = new UsersDao($dbConn, $logger);
-$handler = new ProfileActionHandler($profilesDao, $usersDao, $logger);
+$handler = new ProfileActionHandler($profilesDao, $usersDao, $configManager, $logger);
 
 if ($isLoggedIn) {
     $handler->handleRequest();

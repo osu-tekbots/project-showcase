@@ -52,7 +52,7 @@ class ShowcaseProjectsDao {
             SELECT *
             FROM showcase_project
             $hiddenCondition
-            ORDER BY sp_title ASC
+            ORDER BY sp_date_updated ASC
             $limit
             ";
             $results = $this->conn->query($sql);
@@ -94,7 +94,7 @@ class ShowcaseProjectsDao {
             FROM showcase_project
             $hiddenCondition
             AND sp_date_created >= '$date'
-            ORDER BY sp_title ASC
+            ORDER BY sp_date_updated ASC
             $limit
             ";
             $results = $this->conn->query($sql);
