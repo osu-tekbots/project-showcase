@@ -278,6 +278,47 @@ function onArtifactFileChange() {
 }
 $('#artifactFile').change(onArtifactFileChange);
 
+function onAddKeyword() {
+    if(event.key === 'Enter') {
+        const inputElement = document.getElementById('keywords');
+        const keywordValue = inputElement.value;
+        let body = {
+            action: 'addKeyword',
+            keyword: keywordValue
+        };
+
+        api.post('/showcase-projects.php', body)
+            .then(res => {
+                let $kInput = $('input[name=keywords]');
+                let current = $kInput.val().split(',');
+                if (current.includes(res.message)) {
+                    return false;
+                }
+                if ($kInput.val() === '') {
+                    $kInput.val(res.message);
+                } else {
+                    $kInput.val($kInput.val() + ',' + res.message);
+                }
+                $('#noKeywordsText').hide();
+                let $keyword = $(`
+                <div class="keyword" id="${res.message}">
+                    ${keywordValue}
+                    <i class="fas fa-times-circle" data-id="${res.message}"></i>
+                </div>
+                `);
+                $keyword.find('i').click(function () {
+                    onDeleteTag($(this).data('id'));
+                });
+                $('.project-keywords').append($keyword);
+                inputElement.value = '';
+            })
+            .catch(err => {
+                snackbar(err.message, 'error');
+            });  
+
+    }
+}
+
 /**
  * Sends a request to the server to add a new artifact to a project. This AJAX request has content type urlformencoded.
  */

@@ -366,7 +366,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
             </div>         
         </div>
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label">Keywords <br/>(<i>only provided keywords are acceptable</i>)</label>
+            <label class="col-sm-2 col-form-label">Keywords <br/>(<i>press enter to add new keyword</i>)</label>
             <div class="col-sm-7 autocomplete">
                 <div class="project-keywords">
                     <i id="noKeywordsText" <?php echo $noKeywordsTextStyle; ?>>
@@ -375,7 +375,7 @@ include_once PUBLIC_FILES . '/modules/header.php';
                 </div>
                 <div class="project-keywords-input">
                     <input type="hidden" name="keywords" value="<?php echo $keywordsInputIds; ?>" />
-                    <input type="text" class="form-control" id="keywords" placeholder="Search available keywords" />
+                    <input type="text" class="form-control" id="keywords" onkeydown="onAddKeyword()" placeholder="Search available keywords" />
                 </div>
             </div>
             <script>

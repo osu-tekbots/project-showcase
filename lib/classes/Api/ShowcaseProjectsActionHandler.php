@@ -507,6 +507,34 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to add a keyword
+     *
+     * @return void
+     */
+    public function handleAddKeyword() {
+        $newKeyword = $this->getFromBody('keyword');
+
+        if (!$this->keywordsDao->keywordExists($newKeyword)) {
+            $ok = $this->keywordsDao->addKeyword($newKeyword, 0);
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create keyword'));
+            }
+        }
+
+        $keyword = $this->keywordsDao->getKeyword($newKeyword);
+        if (!$keyword) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to create keyword'));
+        }
+        
+        $keywordId = $keyword->getId();
+
+        $this->respond(new Response(
+            Response::OK,
+            $keywordId
+        ));
+    }
+
+    /**
      * Handles the HTTP request on the API resource. 
      * 
      * This effectively will invoke the correct action based on the `action` parameter value in the request body. If
@@ -566,6 +594,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
 			case 'createFlag':
                 $this->handleCreateFlag();
+
+            case 'addKeyword':
+                $this->handleAddKeyword();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on showcase project resource'));
