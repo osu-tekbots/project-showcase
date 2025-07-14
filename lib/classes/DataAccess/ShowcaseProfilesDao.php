@@ -268,6 +268,29 @@ class ShowcaseProfilesDao {
     }
 
     /**
+     * Deletes profile information from the database
+     *
+     * @param string $profileId the ID of the profile to delete
+     * @return boolean true on success, false otherwise
+     */
+    public function deleteShowcaseProfile($profileId) {
+        try {
+            $sql = '
+            DELETE FROM showcase_user_profile
+            WHERE sup_u_id = :id
+            ';
+            $params = array(':id' => $profileId);
+
+            $this->conn->execute($sql, $params);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to delete showcase project: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Fetches statistics about user profiles in the showcase.
      * 
      * The resulting associative array will have the following keys:

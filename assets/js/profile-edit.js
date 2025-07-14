@@ -310,3 +310,31 @@ function onShowContactInfoChange() {
     }
 }
 $('#publishContactInfo').change(onShowContactInfoChange);
+
+function deleteProfile(userId) {
+    deleteProfileProjects(userId);
+
+    let body = {
+        action: 'deleteProfile',
+        userId: userId
+    };
+
+    api.post('/profiles.php', body).then(res => {
+        snackbar(res.message, 'success');
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}
+
+function deleteProfileProjects(userId) {
+    let body = {
+        action: 'deleteProfileProjects',
+        userId: userId
+    };
+
+    api.post('/showcase-projects.php', body).then(res => {
+        snackbar(res.message, 'success');
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}

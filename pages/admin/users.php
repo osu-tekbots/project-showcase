@@ -6,6 +6,8 @@ include_once '../../bootstrap.php';
 
 use Model\UserType;
 use DataAccess\ShowcaseProfilesDao;
+use DataAccess\ShowcaseProjectsDao;
+use DataAccess\UsersDao;
 
 if (!$isLoggedIn || $_SESSION['userType'] != UserType::ADMIN) {
     $_SESSION['error'] = 'You do not have permission to access the requested page';
@@ -16,12 +18,23 @@ if (!$isLoggedIn || $_SESSION['userType'] != UserType::ADMIN) {
 
 // Get all of the user profiles
 $profilesDao = new ShowcaseProfilesDao($dbConn, $logger);
+$projectsDao = new ShowcaseProjectsDao($dbConn, $logger);
+$usersDao = new UsersDao($dbConn, $logger);
 $profiles = $profilesDao->getAllProfiles();
 $profilesHtml = '';
 foreach ($profiles as $p) {
     $uId = $p->getUserId();
     $pFirstName = $p->getUser()->getFirstName();
     $pLastName = $p->getUser()->getLastName();
+    $pProjectCount = $projectsDao->getUserProjectsCount($uId);
+    $pUser = $usersDao->getUser($uId);
+    $pLastLogin = $pUser->getDateLastLogin();
+    $now = new \DateTime("now");
+    if ($pLastLogin->format('Y-m-d H:i:s') == $now->format('Y-m-d H:i:s')) {
+        $pLastLoginOutput = 'No Login';
+    } else {
+        $pLastLoginOutput = $pLastLogin->format('Y-m-d');
+    }
     $pIsAdmin = $p->getUser()->getType()->getId() == UserType::ADMIN ? "
         <button class='btn btn-sm btn-success btn-user-type' data-id='$uId' data-admin='true' 
             data-toggle='tooltip' data-placement='right' title='Demote to Student'>
@@ -39,10 +52,12 @@ foreach ($profiles as $p) {
         <td>$pFirstName</td>
         <td>$pLastName</td>
         <td>$pIsAdmin</td>
+        <td>$pProjectCount</td>
         <td>
             <a href='profile/edit.php?id=$uId' class='btn btn-sm btn-light'><i class='fas fa-edit'></i>&nbsp;&nbsp;Edit</a>
             <a href='profile/?id=$uId' class='btn btn-sm btn-light'>View</a>
         </td>
+        <td>$pLastLoginOutput</td>
     </tr>
     ";
 }
@@ -105,7 +120,9 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Type</th>
+                    <th>Project Count</th>
                     <th></th>
+                    <th>Last Login</th>
                 </tr>
             </thead>
             <tbody>
@@ -118,10 +135,12 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
                         null,
                         null,
                         null,
+                        null,
                         {
                             "orderable": false,
                             searchable: false
                         },
+                        null,
                     ]
                 });
             </script>
@@ -129,13 +148,6 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
     </div>
 </div>
 
-<div>
-    <div class="col-2">
-        <button class="btn btn-primary btn-sm" onclick='deleteProfileAssets("<?php echo $_SESSION["userID"]; ?>")'>
-            <i class="fas fa-plus"></i>&nbsp;&nbsp;Test Delete User Assets
-        </button>
-    </div>
-</div
 
 <?php
 include_once PUBLIC_FILES . '/modules/footer.php';

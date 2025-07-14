@@ -358,6 +358,11 @@ include_once PUBLIC_FILES . '/modules/header.php';
         </div>
 
     </form>
+
+    <button class="btn btn-danger btn-lg" onclick='deleteProfile("<?php echo $userId; ?>")'>
+        <i class="fas fa-trash"></i>&nbsp;&nbsp;Delete User
+    </button>
+    
 </div>
 
 

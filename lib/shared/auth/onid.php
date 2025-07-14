@@ -45,6 +45,10 @@ function authenticateWithONID() {
         $url = 'https://login.oregonstate.edu/cas/serviceValidate?ticket=' . $ticket . '&service=' . $pageURL;
         $html = file_get_contents($url);
 
+        // ini_set("log_errors", 1);
+        // ini_set("error_log", __DIR__ . "/../../../.private/logs/php-error.log");
+        // error_log(print_r($html, true));
+
         $_SESSION['auth'] = array(
             'method' => 'onid',
             'id' => strtolower(extractFromXml('cas:user', $html)),

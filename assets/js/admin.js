@@ -115,15 +115,27 @@ function onAwardActiveToggle(awardId, isActive) {
     });
 }
 
-function deleteProfileAssets(userId) {
+function deleteProfile(userId) {
     let body = {
-        action: 'deleteProfileAssets',
+        action: 'deleteProfile',
         userId: userId
     };
 
     api.post('/profiles.php', body).then(res => {
         snackbar(res.message, 'success');
-        setTimeout(() => window.location.reload(), 1000);
+    }).catch(err => {
+        snackbar(err.message, 'error');
+    });
+}
+
+function deleteProfileProjects(userId) {
+    let body = {
+        action: 'deleteProfileProjects',
+        userId: userId
+    };
+
+    api.post('/showcase-projects.php', body).then(res => {
+        snackbar(res.message, 'success');
     }).catch(err => {
         snackbar(err.message, 'error');
     });

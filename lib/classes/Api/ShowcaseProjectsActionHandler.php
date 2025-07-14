@@ -507,6 +507,58 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
     }
 
     /**
+     * Handles a request to delete all showcase project attached to a user
+     *
+     * @return void
+     */
+    public function handleDeleteProfileProjects() {
+        $userId = $this->getFromBody('userId');
+        $projects = $this->projectsDao->getUserProjects($userId, false, true, 'title');
+
+        foreach ($projects as $project) {
+            $sid = $project->getId();
+
+            $pImages = $project->getImages();
+            foreach ($pImages as $i) {
+                $id = $i->getId();
+                $ok = $this->projectsDao->deleteProjectImage($id);
+                if (!$ok) {
+                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to upate delete project image'));
+                }
+            }
+
+            $pArtifacts = $project->getArtifacts();
+            foreach ($pArtifacts as $artifact) {
+                $aId = $artifact->getId();
+                $ok = $this->projectsDao->deleteProjectArtifact($aId);
+                if (!$ok) {
+                    $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete project artifacts'));
+                }
+            }
+
+            $ok = $this->projectsDao->deleteProjectInvites($sid);
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete project invites'));
+            }
+
+            $ok = $this->projectsDao->deleteProjectCollaborators($sid);
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete collaborators'));
+            }
+
+            $ok = $this->projectsDao->deleteShowcaseProject($sid);
+            if (!$ok) {
+                $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete project'));
+            }
+        }
+    
+        $this->respond(new Response(
+            Response::OK,
+            'Successfully deleted projects'
+        ));
+    }
+
+    /**
      * Handles a request to add a keyword
      *
      * @return void
@@ -588,6 +640,9 @@ class ShowcaseProjectsActionHandler extends ActionHandler {
 
             case 'deleteProject':
                 $this->handleDeleteProject();
+            
+            case 'deleteProfileProjects':
+                $this->handleDeleteProfileProjects();
 
             case 'createAward':
                 $this->handleCreateAward();

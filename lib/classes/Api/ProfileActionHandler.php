@@ -161,7 +161,7 @@ class ProfileActionHandler extends ActionHandler {
      * 
      * @return void
      */
-    public function handleDeleteProfileAssets() {
+    public function handleDeleteProfile() {
         $userId = $this->getFromBody('userId');
 
         $user = $this->usersDao->getUser($userId);
@@ -177,10 +177,15 @@ class ProfileActionHandler extends ActionHandler {
         if (!$ok) {
             $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete showcase profile resume'));
         }
+
+         $ok = $this->profilesDao->deleteShowcaseProfile($userId);
+        if (!$ok) {
+            $this->respond(new Response(Response::INTERNAL_SERVER_ERROR, 'Failed to delete showcase profile'));
+        }
         
         $this->respond(new Response(
             Response::OK,
-            'Successfully updated user type'
+            'Successfully deleted user'
         ));
     }
 
@@ -209,8 +214,8 @@ class ProfileActionHandler extends ActionHandler {
             case 'updateUserType':
                 $this->handleUpdateUserType();
             
-            case 'deleteProfileAssets':
-                $this->handleDeleteProfileAssets();
+            case 'deleteProfile':
+                $this->handleDeleteProfile();
 
             default:
                 $this->respond(new Response(Response::BAD_REQUEST, 'Invalid action on user resource'));

@@ -52,7 +52,7 @@ class ShowcaseProjectsDao {
             SELECT *
             FROM showcase_project
             $hiddenCondition
-            ORDER BY sp_date_updated ASC
+            ORDER BY sp_date_created DESC
             $limit
             ";
             $results = $this->conn->query($sql);
@@ -94,7 +94,7 @@ class ShowcaseProjectsDao {
             FROM showcase_project
             $hiddenCondition
             AND sp_date_created >= '$date'
-            ORDER BY sp_date_updated ASC
+            ORDER BY sp_date_created DESC
             $limit
             ";
             $results = $this->conn->query($sql);
@@ -178,7 +178,7 @@ class ShowcaseProjectsDao {
             INNER JOIN showcase_category ON showcase_category.id = showcase_project.sp_category 
 			WHERE showcase_category.shortname = '$category' 
 			$hiddenCondition 
-			ORDER BY sp_title ASC 
+			ORDER BY sp_date_created DESC 
             $limit
             ";
 
@@ -252,6 +252,36 @@ class ShowcaseProjectsDao {
 				});
 
             return $projects;
+        } catch (\Exception $e) {
+            $this->logger->error("Failed to fetch projects for user with id '$userId': " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Fetches a count of showcase projects associated with the user that has the provided ID.
+     *
+     * @param string $userId the ID of the user whose projects to fetch
+     * @param boolean $includeHidden flag to indicate whether to include hidden projects. Defaults to true
+     * @return \Model\ShowcaseProject[]|boolean an array of projects on success, false on error
+     */
+    public function getUserProjectsCount($userId, $includeHidden = true) {
+        try {
+            $hiddenPredicate = !$includeHidden ? 'AND sp_published = 1' : '';
+            $sql = "
+            SELECT * 
+            FROM showcase_project, showcase_worked_on
+            WHERE swo_u_id = :id AND swo_sp_id = sp_id $hiddenPredicate
+            ";
+            $params = array(':id' => $userId);
+            $results = $this->conn->query($sql, $params);
+
+            $projectsCount = 0;
+            foreach ($results as $row) {
+                $projectsCount += 1;
+            }
+
+            return $projectsCount;
         } catch (\Exception $e) {
             $this->logger->error("Failed to fetch projects for user with id '$userId': " . $e->getMessage());
             return false;
