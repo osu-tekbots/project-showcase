@@ -98,7 +98,7 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
     <div class="admin-content">
         <div class="row">
             <div class="col-md-3 col-stat">
-                <a class="stat-card-link" href='admin/users'>
+                <a class="stat-card-link" href='admin/users.php'>
                     <div class="card">
                         <div class="card-body">
                             <p class="text-center">
@@ -110,7 +110,7 @@ include_once PUBLIC_FILES . '/modules/admin-menu.php';
                 </a>
             </div>
             <div class="col-md-3 col-stat">
-                <a class="stat-card-link" href="admin/projects">
+                <a class="stat-card-link" href="admin/projects.php">
                     <div class="card">
                         <div class="card-body">
                             <p class="text-center">
