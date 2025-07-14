@@ -51,7 +51,7 @@ foreach ($projects AS $p){
 
 $categoryHTML = '';
 foreach ($categories AS $category){
-	$categoryHTML .= "" . $category->getName() . ": " . $category_array[$category->getId()] . "<BR>";
+	$categoryHTML .= "" . $category->getName() . ": " . (($category_array[$category->getId()]) ? ($category_array[$category->getId()]) : "0") . "<BR>";
 }
 
 $topUsersHTML = '';
