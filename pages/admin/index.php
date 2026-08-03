@@ -58,7 +58,7 @@ $topUsersHTML = '';
 $keys = array_keys($topUsers); 
 for ($i=0;$i<6;$i++){
 	$user = $profilesDao->getUserProfileInformation($topUsers[$i]['user_id']);
-	$topUsersHTML .= "<div class='row'><div class='col-6'>" . $user->getUser()->getFirstname() . " " . $user->getUser()->getLastname() . ":</div><div class='col-6'>".$topUsers[$i]['project_count']." projects</div></div>";
+	$topUsersHTML .= "<div class='row'><div class='col-6'>" . $user->getUser()->getFirstname() . " " . $user->getUser()->getLastname() . ":</div><div class='col-6'>".(($topUsers[$i]['project_count']) ? $topUsers[$i]['project_count'] : "0")." projects</div></div>";
 }
 
 // Build the keywords chart data
