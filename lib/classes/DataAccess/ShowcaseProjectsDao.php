@@ -1111,7 +1111,7 @@ class ShowcaseProjectsDao {
             $visibleSql = $visibleOnly ? 'AND swo_is_visible = :visible' : '';
             $sql = "
             SELECT *
-            FROM user, showcase_user_profile, showcase_worked_on
+            FROM showcase_user, showcase_user_profile, showcase_worked_on
             WHERE u_id = swo_u_id AND swo_sp_id = :id AND sup_u_id = u_id $visibleSql
             ";
             $params = array(':id' => $projectId);

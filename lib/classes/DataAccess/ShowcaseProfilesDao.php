@@ -45,7 +45,7 @@ class ShowcaseProfilesDao {
             }
             $sql = "
             SELECT *
-            FROM user, showcase_user_profile
+            FROM showcase_user, showcase_user_profile
             WHERE u_id = sup_u_id
             ORDER BY u_lname ASC
             $limit
@@ -76,7 +76,7 @@ class ShowcaseProfilesDao {
         try {
             $sql = '
             SELECT *
-            FROM user, showcase_user_profile
+            FROM showcase_user, showcase_user_profile
             WHERE u_id = sup_u_id AND u_id = :id
             ';
             $params = array(':id' => $userId);
@@ -96,7 +96,7 @@ class ShowcaseProfilesDao {
         try {
             $sql = '
             SELECT u_id
-            FROM user
+            FROM showcase_user
             WHERE u_onid = :onid
             ';
             $params = array(':onid' => $onid);
@@ -231,7 +231,7 @@ class ShowcaseProfilesDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to delete profile: ' . $e->getMessage());
+            $this->logger->error('Failed to delete profile picture: ' . $e->getMessage());
             return false;
         }
     }
@@ -262,7 +262,7 @@ class ShowcaseProfilesDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to delete profile: ' . $e->getMessage());
+            $this->logger->error('Failed to delete profile resume: ' . $e->getMessage());
             return false;
         }
     }
@@ -285,7 +285,7 @@ class ShowcaseProfilesDao {
 
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Failed to delete showcase project: ' . $e->getMessage());
+            $this->logger->error('Failed to delete showcase profile: ' . $e->getMessage());
             return false;
         }
     }
@@ -351,10 +351,10 @@ class ShowcaseProfilesDao {
      * Uses information from a row in the database to create a ShowcaseProfile object.
      * 
      * If the `$includeUser` flag is true, then the user reference will also be set in the profile. This
-     * implies that the necessary information from the `user` table is in the row being processed.
+     * implies that the necessary information from the `showcase_user` table is in the row being processed.
      *
      * @param mixed[] $row the row from the database
-     * @param boolean $includeUser indicates whether `user` table information is in the row
+     * @param boolean $includeUser indicates whether `showcase_user` table information is in the row
      * @return \Model\ShowcaseProfile the extracted profile
      */
     public static function ExtractShowcaseProfileFromRow($row, $includeUser = true) {

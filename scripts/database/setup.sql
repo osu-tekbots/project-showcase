@@ -1,7 +1,7 @@
 --
 -- Project Showcase Database Setup Queries
 --
--- This script assumes that the `user` table already exists
+-- This script assumes that the `showcase_user` table already exists
 --
 
 CREATE TABLE IF NOT EXISTS showcase_user_profile (
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS showcase_user_profile (
     sup_date_updated DATETIME,
 
     PRIMARY KEY (sup_u_id),
-    FOREIGN KEY (sup_u_id) REFERENCES user (u_id)
+    FOREIGN KEY (sup_u_id) REFERENCES showcase_user (u_id)
 );
 
 CREATE TABLE IF NOT EXISTS showcase_project (
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS showcase_worked_on (
     swo_is_visible BOOLEAN NOT NULL DEFAULT TRUE,
 
     PRIMARY KEY (swo_u_id, swo_sp_id),
-    FOREIGN KEY (swo_u_id) REFERENCES user (u_id),
+    FOREIGN KEY (swo_u_id) REFERENCES showcase_user (u_id),
     FOREIGN KEY (swo_sp_id) REFERENCES showcase_project (sp_id)
 );
 

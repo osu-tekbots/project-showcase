@@ -44,7 +44,7 @@ class UsersDao {
      */
     public function getAllUsers() {
         try {
-            $sql = 'SELECT * FROM user, user_type, user_salutation, user_auth_provider ';
+            $sql = 'SELECT * FROM showcase_user, showcase_user_type, showcase_user_salutation, showcase_user_auth_provider ';
             $sql .= 'WHERE u_ut_id = ut_id AND u_us_id = us_id AND u_uap_id = uap_id';
             $result = $this->conn->query($sql);
 
@@ -65,7 +65,7 @@ class UsersDao {
      */
     public function getUser($id) {
         try {
-            $sql = 'SELECT * FROM user, user_type, user_salutation, user_auth_provider ';
+            $sql = 'SELECT * FROM showcase_user, showcase_user_type, showcase_user_salutation, showcase_user_auth_provider ';
             $sql .= 'WHERE u_id = :id AND u_ut_id = ut_id AND u_us_id = us_id AND u_uap_id = uap_id';
             $params = array(':id' => $id);
             $result = $this->conn->query($sql, $params);
@@ -95,7 +95,7 @@ class UsersDao {
         try {
             $sql = '
             SELECT * 
-            FROM user, user_type, user_salutation, user_auth_provider
+            FROM showcase_user, showcase_user_type, showcase_user_salutation, showcase_user_auth_provider
             WHERE u_uap_provided_id = :id AND u_ut_id = ut_id AND u_us_id = us_id AND u_uap_id = uap_id
             ';
             $params = array(':id' => $id);
@@ -126,7 +126,7 @@ class UsersDao {
                 return false;
             }
 
-            $sql = 'SELECT * FROM user, user_type, user_salutation, user_auth_provider ';
+            $sql = 'SELECT * FROM showcase_user, showcase_user_type, showcase_user_salutation, showcase_user_auth_provider ';
             $sql .= 'WHERE u_onid = :id AND u_ut_id = ut_id AND u_us_id = us_id AND u_uap_id = uap_id';
             $params = array(':id' => $onid);
             $result = $this->conn->query($sql, $params);
@@ -152,7 +152,7 @@ class UsersDao {
         try {
             $this->logger->info("Adding new user");
 
-            $sql = 'INSERT INTO user ';
+            $sql = 'INSERT INTO showcase_user ';
             $sql .= '(u_id, u_ut_id, u_fname, u_lname, u_us_id, u_email, u_phone, u_major, u_affiliation, u_onid, ';
             $sql .= 'u_uap_id, u_uap_provided_id, u_date_created) ';
             $sql .= 'VALUES (:id,:type,:fname,:lname,:salu,:email,:phone,:maj,:affil,:onid,:auth,:authpid,:datec)';
@@ -192,7 +192,7 @@ class UsersDao {
      */
     public function updateUser($user) {
         try {
-            $sql = 'UPDATE user SET ';
+            $sql = 'UPDATE showcase_user SET ';
             $sql .= 'u_ut_id = :type,';
             $sql .= 'u_fname = :fname, ';
             $sql .= 'u_lname = :lname, ';
@@ -234,7 +234,7 @@ class UsersDao {
      */
     public function getUserTypes() {
         try {
-            $sql = 'SELECT * FROM user_type';
+            $sql = 'SELECT * FROM showcase_user_type';
             $results = $this->conn->query($sql);
             return \array_map('self::ExtractUserTypeFromRow', $results);
         } catch (\Exception $e) {
@@ -250,7 +250,7 @@ class UsersDao {
      */
     public function getUserSalutations() {
         try {
-            $sql = 'SELECT * FROM user_salutation';
+            $sql = 'SELECT * FROM showcase_user_salutation';
             $results = $this->conn->query($sql);
             return \array_map('self::ExtractUserSalutationFromRow', $results);
         } catch (\Exception $e) {
@@ -266,7 +266,7 @@ class UsersDao {
      */
     public function getUserAuthProviders() {
         try {
-            $sql = 'SELECT * FROM user_auth_provider';
+            $sql = 'SELECT * FROM showcase_user_auth_provider';
             $results = $this->conn->query($sql);
             return \array_map('self::ExtractUserAuthProviderFromRow', $results);
         } catch (\Exception $e) {
@@ -305,11 +305,11 @@ class UsersDao {
     /**
      * Creates a new UserType object by extracting the necessary information from a row in a database.
      * 
-     * The extraction will default to using the UserType ID from the user table if it is present so that this
-     * function can be used on the user table alone without joining on the user type table.
+     * The extraction will default to using the UserType ID from the showcase_user table if it is present so that this
+     * function can be used on the showcase_user table alone without joining on the showcase_user_type table.
      *
      * @param mixed[] $row the row from the database
-     * @param boolean $userInRow flag indicating whether entries from the user table are in the row or not
+     * @param boolean $userInRow flag indicating whether entries from the showcase_user table are in the row or not
      * @return \Model\UserType the user type extracted from the row
      */
     public static function ExtractUserTypeFromRow($row, $userInRow = false) {
@@ -321,11 +321,11 @@ class UsersDao {
     /**
      * Creates a new UserSalutation object by extracting the necessary information from a row in a database.
      * 
-     * The extraction will default to using the UserSalutation ID from the user table if it is present so that this
-     * function can be used on the user table alone without joining on the user salutation table.
+     * The extraction will default to using the UserSalutation ID from the showcase_user table if it is present so that this
+     * function can be used on the showcase_user table alone without joining on the showcase_user_salutation table.
      *
      * @param mixed[] $row the row from the database
-     * @param boolean $userInRow flag indicating whether entries from the user table are in the row or not
+     * @param boolean $userInRow flag indicating whether entries from the showcase_user table are in the row or not
      * @return \Model\UserSalutation the user salutation extracted from the row
      */
     public static function ExtractUserSalutationFromRow($row, $userInRow = false) {
@@ -337,11 +337,11 @@ class UsersDao {
     /**
      * Creates a new UserAuthProvider object by extracting the necessary information from a row in a database.
      * 
-     * The extraction will default to using the UserAuthProvider ID from the user table if it is present so that this
-     * function can be used on the user table alone without joining on the user auth provider table.
+     * The extraction will default to using the UserAuthProvider ID from the showcase_user table if it is present so that this
+     * function can be used on the showcase_user table alone without joining on the showcase_user_auth_provider table.
      *
      * @param mixed[] $row the row from the database
-     * @param boolean $userInRow flag indicating whether entries from the user table are in the row or not
+     * @param boolean $userInRow flag indicating whether entries from the showcase_user table are in the row or not
      * @return \Model\UserAuthProvider the user auth provider extracted from the row
      */
     public static function ExtractUserAuthProviderFromRow($row, $userInRow = false) {
