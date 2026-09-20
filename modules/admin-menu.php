@@ -30,6 +30,11 @@ function renderAdminMenu($active = 'dashboard') {
             'icon' => 'fas fa-project-diagram',
             'link' => 'admin/categories.php',
             'title' => 'Edit Categories'
+        ),
+        'keywords' => array(
+            'icon' => 'fas fa-project-diagram',
+            'link' => 'admin/keywords.php',
+            'title' => 'Edit Keywords'
         )
     );
     

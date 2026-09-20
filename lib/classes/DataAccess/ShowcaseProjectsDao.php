@@ -304,14 +304,14 @@ class ShowcaseProjectsDao {
             FROM showcase_project p
             LEFT OUTER JOIN (
                 SELECT *
-                FROM capstone_keyword_for, capstone_keyword
-                WHERE ckf_ck_id = ck_id
-            ) AS keywords ON ckf_entity_id = sp_id
+                FROM showcase_keyword_for, showcase_keyword
+                WHERE skf_sk_id = sk_id
+            ) AS keywords ON skf_entity_id = sp_id
             WHERE
                 sp_published = 1 AND (
                     LOWER(sp_title) LIKE :query
                     OR LOWER(sp_description) LIKE :query
-                    OR LOWER(ck_name) LIKE :query
+                    OR LOWER(sk_name) LIKE :query
                 )
             GROUP BY sp_id
             ';
@@ -348,14 +348,14 @@ class ShowcaseProjectsDao {
             FROM showcase_project p
             LEFT OUTER JOIN (
                 SELECT *
-                FROM capstone_keyword_for, capstone_keyword
-                WHERE ckf_ck_id = ck_id
-            ) AS keywords ON ckf_entity_id = sp_id
+                FROM showcase_keyword_for, showcase_keyword
+                WHERE skf_sk_id = sk_id
+            ) AS keywords ON skf_entity_id = sp_id
             WHERE
                 sp_published = 1 AND (
                     LOWER(sp_title) LIKE :query
                     OR LOWER(sp_description) LIKE :query
-                    OR LOWER(ck_name) LIKE :query
+                    OR LOWER(sk_name) LIKE :query
                 )
             AND sp_date_created >= '$date'
             GROUP BY sp_id
@@ -1268,16 +1268,16 @@ class ShowcaseProjectsDao {
             $stats = array();
             // All keywords used in projects
             $sql = '
-            SELECT k.ck_name, COUNT(k.ck_id) AS count
-            FROM capstone_keyword k, capstone_keyword_for kf, showcase_project p
-            WHERE k.ck_id = kf.ckf_ck_id AND kf.ckf_entity_id = p.sp_id
-            GROUP BY k.ck_name
+            SELECT k.sk_name, COUNT(k.sk_id) AS count
+            FROM showcase_keyword k, showcase_keyword_for kf, showcase_project p
+            WHERE k.sk_id = kf.skf_sk_id AND kf.skf_entity_id = p.sp_id
+            GROUP BY k.sk_name
             ORDER BY `count` DESC;
             ';
             $stats['keywords'] = array();
             $results = $this->conn->query($sql);
             foreach($results as $row) {
-                $stats['keywords'][$row['ck_name']] = $row['count'];
+                $stats['keywords'][$row['sk_name']] = $row['count'];
             }
 
             // Total number of projects
